@@ -2,13 +2,9 @@
 
 // 조건없이 전체조회
 const selectBoardList = `
-SELECT  no
-      , title
-      , writer
-      , content
-      , created_date
-FROM    t_board_board
-ORDER BY no
+SELECT  id
+FROM    t_ta
+
 `;
 
 // 등록

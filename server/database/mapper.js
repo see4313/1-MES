@@ -3,10 +3,10 @@ const sqlList = require("./sqlList.js");
 
 const connectionPool = mariadb.createPool({
   // DB에 접속하는 정보
-  host: "localhost",
+  host: "223.130.160.217",
   port: 3306,
   user: "dev01",
-  password: "dev01",
+  password: "1234",
   database: "dev",
   connectionLimit: 10,
 
