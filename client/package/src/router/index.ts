@@ -3,6 +3,7 @@ import MainRoutes from './MainRoutes';
 import AuthRoutes from './AuthRoutes';
 
 import Business from './Business';
+import Materials from './Materials';
 
 import Production from './Production';
 import BasicRoutes from './BasicRoutes';
@@ -21,5 +22,6 @@ export const router = createRouter({
 
         Production,
         BasicRoutes,
+        Materials
     ]
 });

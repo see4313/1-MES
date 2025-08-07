@@ -1,11 +1,3 @@
-const userRole = 'user';
-
-const sidebarRoutes = MainRoutes.children.filter((route) => {
-    const roles = route.meta?.roles;
-    if (!roles) return true;
-    return roles.includes(userRole);
-});
-
 const sidebarItem = [
     {
         title: '기준정보',
