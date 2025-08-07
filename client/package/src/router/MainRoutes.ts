@@ -9,11 +9,13 @@ const MainRoutes = {
         {
             name: 'Dashboard',
             path: '/',
+            meta: { requiresAuth: true, roles: ['user', 'admin'] },
             component: () => import('@/views/dashboard/index.vue')
         },
         {
             name: 'Typography',
             path: '/ui/typography',
+            meta: { requiresAuth: true, roles: ['user'] },
             component: () => import('@/views/components/Typography.vue')
         },
         {
