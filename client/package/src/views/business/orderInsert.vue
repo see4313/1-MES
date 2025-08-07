@@ -1,109 +1,119 @@
 <template>
-    <div>
-        <v-form v-model="valid">
-            <v-container>
+    <v-row>
+        <v-col cols="12" md="12">
+            <UiParentCard title="주문등록">
+                <h3>주문등록</h3>
                 <v-row justify="end">
                     <v-btn color="primary">등록</v-btn>
                 </v-row>
-                <v-row>
-                    <v-col cols="12" md="4">
-                        <v-text-field v-model="주문명" :counter="10" :rules="nameRules" label="주문명" required></v-text-field>
+                <v-row dense>
+                    <v-col cols="12" sm="4">
+                        <v-text-field variant="outlined" label="주문명" />
                     </v-col>
-
-                    <v-col cols="12" md="4">
+                    <v-col cols="12" sm="4">
                         <v-text-field
-                            v-model="주문일자"
-                            :counter="10"
-                            :rules="nameRules"
-                            label="주문일자"
-                            required
-                            append-inner-icon="mdi-calendar"
-                            @click:append-inner="주문일자Dialog = true"
-                        ></v-text-field>
+                            variant="outlined"
+                            label="담당자"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner="onSearchEmployee"
+                        />
                     </v-col>
-
-                    <v-col cols="12" md="4">
+                    <v-col cols="12" sm="4">
                         <v-text-field
-                            v-model="업체명"
-                            :rules="emailRules"
+                            variant="outlined"
                             label="업체명"
-                            required
                             append-inner-icon="mdi-magnify"
                             @click:append-inner="onSearchCompany"
-                        ></v-text-field>
+                        />
                     </v-col>
-                    <v-col cols="12" md="4">
-                        <v-text-field
-                            v-model="담당자"
-                            :counter="10"
-                            :rules="nameRules"
-                            label="담당자"
-                            required
-                            append-inner-icon="mdi-magnify"
-                            @click:append-inner="onSearchEmp"
-                        ></v-text-field>
+                    <v-col cols="12" sm="4">
+                        <v-menu v-model="joinMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
+                            <template #activator="{ props }">
+                                <v-text-field
+                                    v-bind="props"
+                                    v-model="joinDate"
+                                    label="주문일자"
+                                    append-inner-icon="mdi-calendar"
+                                    readonly
+                                    variant="outlined"
+                                    :model-value="formattedJoinDate"
+                                />
+                            </template>
+                            <v-date-picker v-model="joinDate" @change="joinMenu = false" />
+                        </v-menu>
                     </v-col>
-
-                    <v-col cols="12" md="4">
-                        <v-text-field
-                            v-model="납기일자"
-                            :counter="10"
-                            :rules="nameRules"
-                            label="납기일자"
-                            required
-                            append-inner-icon="mdi-calendar"
-                            @click:append-inner="납기일자Dialog = true"
-                        ></v-text-field>
+                    <v-col cols="12" sm="4">
+                        <v-menu v-model="leavMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
+                            <template #activator="{ props }">
+                                <v-text-field
+                                    v-bind="props"
+                                    v-model="leavDate"
+                                    label="납기일자"
+                                    append-inner-icon="mdi-calendar"
+                                    readonly
+                                    variant="outlined"
+                                    :model-value="formattedLeavDate"
+                                />
+                            </template>
+                            <v-date-picker v-model="leavDate" @change="leavMenu = false" />
+                        </v-menu>
                     </v-col>
-
-                    <v-col cols="12" md="4">
-                        <v-text-field v-model="비고" :rules="emailRules" label="비고" required></v-text-field>
+                    <v-col cols="12" sm="4">
+                        <v-text-field variant="outlined" label="비고" />
                     </v-col>
                 </v-row>
-            </v-container>
-        </v-form>
-    </div>
+            </UiParentCard>
+        </v-col>
+    </v-row>
+    <v-row>
+        <v-col cols="12">
+            <div class="card">
+                <DataTable :value="products" tableStyle="min-width: 50rem">
+                    <Column field="code" header="Code"></Column>
+                    <Column field="name" header="Name"></Column>
+                    <Column field="category" header="Category"></Column>
+                    <Column field="quantity" header="Quantity"></Column>
+                </DataTable>
+            </div>
+        </v-col>
+    </v-row>
 </template>
+<script setup>
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import { ref, onMounted, computed } from 'vue';
+import { ProductService } from '@/service/ProductService';
+import dayjs from 'dayjs';
 
-<script>
-export default {
-    data: () => ({
-        valid: false,
-        firstname: '',
-        lastname: '',
-        nameRules: [
-            (value) => {
-                if (value) return true;
+onMounted(() => {
+    ProductService.getProductsMini().then((data) => (products.value = data));
+});
 
-                return 'Name is required.';
-            },
-            (value) => {
-                if (value?.length <= 10) return true;
+function onSearchEmployee() {
+    console.log('담당자 검색 클릭!');
+}
 
-                return 'Name must be less than 10 characters.';
-            }
-        ],
-        email: '',
-        emailRules: [
-            (value) => {
-                if (value) return true;
+function onSearchCompany() {
+    console.log('업체명 검색 클릭!');
+}
 
-                return 'E-mail is required.';
-            },
-            (value) => {
-                if (/.+@.+\..+/.test(value)) return true;
+const products = ref();
+const joinMenu = ref(false);
+const joinDate = ref(null);
+const leavMenu = ref(false);
+const leavDate = ref(null);
 
-                return 'E-mail must be valid.';
-            }
-        ]
-    }),
-    methods: {
-        onSearchCompany() {
-            console.log('업체명 검색 아이콘 클릭됨');
-        },
-        onSearchEmp() {
-            console.log('사원명 검색 아이콘 클릭됨');
-        }
-    }
-};
+const formattedJoinDate = computed(() => {
+    return joinDate.value ? dayjs(joinDate.value).format('YYYY-MM-DD') : '';
+});
+
+const formattedLeavDate = computed(() => {
+    return leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : '';
+});
 </script>
+
+<style scoped>
+::v-deep(.v-field__append-inner) {
+    cursor: pointer;
+}
+</style>
