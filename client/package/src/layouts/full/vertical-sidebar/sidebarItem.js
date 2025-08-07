@@ -49,31 +49,31 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
-                to: '/sample-page'
+                title: '주문조회',
+                to: '/orderList'
             },
             {
-                title: 'About Us',
+                title: '주문등록',
+                to: '/orderInsert'
+            },
+            {
+                title: '주문관리',
                 to: ''
             },
             {
-                title: 'Blog',
+                title: '제품조회',
                 to: ''
             },
             {
-                title: 'Blog Details',
+                title: '제품입고처리',
                 to: ''
             },
             {
-                title: 'Contact Us',
+                title: '제품관리',
                 to: ''
             },
             {
-                title: 'Portfolio',
-                to: ''
-            },
-            {
-                title: 'Pricing',
+                title: '출고관리',
                 to: ''
             }
         ]
