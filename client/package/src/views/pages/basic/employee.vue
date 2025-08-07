@@ -65,7 +65,7 @@
                     <Column field="quantity" header="Quantity"></Column>
                 </DataTable>
             </div>
-            </v-col>
+        </v-col>
     </v-row>
 </template>
 <script setup>
@@ -94,5 +94,4 @@ const formattedJoinDate = computed(() => {
 const formattedLeavDate = computed(() => {
     return leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : '';
 });
-
 </script>
