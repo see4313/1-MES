@@ -22,6 +22,8 @@ export const router = createRouter({
         Business,
 
         Production,
-        BasicRoutes
+        BasicRoutes,
+
+        ...FacilityRoutes
     ]
 });

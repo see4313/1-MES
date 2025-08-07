@@ -10,7 +10,7 @@ const sidebarItem = [
             },
             {
                 title: '거래처관리',
-                to: ''
+                to: '/vendor'
             },
             {
                 title: '품목관리',
@@ -26,6 +26,10 @@ const sidebarItem = [
             },
             {
                 title: '공정정보',
+                to: ''
+            },
+            {
+                title: 'Pricing',
                 to: ''
             }
         ]
