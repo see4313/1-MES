@@ -50,23 +50,23 @@ const sidebarItem = [
             },
             {
                 title: '주문관리',
-                to: ''
+                to: '/setOrder'
             },
             {
                 title: '제품조회',
-                to: ''
+                to: '/productList'
             },
             {
                 title: '제품입고처리',
-                to: ''
+                to: '/productInsert'
             },
             {
                 title: '제품관리',
-                to: ''
+                to: '/setProduct'
             },
             {
                 title: '출고관리',
-                to: ''
+                to: '/setDelivery'
             }
         ]
     },
