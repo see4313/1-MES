@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef, watch } from 'vue';
 import { useDisplay } from 'vuetify';
-import sidebarItems from './vertical-sidebar/sidebarItem';
+import sidebarItems from './vertical-sidebar/sidebarItem.js';
 import NavGroup from './vertical-sidebar/NavGroup/index.vue';
 import NavItem from './vertical-sidebar/NavItem/index.vue';
 // dropdown imports
@@ -38,9 +38,6 @@ watch(mdAndDown, (val) => {
                         <!---End Single Item-->
                     </template>
                 </v-list>
-                <div class="pa-4">
-                    <Upgradeversion />
-                </div>
             </perfect-scrollbar>
         </div>
     </v-navigation-drawer>

@@ -1,22 +1,4 @@
-export interface menu {
-    header?: string;
-    title?: string;
-    icon?: any;
-    to?: string;
-    chip?: string;
-    BgColor?: string;
-    chipBgColor?: string;
-    chipColor?: string;
-    chipVariant?: string;
-    chipIcon?: string;
-    children?: menu[];
-    disabled?: boolean;
-    type?: string;
-    subCaption?: string;
-    external?: boolean;
-}
-
-const sidebarItem: menu[] = [
+const sidebarItem = [
     {
         title: '기준정보',
         icon: 'home-angle-linear',
@@ -24,38 +6,31 @@ const sidebarItem: menu[] = [
         children: [
             {
                 title: 'Homepage',
-                to: '/sample-page',
-                external: true
+                to: '/sample-page'
             },
             {
                 title: 'About Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog Details',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Contact Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Portfolio',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Pricing',
-                to: '',
-                external: true
+                to: ''
             }
         ]
     },
@@ -67,38 +42,31 @@ const sidebarItem: menu[] = [
         children: [
             {
                 title: 'Homepage',
-                to: '',
-                external: true
+                to: '/sample-page'
             },
             {
                 title: 'About Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog Details',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Contact Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Portfolio',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Pricing',
-                to: '',
-                external: true
+                to: ''
             }
         ]
     },
@@ -110,38 +78,31 @@ const sidebarItem: menu[] = [
         children: [
             {
                 title: 'Homepage',
-                to: '',
-                external: true
+                to: '/sample-page'
             },
             {
                 title: 'About Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog Details',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Contact Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Portfolio',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Pricing',
-                to: '',
-                external: true
+                to: ''
             }
         ]
     },
@@ -153,38 +114,31 @@ const sidebarItem: menu[] = [
         children: [
             {
                 title: 'Homepage',
-                to: '',
-                external: true
+                to: '/sample-page'
             },
             {
                 title: 'About Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog Details',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Contact Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Portfolio',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Pricing',
-                to: '',
-                external: true
+                to: ''
             }
         ]
     },
@@ -196,38 +150,31 @@ const sidebarItem: menu[] = [
         children: [
             {
                 title: 'Homepage',
-                to: '',
-                external: true
+                to: '/sample-page'
             },
             {
                 title: 'About Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog Details',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Contact Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Portfolio',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Pricing',
-                to: '',
-                external: true
+                to: ''
             }
         ]
     },
@@ -239,38 +186,31 @@ const sidebarItem: menu[] = [
         children: [
             {
                 title: 'Homepage',
-                to: '',
-                external: true
+                to: '/sample-page'
             },
             {
                 title: 'About Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Blog Details',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Contact Us',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Portfolio',
-                to: '',
-                external: true
+                to: ''
             },
             {
                 title: 'Pricing',
-                to: '',
-                external: true
+                to: ''
             }
         ]
     },
@@ -280,11 +220,6 @@ const sidebarItem: menu[] = [
         title: 'Login',
         icon: 'login-3-line-duotone',
         to: '/auth/login'
-    },
-    {
-        title: 'Register',
-        icon: 'user-plus-rounded-line-duotone',
-        to: '/auth/register'
     }
 ];
 

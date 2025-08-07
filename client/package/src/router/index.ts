@@ -13,4 +13,3 @@ export const router = createRouter({
         AuthRoutes
     ]
 });
-
