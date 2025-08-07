@@ -51,11 +51,6 @@ const MainRoutes = {
             path: '/sample-page',
             component: () => import('@/views/pages/SamplePage.vue')
         },
-        {
-            name: 'test',
-            path: '/test',
-            component: () => import('@/views/production/instruction.vue')
-        }
     ]
 };
 
