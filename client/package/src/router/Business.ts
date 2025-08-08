@@ -12,44 +12,34 @@ const MainRoutes = {
             component: () => import('@/views/business/orderInsert.vue')
         },
         {
-            name: 'Typography',
-            path: '/ui/typography',
-            component: () => import('@/views/components/Typography.vue')
+            name: 'orderList',
+            path: '/orderList',
+            component: () => import('@/views/business/orderList.vue')
         },
         {
-            name: 'Shadow',
-            path: '/ui/shadow',
-            component: () => import('@/views/components/Shadow.vue')
+            name: 'setOrder',
+            path: '/setOrder',
+            component: () => import('@/views/business/setOrder.vue')
         },
         {
-            name: 'Alert',
-            path: '/ui/alerts',
-            component: () => import('@/views/ui-components/Alerts.vue')
+            name: 'productList',
+            path: '/productList',
+            component: () => import('@/views/business/productList.vue')
         },
         {
-            name: 'Buttons',
-            path: '/ui/buttons',
-            component: () => import('@/views/ui-components/Buttons.vue')
+            name: 'productInsert',
+            path: '/productInsert',
+            component: () => import('@/views/business/productInsert.vue')
         },
         {
-            name: 'Cards',
-            path: '/ui/cards',
-            component: () => import('@/views/ui-components/Cards.vue')
+            name: 'setProduct',
+            path: '/setProduct',
+            component: () => import('@/views/business/setProduct.vue')
         },
         {
-            name: 'Tables',
-            path: '/ui/tables',
-            component: () => import('@/views/ui-components/Tables.vue')
-        },
-        {
-            name: 'Icons',
-            path: '/icons',
-            component: () => import('@/views/pages/Icons.vue')
-        },
-        {
-            name: 'Starter',
-            path: '/sample-page',
-            component: () => import('@/views/pages/SamplePage.vue')
+            name: 'setDelivery',
+            path: '/setDelivery',
+            component: () => import('@/views/business/setDelivery.vue')
         }
     ]
 };
