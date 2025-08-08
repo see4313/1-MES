@@ -1,12 +1,8 @@
 const express = require("express");
 const router = express.Router();
-// 라우팅 = 사용자의 요청(URI + METHOD) + Service + 응답형태(View or Data)
-const basicService = require("../services/basic_service.js");
+const employeeService = require("../services/employee_service.js");
 
-router.get("/emp/search", async (req, res) => {
-  const filters = req.query; // 넘어온 값만 사용
-  const list = await basicService.findByFilters(filters);
-  res.send(list);
-});
+// /emp/search  사원검색
+router.post("/emp/search", employeeService.search);
 
 module.exports = router;
