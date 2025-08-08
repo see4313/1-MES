@@ -5,31 +5,27 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
-                to: '/sample-page'
+                title: '사원관리',
+                to: '/emp'
             },
             {
-                title: 'About Us',
+                title: '거래처관리',
                 to: ''
             },
             {
-                title: 'Blog',
+                title: '품목관리',
                 to: ''
             },
             {
-                title: 'Blog Details',
+                title: 'BOM관리',
                 to: ''
             },
             {
-                title: 'Contact Us',
+                title: '창고관리',
                 to: ''
             },
             {
-                title: 'Portfolio',
-                to: ''
-            },
-            {
-                title: 'Pricing',
+                title: '공정정보',
                 to: ''
             }
         ]
