@@ -15,6 +15,19 @@ function convertToArray(obj, columns) {
   return result;
 }
 
+//등록
+const addNew = async (boardInfo) => {
+  let insertData = convertToArray(boardInfo, [
+    "order_id",
+    "emp_id",
+    "ordr_date",
+    "paprd_date",
+    "remk",
+  ]);
+  let resInfo = await mariadb.query("orderInsert", insertData);
+};
+
 module.exports = {
   findAll,
+  addNew,
 };
