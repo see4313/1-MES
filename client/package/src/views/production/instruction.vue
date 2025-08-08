@@ -1,7 +1,9 @@
 <!-- instruction.vue -->
 <script setup>
-import CardHeader from '@/components/production/card-header.vue';
+// import CardHeader from '@/components/production/card-header.vue';
+import CardHeader from '@/components/production/card-header-btn2.vue';
 import { useFormatDate } from '@/composables/useFormatDate.js';
+import { ref } from 'vue';
 
 
 </script>
@@ -11,11 +13,18 @@ import { useFormatDate } from '@/composables/useFormatDate.js';
         <v-card-item class="py-6 px-6">
             <CardHeader
                 title="생산 지시"
-                btn-icon="mdi-plus-circle"
-                btn-text="생산 계획 불러오기"
-                btn-variant="flat"
-                btn-color="primary"
-                @btn-click="planLoad"
+                btn-icon1="mdi-plus-circle"
+                btn-text1="생산 계획 불러오기"
+                btn-variant1="flat"
+                btn-color1="primary"
+                isBtn1="false"
+                @btn-click1="planLoad"
+                btn-icon2="mdi-plus-circle"
+                btn-text2="생산 계획 불러오기"
+                btn-variant2="flat"
+                btn-color2="warning"
+                isBtn2="false"
+                @btn-click2="planLoad"
             />
               <v-table>
                     <thead>
@@ -73,7 +82,7 @@ import { useFormatDate } from '@/composables/useFormatDate.js';
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
-                                    v-model="joinDate1"
+                                    v-model="goalDate"
                                     label="목표 생산 일자"
                                     append-inner-icon="mdi-calendar"
                                     readonly
