@@ -7,14 +7,9 @@ const MainRoutes = {
     component: () => import('@/layouts/full/FullLayout.vue'),
     children: [
         {
-            name: 'orderInsert',
-            path: '/orderInsert',
-            component: () => import('@/views/business/orderInsert.vue')
-        },
-        {
-            name: 'Typography',
-            path: '/ui/typography',
-            component: () => import('@/views/components/Typography.vue')
+            name: 'mt-003',
+            path: '/mt-003',
+            component: () => import('@/views/materials/MT-003.vue')
         },
         {
             name: 'Shadow',

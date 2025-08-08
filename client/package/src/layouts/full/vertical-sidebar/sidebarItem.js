@@ -78,7 +78,7 @@ const sidebarItem = [
         children: [
             {
                 title: 'Homepage',
-                to: '/sample-page'
+                to: '/mt-003'
             },
             {
                 title: 'About Us',

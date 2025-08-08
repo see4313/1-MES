@@ -5,7 +5,11 @@
                 <h3>사원조회</h3>
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="사원명" />
+                        <v-text-field label="사원명" v-model="selectedItem" readonly>
+                            <template #append-inner>
+                                <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                            </template>
+                        </v-text-field>
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="부서명" />
@@ -67,6 +71,22 @@
             </div>
         </v-col>
     </v-row>
+
+    <!-- 사원 모달 -->
+    <ModalSearch
+        :visible="showModal"
+        title="사원 검색"
+        idField="emp_id"
+        :columns="[
+            { key: 'emp_id', label: '사원번호' },
+            { key: 'emp_name', label: '사원명' },
+            { key: 'status', label: '상태' }
+        ]"
+        :fetchData="fetchItems"
+        :pageSize="5"
+        @select="onSelectItem"
+        @close="showModal = false"
+    />
 </template>
 <script setup>
 import DataTable from 'primevue/datatable';
@@ -74,6 +94,8 @@ import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
 import { ProductService } from '@/service/ProductService';
 import dayjs from 'dayjs';
+import ModalSearch from '@/views/commons/CommonModal.vue';
+import axios from 'axios';
 
 onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
@@ -92,4 +114,23 @@ const formattedJoinDate = computed(() => {
 const formattedLeavDate = computed(() => {
     return leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : '';
 });
+
+const showModal = ref(false);
+const selectedItem = ref(null);
+
+// DB에서 리스트 가져오기
+const fetchItems = async () => {
+    try {
+        const response = await axios.get('/api/boards');
+        return response.data; // 반드시 배열 형태여야 함
+    } catch (error) {
+        console.error('조회 실패', error);
+        return [];
+    }
+};
+
+// 선택한 값 처리
+const onSelectItem = (item) => {
+    selectedItem.value = item.emp_name;
+};
 </script>

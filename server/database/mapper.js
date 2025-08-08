@@ -25,13 +25,14 @@ const connectionPool = mariadb.createPool({
 const query = async (alias, values) => {
   let conn = null;
   try {
-    // DB와 연결해야하기 때문에 무조건 비동기
     conn = await connectionPool.getConnection();
-    let executeSql = sqlList[alias];
-    let result = await conn.query(executeSql, values);
+    let exeuteSql = sqlList[alias];
+    let result = await conn.query(exeuteSql, values);
     return result;
   } catch (e) {
     console.log(e);
+  } finally {
+    conn.release();
   }
 };
 
