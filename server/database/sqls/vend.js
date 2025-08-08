@@ -12,8 +12,6 @@ SELECT vend_id,
 FROM   VENDOR
 `;
 
-const 
-
 module.exports = {
   vend,
 };

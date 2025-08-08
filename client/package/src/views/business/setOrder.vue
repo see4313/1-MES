@@ -1,65 +1,58 @@
 <template>
-    <v-row>
-        <v-card elevation="10">
-            <v-col cols="12" md="12">
-                <UiParentCard title="주문관리">
-                    <v-card-item class="py-6 px-6">
-                        <CardHeader title="주문 등록" btn-text="수정" btn-variant="flat" btn-color="primary" @btn-click="" />
-                    </v-card-item>
+    <v-card elevation="10">
+        <v-col cols="12" md="12">
+            <v-card-item class="py-6 px-6">
+                <CardHeader
+                    title="주문 등록"
+                    btn-text1="수정"
+                    btn-variant1="flat"
+                    btn-color1="warning"
+                    @btn-click1=""
+                    btn-text2="삭제"
+                    btn-variant2="flat"
+                    btn-color2="error"
+                    @btn-click2=""
+                />
+            </v-card-item>
+            <v-row dense>
+                <v-col cols="12" sm="3">
+                    <v-text-field variant="outlined" label="주문코드" readonly />
+                </v-col>
+                <v-col cols="12" sm="3">
+                    <v-text-field variant="outlined" label="주문명" readonly />
+                </v-col>
+                <v-col cols="12" sm="3">
+                    <v-text-field variant="outlined" label="담당자" readonly />
+                </v-col>
+                <v-col cols="12" sm="3" :rowspan="2" class="merged-cell">
+                    <v-text-field variant="outlined" label="비고" readonly />
+                </v-col>
+            </v-row>
 
-                    <v-row dense>
-                        <v-col cols="12" sm="3">
-                            <v-text-field variant="outlined" label="주문코드" readonly />
-                        </v-col>
-                        <v-col cols="12" sm="3">
-                            <v-text-field variant="outlined" label="주문명" readonly />
-                        </v-col>
-                        <v-col cols="12" sm="3">
-                            <v-text-field variant="outlined" label="담당자" readonly />
-                        </v-col>
-                        <v-col cols="12" sm="3" :rowspan="2" class="merged-cell">
-                            <v-text-field variant="outlined" label="비고" readonly />
-                        </v-col>
-                    </v-row>
+            <v-row dense>
+                <v-col cols="12" sm="3">
+                    <v-text-field variant="outlined" label="업체명" readonly />
+                </v-col>
 
-                    <v-row dense>
-                        <v-col cols="12" sm="3">
-                            <v-text-field variant="outlined" label="업체명" readonly />
-                        </v-col>
-
-                        <v-col cols="12" sm="3">
-                            <v-menu
-                                v-model="joinMenu"
-                                :close-on-content-click="false"
-                                transition="scale-transition"
-                                offset-y
-                                min-width="auto"
-                            >
-                                <template #activator="{ props }">
-                                    <v-text-field v-bind="props" v-model="joinDate" label="주문일자" readonly />
-                                </template>
-                                <v-date-picker v-model="joinDate" @change="joinMenu = false" />
-                            </v-menu>
-                        </v-col>
-                        <v-col cols="12" sm="3">
-                            <v-menu
-                                v-model="leavMenu"
-                                :close-on-content-click="false"
-                                transition="scale-transition"
-                                offset-y
-                                min-width="auto"
-                            >
-                                <template #activator="{ props }">
-                                    <v-text-field v-bind="props" v-model="leavDate" label="납기일자" readonly />
-                                </template>
-                                <v-date-picker v-model="leavDate" @change="leavMenu = false" />
-                            </v-menu>
-                        </v-col>
-                    </v-row>
-                </UiParentCard>
-            </v-col>
-        </v-card>
-    </v-row>
+                <v-col cols="12" sm="3">
+                    <v-menu v-model="joinMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
+                        <template #activator="{ props }">
+                            <v-text-field v-bind="props" v-model="joinDate" label="주문일자" readonly />
+                        </template>
+                        <v-date-picker v-model="joinDate" @change="joinMenu = false" />
+                    </v-menu>
+                </v-col>
+                <v-col cols="12" sm="3">
+                    <v-menu v-model="leavMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
+                        <template #activator="{ props }">
+                            <v-text-field v-bind="props" v-model="leavDate" label="납기일자" readonly />
+                        </template>
+                        <v-date-picker v-model="leavDate" @change="leavMenu = false" />
+                    </v-menu>
+                </v-col>
+            </v-row>
+        </v-col>
+    </v-card>
     <v-row class="mt-10">
         <v-card elevation="10">
             <v-col cols="12">
@@ -78,7 +71,7 @@
     </v-row>
 </template>
 <script setup>
-import CardHeader from '@/components/production/card-header.vue';
+import CardHeader from '@/components/production/card-header-btn2.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';

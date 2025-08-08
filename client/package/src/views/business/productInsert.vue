@@ -1,71 +1,79 @@
 <template>
-    <v-row>
-        <v-card elevation="10">
-            <v-col cols="12" md="12">
-                <v-card-item class="py-6 px-6">
-                    <CardHeader title="주문 등록" btn-text="등록" btn-variant="flat" btn-color="primary" @btn-click="" />
-                </v-card-item>
-                <v-row dense>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="주문명" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="담당자"
-                            append-inner-icon="mdi-magnify"
-                            @click:append-inner="showModal = true"
-                            v-model="selectedItem"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="업체명"
-                            append-inner-icon="mdi-magnify"
-                            @click:append-inner="showModal = true"
-                            v-model="selectItem2"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-menu v-model="joinMenu" :close-on-content-click="true" transition="scale-transition" offset-y min-width="auto">
-                            <template #activator="{ props }">
-                                <v-text-field
-                                    v-bind="props"
-                                    v-model="joinDate"
-                                    label="주문일자"
-                                    append-inner-icon="mdi-calendar"
-                                    readonly
-                                    variant="outlined"
-                                    :model-value="formattedJoinDate"
-                                />
-                            </template>
-                            <v-date-picker v-model="joinDate" @change="joinMenu = false" />
-                        </v-menu>
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-menu v-model="leavMenu" :close-on-content-click="true" transition="scale-transition" offset-y min-width="auto">
-                            <template #activator="{ props }">
-                                <v-text-field
-                                    v-bind="props"
-                                    v-model="leavDate"
-                                    label="납기일자"
-                                    append-inner-icon="mdi-calendar"
-                                    readonly
-                                    variant="outlined"
-                                    :model-value="formattedLeavDate"
-                                />
-                            </template>
-                            <v-date-picker v-model="leavDate" @change="leavMenu = false" />
-                        </v-menu>
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="비고" />
-                    </v-col>
-                </v-row>
-            </v-col>
-        </v-card>
-    </v-row>
+    <v-card elevation="10">
+        <v-col cols="12" md="12">
+            <v-card-item class="py-6 px-6">
+                <CardHeader
+                    title="제품 등록"
+                    btn-text1="등록"
+                    btn-variant1="flat"
+                    btn-color1="primary"
+                    @btn-click1=""
+                    btn-text2="초기화"
+                    btn-variant2="flat"
+                    btn-color2="warning"
+                    @btn-click2=""
+                />
+            </v-card-item>
+            <v-row dense>
+                <v-col cols="12" sm="4">
+                    <v-text-field variant="outlined" label="주문명" />
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-text-field
+                        variant="outlined"
+                        label="담당자"
+                        append-inner-icon="mdi-magnify"
+                        @click:append-inner="showModal = true"
+                        v-model="selectedItem"
+                    />
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-text-field
+                        variant="outlined"
+                        label="업체명"
+                        append-inner-icon="mdi-magnify"
+                        @click:append-inner="showModal = true"
+                        v-model="selectItem2"
+                    />
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-menu v-model="joinMenu" :close-on-content-click="true" transition="scale-transition" offset-y min-width="auto">
+                        <template #activator="{ props }">
+                            <v-text-field
+                                v-bind="props"
+                                v-model="joinDate"
+                                label="주문일자"
+                                append-inner-icon="mdi-calendar"
+                                readonly
+                                variant="outlined"
+                                :model-value="formattedJoinDate"
+                            />
+                        </template>
+                        <v-date-picker v-model="joinDate" @change="joinMenu = false" />
+                    </v-menu>
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-menu v-model="leavMenu" :close-on-content-click="true" transition="scale-transition" offset-y min-width="auto">
+                        <template #activator="{ props }">
+                            <v-text-field
+                                v-bind="props"
+                                v-model="leavDate"
+                                label="납기일자"
+                                append-inner-icon="mdi-calendar"
+                                readonly
+                                variant="outlined"
+                                :model-value="formattedLeavDate"
+                            />
+                        </template>
+                        <v-date-picker v-model="leavDate" @change="leavMenu = false" />
+                    </v-menu>
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-text-field variant="outlined" label="비고" />
+                </v-col>
+            </v-row>
+        </v-col>
+    </v-card>
     <v-row class="mt-10">
         <v-card elevation="10">
             <v-col cols="12">
@@ -124,7 +132,7 @@
     />
 </template>
 <script setup>
-import CardHeader from '@/components/production/card-header.vue';
+import CardHeader from '@/components/production/card-header-btn2.vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';

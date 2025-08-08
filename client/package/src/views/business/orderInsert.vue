@@ -3,14 +3,7 @@
         <v-card elevation="10">
             <v-col cols="12" md="12">
                 <v-card-item class="py-6 px-6">
-                    <CardHeader
-                        title="주문 등록"
-                        btn-icon="mdi-plus-circle"
-                        btn-text="등록"
-                        btn-variant="flat"
-                        btn-color="primary"
-                        @btn-click=""
-                    />
+                    <CardHeader title="주문 등록" btn-text="등록" btn-variant="flat" btn-color="primary" @btn-click="" />
                 </v-card-item>
                 <v-row dense>
                     <v-col cols="12" sm="4">
@@ -131,7 +124,7 @@
     />
 </template>
 <script setup>
-import CardHeader from '@/components/production/card-header.vue';
+import CardHeader from '@/components/production/card-header-btn.vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
