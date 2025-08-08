@@ -20,8 +20,7 @@ export const router = createRouter({
         Business,
         Production,
         BasicRoutes,
-        ...FacilityRoutes
+        ...FacilityRoutes,
         Materials
-
     ]
 });

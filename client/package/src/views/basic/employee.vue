@@ -55,7 +55,7 @@
                                 v-model="leavDate"
                                 @update:model-value="
                                     (val) => {
-                                        joinDate = val;
+                                        leavDate = val;
                                         searchForm.leavDate = val;
                                         leavMenu = false;
                                     }
@@ -64,24 +64,30 @@
                         </v-menu>
                     </v-col>
                     <v-col cols="12" sm="4">
+                        <!-- 조회 폼: 상태 -->
                         <v-text-field
-                            variant="outlined"
+                            v-model="searchSelectStatus"
                             label="사원상태"
-                            v-model="searchForm.status"
                             readonly
                             append-inner-icon="mdi-magnify"
-                            @click:append-inner="(searchStatus, (isStatusDialogOpen = true))"
+                            @click:append-inner="
+                                statusTarget = 'search';
+                                showStatusModal = true;
+                            "
                         />
                     </v-col>
                     <v-row class="d-flex justify-space-between align-center mb-4">
                         <v-col cols="12" sm="4">
+                            <!-- 조회 폼: 권한 -->
                             <v-text-field
-                                variant="outlined"
+                                v-model="searchSelectPermName"
                                 label="권한"
                                 readonly
                                 append-inner-icon="mdi-magnify"
-                                v-model="searchForm.PermName"
-                                @click:append-inner="(searchPerm, (isPermDialogOpen = true))"
+                                @click:append-inner="
+                                    permTarget = 'search';
+                                    showPermModal = true;
+                                "
                             />
                         </v-col>
 
@@ -146,8 +152,8 @@
                                     v-bind="props"
                                     v-model="joinDate1"
                                     label="입사일"
-                                    append-inner-icon="mdi-calendar"
                                     readonly
+                                    append-inner-icon="mdi-calendar"
                                     variant="outlined"
                                     :model-value="formattedJoinDate1"
                                 />
@@ -172,23 +178,28 @@
                         </v-menu>
                     </v-col>
                     <v-col cols="12" sm="4">
+                        <!-- 등록 폼: 상태 -->
                         <v-text-field
-                            variant="outlined"
+                            v-model="searchSelectStatus2"
                             label="사원상태"
-                            required
+                            readonly
                             append-inner-icon="mdi-magnify"
-                            v-model="selectedStatus"
-                            @click:append-inner="(searchStatus, (isStatusDialogOpen = true))"
+                            @click:append-inner="
+                                statusTarget = 'register';
+                                showStatusModal = true;
+                            "
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field
-                            variant="outlined"
+                            v-model="searchSelectPermName2"
                             label="권한"
                             readonly
                             append-inner-icon="mdi-magnify"
-                            v-model="selectedPermName"
-                            @click:append-inner="(searchPerm, (isPermDialogOpen = true))"
+                            @click:append-inner="
+                                permTarget = 'register';
+                                showPermModal = true;
+                            "
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
@@ -199,49 +210,35 @@
         </v-col>
     </v-row>
 
-    <v-dialog v-model="isStatusDialogOpen" max-width="400">
-        <v-card>
-            <v-card-title class="text-h6">사원상태 선택</v-card-title>
-            <v-list>
-                <v-list-item @click="selectStatus('재직')">
-                    <v-list-item-title>재직</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="selectStatus('휴직')">
-                    <v-list-item-title>휴직</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="selectStatus('퇴사')">
-                    <v-list-item-title>퇴사</v-list-item-title>
-                </v-list-item>
-            </v-list>
-        </v-card>
-    </v-dialog>
-    <!-- 모달 다이얼로그 -->
-    <v-dialog v-model="isPermDialogOpen" max-width="600" persistent>
-        <v-card class="rounded-lg">
-            <v-card-title class="text-h6 font-weight-bold"> 권한 검색 </v-card-title>
+    <!-- 상태 모달 1개만 -->
+    <ModalSearch
+        :visible="showStatusModal"
+        title="상태검색"
+        idField="emp_status"
+        :columns="[
+            { key: 'status_id', label: '상태코드' },
+            { key: 'status', label: '상태명' }
+        ]"
+        :fetchData="fetchStatusItems"
+        :pageSize="5"
+        @select="onSelectStatus"
+        @close="showStatusModal = false"
+    />
 
-            <v-card-text>
-                <v-table dense>
-                    <thead>
-                        <tr>
-                            <th class="text-left">권한 코드</th>
-                            <th class="text-left">권한명</th>
-                            <th class="text-center"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in perm" :key="item.code">
-                            <td>{{ item.code }}</td>
-                            <td>{{ item.name }}</td>
-                            <td class="text-center">
-                                <v-btn color="primary" size="small" variant="tonal" @click="selectPerm(item)"> 선택 </v-btn>
-                            </td>
-                        </tr>
-                    </tbody>
-                </v-table>
-            </v-card-text>
-        </v-card>
-    </v-dialog>
+    <!-- 권한 모달 1개만 -->
+    <ModalSearch
+        :visible="showPermModal"
+        title="권한검색"
+        idField="emp_perm"
+        :columns="[
+            { key: 'perm_id', label: '권한코드' },
+            { key: 'perm_name', label: '권한명' }
+        ]"
+        :fetchData="fetchPermItems"
+        :pageSize="5"
+        @select="onSelectPerm"
+        @close="showPermModal = false"
+    />
 </template>
 <script setup>
 import DataTable from 'primevue/datatable';
@@ -249,118 +246,112 @@ import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
 import { ProductService } from '@/service/ProductService';
 import dayjs from 'dayjs';
+import ModalSearch from '@/views/commons/CommonModal.vue';
+import axios from 'axios';
 
-onMounted(() => {
-    ProductService.getProductsMini().then((data) => (products.value = data));
-});
-
-const products = ref();
-const joinMenu = ref(false);
-const joinDate = ref(null);
-const leavMenu = ref(false);
-const leavDate = ref(null);
-const joinMenu1 = ref(false);
-const joinDate1 = ref(null);
-const leavMenu1 = ref(false);
-const leavDate1 = ref(null);
-
-// 공통 날짜 포맷 함수
+// 날짜 포맷 함수
 const formatDate = (dateRef) => computed(() => (dateRef.value ? dayjs(dateRef.value).format('YYYY-MM-DD') : ''));
+
+const products = ref([]);
+const joinMenu = ref(false);
+const leavMenu = ref(false);
+const joinMenu1 = ref(false);
+const leavMenu1 = ref(false);
+const joinDate = ref(null);
+const leavDate = ref(null);
+const joinDate1 = ref(null);
+const leavDate1 = ref(null);
 
 const formattedJoinDate = formatDate(joinDate);
 const formattedLeavDate = formatDate(leavDate);
 const formattedJoinDate1 = formatDate(joinDate1);
 const formattedLeavDate1 = formatDate(leavDate1);
 
-const selectedStatus = ref(''); // 입력 필드에 바인딩
-const isStatusDialogOpen = ref(false); // 모달 열림 여부
-
-const selectStatus = (status) => {
-    selectedStatus.value = status; // 필드에 값 입력
-    isStatusDialogOpen.value = false; // 모달 닫기
-};
-
-// 모달 상태
-const isPermDialogOpen = ref(false);
-
-// 권한 목록 데이터
-const perm = ref([
-    { code: 'AD001', name: '전체 관리자' },
-    { code: 'AD002', name: '부서 관리자' },
-    { code: 'AD003', name: '일반 사용자' }
-]);
-
-const search = () => {
-    searchForm.status = selectedStatus.value;
-    doSearch(searchForm);
-};
-
-// 선택된 값
-const selectedPermnCode = ref('');
-const selectedPermName = ref('');
-
-// 선택 시 처리
-const selectPerm = (item) => {
-    selectedPermnCode.value = item.code;
-    selectedPermName.value = item.name;
-    isPermDialogOpen.value = false;
-};
-
-const productsList = ref([]); // 화면에 보여줄 리스트
-const allProducts = ref([]); // 전체 원본
-
-const onClickSearch = () => {
-    // 모달/픽커로 고른 값 폼에 반영
-    searchForm.value.status = selectedStatus.value;
-    searchForm.value.permName = selectedPermName.value;
-    searchAll(); //실제 검색 실행
-};
-
-// 검색 폼 모델
+// 검색 폼
 const searchForm = ref({
     name: '',
     department: '',
     phone: '',
-    joinDate: null, // YYYY-MM-DD or Date
+    joinDate: null,
     leavDate: null,
     status: '',
     permName: ''
 });
 
+// 조회용 입력란
+const searchSelectStatus = ref(null);
+const searchSelectPermName = ref(null);
+
+// 등록용 입력란
+const searchSelectStatus2 = ref(null);
+const searchSelectPermName2 = ref(null);
+
+// 모달 제어
+const showStatusModal = ref(false);
+const showPermModal = ref(false);
+const statusTarget = ref(null); // 'search' | 'register'
+const permTarget = ref(null); // 'search' | 'register'
+
+// 상태 데이터
+const fetchStatusItems = async (page, search) => {
+    const statusList = [
+        { status_id: 'S001', status: '재직' },
+        { status_id: 'S002', status: '휴직' },
+        { status_id: 'S003', status: '퇴직' }
+    ];
+    return search ? statusList.filter((item) => item.status.includes(search)) : statusList;
+};
+
+// 권한 데이터
+const fetchPermItems = async (page, search) => {
+    const permList = [
+        { perm_id: 'AD001', perm_name: '전체 관리자' },
+        { perm_id: 'AD002', perm_name: '부서 관리자' },
+        { perm_id: 'AD003', perm_name: '일반 사용자' }
+    ];
+    return search ? permList.filter((item) => item.perm_name.includes(search)) : permList;
+};
+
+// 상태 선택
+const onSelectStatus = (item) => {
+    if (statusTarget.value === 'search') {
+        searchSelectStatus.value = item.status;
+        searchForm.value.status = item.status;
+    } else if (statusTarget.value === 'register') {
+        searchSelectStatus2.value = item.status;
+    }
+    showStatusModal.value = false;
+    statusTarget.value = null;
+};
+
+// 권한 선택
+const onSelectPerm = (item) => {
+    if (permTarget.value === 'search') {
+        searchSelectPermName.value = item.perm_name;
+        searchForm.value.permName = item.perm_name;
+    } else if (permTarget.value === 'register') {
+        searchSelectPermName2.value = item.perm_name;
+    }
+    showPermModal.value = false;
+    permTarget.value = null;
+};
+
+// 검색 버튼
+// 조회 버튼 클릭
+const onClickSearch = async () => {
+    try {
+        const res = await axios.post('http://localhost:3000/emp/search', searchForm.value);
+        products.value = res.data;
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+// 초기 데이터 로드
 onMounted(async () => {
     const data = await ProductService.getProductsMini();
-    allProducts.value = data;
-    products.value = data; // 기본 전체 표시
+    products.value = data;
 });
-
-const searchAll = () => {
-    const f = searchForm.value;
-
-    // 아무 것도 안 넣었으면 전체 표시
-    const nothingFilled = !f.name && !f.department && !f.phone && !f.joinDate && !f.leavDate && !f.status && !f.permName;
-    if (nothingFilled) {
-        productsList.value = allProducts.value.slice();
-        return;
-    }
-
-    // productsList.value = allProducts.value.filter((row) => {
-    //     // row 필드 예시는 Column에 맞춰
-    //     if (f.name && !includesIC(row.empName, f.name)) return false;
-    //     if (f.department && !includesIC(row.deptId, f.department)) return false;
-    //     if (f.phone && !includesIC(row.phone, f.phone)) return false;
-    //     if (f.status && !includesIC(row.status, f.status)) return false;
-    //     if (f.permName && !includesIC(row.perm, f.permName)) return false;
-
-    //     // 날짜
-    //     if (f.joinDate) {
-    //         if (toYmd(row.join) !== toYmd(f.joinDate)) return false;
-    //     }
-    //     if (f.leavDate) {
-    //         if (toYmd(row.leav) !== toYmd(f.leavDate)) return false;
-    //     }
-    //     return true;
-    // });
-};
 </script>
 <style scoped>
 ::v-deep(.v-icon) {
