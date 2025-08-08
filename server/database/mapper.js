@@ -1,20 +1,17 @@
+require("dotenv").config(); // .env 파일 로드
 const mariadb = require("mariadb");
 const sqlList = require("./sqlList.js");
 
 const connectionPool = mariadb.createPool({
-  // DB에 접속하는 정보
-  host: "223.130.160.217",
-  port: 3306,
-  user: "dev01",
-  password: "1234",
-  database: "dev",
-  connectionLimit: 10,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  connectionLimit: process.env.DB_CONNECTION_LIMIT || 10,
 
-  // autoincrement로 증가하는 값이 number타입으로 넘어오지 않기때문에 설정
   insertIdAsNumber: true,
-  // bigInt 타입이 자바스크립트에서 자동변환이 이루어지지 않기때문에 number으로 변환하기 위해 설정
   bigIntAsNumber: true,
-  // ?가 여러값을 가지는 경우 mariadb에서 매핑하기 위해 설정
   permitSetMultiParamEntries: true,
   logger: {
     query: console.log,
@@ -36,6 +33,4 @@ const query = async (alias, values) => {
   }
 };
 
-module.exports = {
-  query,
-};
+module.exports = { query };

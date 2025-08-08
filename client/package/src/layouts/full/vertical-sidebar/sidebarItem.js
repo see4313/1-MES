@@ -5,31 +5,27 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
-                to: '/sample-page'
+                title: '사원관리',
+                to: '/emp'
             },
             {
-                title: 'About Us',
+                title: '거래처관리',
                 to: ''
             },
             {
-                title: 'Blog',
+                title: '품목관리',
                 to: ''
             },
             {
-                title: 'Blog Details',
+                title: 'BOM관리',
                 to: ''
             },
             {
-                title: 'Contact Us',
+                title: '창고관리',
                 to: ''
             },
             {
-                title: 'Portfolio',
-                to: ''
-            },
-            {
-                title: 'Pricing',
+                title: '공정정보',
                 to: ''
             }
         ]
@@ -185,32 +181,44 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
-                to: '/sample-page'
+                title: '대시보드',
+                to: '/facility/dashboard'
             },
             {
-                title: 'About Us',
-                to: ''
+                title: '설비목록',
+                to: '/facility/list'
             },
             {
-                title: 'Blog',
-                to: ''
+                title: '설비 상태 조회',
+                to: '/facility/status'
             },
             {
-                title: 'Blog Details',
-                to: ''
+                title: '점검 이력 등록',
+                to: '/facility/inspect/add'
             },
             {
-                title: 'Contact Us',
-                to: ''
+                title: '점검 이력 관리',
+                to: '/facility/inspect/manage'
             },
             {
-                title: 'Portfolio',
-                to: ''
+                title: '세척이력 등록',
+                to: '/facility/cleaning/add'
             },
             {
-                title: 'Pricing',
-                to: ''
+                title: '세척이력 관리',
+                to: '/facility/cleaning/manage'
+            },
+            {
+                title: '고장 등록',
+                to: '/facility/failure/add'
+            },
+            {
+                title: '수리이력 등록',
+                to: '/facility/repair/add'
+            },
+            {
+                title: '비가동 관리',
+                to: '/facility/downtime'
             }
         ]
     },

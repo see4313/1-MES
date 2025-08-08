@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainRoutes from './MainRoutes';
 import AuthRoutes from './AuthRoutes';
+import FacilityRoutes from './FacilityRoutes';
 
 import Business from './Business';
 import Materials from './Materials';
@@ -17,9 +18,8 @@ export const router = createRouter({
         },
         MainRoutes,
         AuthRoutes,
-
+        ...FacilityRoutes,
         Business,
-
         Production,
         BasicRoutes,
         Materials
