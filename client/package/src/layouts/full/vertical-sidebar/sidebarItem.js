@@ -1,11 +1,3 @@
-const userRole = 'user';
-
-const sidebarRoutes = MainRoutes.children.filter((route) => {
-    const roles = route.meta?.roles;
-    if (!roles) return true;
-    return roles.includes(userRole);
-});
-
 const sidebarItem = [
     {
         title: '기준정보',
@@ -18,7 +10,7 @@ const sidebarItem = [
             },
             {
                 title: '거래처관리',
-                to: ''
+                to: '/vendor'
             },
             {
                 title: '품목관리',
@@ -34,6 +26,10 @@ const sidebarItem = [
             },
             {
                 title: '공정정보',
+                to: ''
+            },
+            {
+                title: 'Pricing',
                 to: ''
             }
         ]
@@ -54,23 +50,23 @@ const sidebarItem = [
             },
             {
                 title: '주문관리',
-                to: ''
+                to: '/setOrder'
             },
             {
                 title: '제품조회',
-                to: ''
+                to: '/productList'
             },
             {
                 title: '제품입고처리',
-                to: ''
+                to: '/productInsert'
             },
             {
                 title: '제품관리',
-                to: ''
+                to: '/setProduct'
             },
             {
                 title: '출고관리',
-                to: ''
+                to: '/setDelivery'
             }
         ]
     },
@@ -82,7 +78,7 @@ const sidebarItem = [
         children: [
             {
                 title: 'Homepage',
-                to: '/sample-page'
+                to: '/mt-003'
             },
             {
                 title: 'About Us',

@@ -5,93 +5,33 @@
                 <h3>사원조회</h3>
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="사원명" v-model="searchForm.name" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="부서명" v-model="searchForm.dept" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" v-model="searchForm.phone" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-menu v-model="joinMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
-                            <template #activator="{ props }">
-                                <v-text-field
-                                    v-bind="props"
-                                    v-model="joinDate"
-                                    label="입사일"
-                                    append-inner-icon="mdi-calendar"
-                                    readonly
-                                    variant="outlined"
-                                    :model-value="formattedJoinDate"
-                                />
-                            </template>
-                            <v-date-picker
-                                v-model="joinDate"
-                                @update:model-value="
-                                    (val) => {
-                                        joinDate = val;
-                                        searchForm.joinDate = val;
-                                        joinMenu = false;
-                                    }
-                                "
-                            />
-                        </v-menu>
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-menu v-model="leavMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
-                            <template #activator="{ props }">
-                                <v-text-field
-                                    v-bind="props"
-                                    v-model="leavDate"
-                                    label="퇴사일"
-                                    append-inner-icon="mdi-calendar"
-                                    readonly
-                                    variant="outlined"
-                                    :model-value="formattedLeavDate"
-                                />
-                            </template>
-                            <v-date-picker
-                                v-model="leavDate"
-                                @update:model-value="
-                                    (val) => {
-                                        joinDate = val;
-                                        searchForm.leavDate = val;
-                                        leavMenu = false;
-                                    }
-                                "
-                            />
-                        </v-menu>
-                    </v-col>
-                    <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="사원상태"
-                            v-model="searchForm.status"
+                            label="거래처코드"
                             readonly
                             append-inner-icon="mdi-magnify"
+                            v-model="selectedStatus"
                             @click:append-inner="(searchStatus, (isStatusDialogOpen = true))"
                         />
                     </v-col>
-                    <v-row class="d-flex justify-space-between align-center mb-4">
-                        <v-col cols="12" sm="4">
-                            <v-text-field
-                                variant="outlined"
-                                label="권한"
-                                readonly
-                                append-inner-icon="mdi-magnify"
-                                v-model="searchForm.PermName"
-                                @click:append-inner="(searchPerm, (isPermDialogOpen = true))"
-                            />
-                        </v-col>
+                    <v-col cols="12" sm="4">
+                        <v-text-field variant="outlined" label="거래처명" />
+                    </v-col>
 
-                        <!-- 오른쪽: 버튼 -->
-                        <div class="d-flex">
-                            <v-col cols="12" class="d-flex justify-end ga-2">
-                                <v-btn color="primary" @click="onClickSearch">조회</v-btn>
-                            </v-col>
-                        </div>
-                    </v-row>
+                    <v-col cols="12" sm="4">
+                        <v-text-field
+                            variant="outlined"
+                            label="거래처 유형"
+                            readonly
+                            append-inner-icon="mdi-magnify"
+                            v-model="selectedPermName"
+                            @click:append-inner="(searchPerm, (isPermDialogOpen = true))"
+                        />
+                    </v-col>
+                    <!-- 오른쪽: 버튼 -->
+                    <v-col cols="12" class="d-flex justify-end">
+                        <v-btn color="primary">조회</v-btn>
+                    </v-col>
                 </v-row>
             </UiParentCard>
         </v-col>
@@ -100,14 +40,14 @@
         <v-col cols="12">
             <div class="card">
                 <DataTable :value="products" tableStyle="min-width: 50rem">
-                    <Column field="empId" header="사원번호"></Column>
-                    <Column field="empName" header="사원명"></Column>
-                    <Column field="deptId" header="소속부서"></Column>
-                    <Column field="phone" header="연락처"></Column>
-                    <Column field="join" header="입사일"></Column>
-                    <Column field="leav" header="퇴사일"></Column>
-                    <Column field="status" header="사원상태"></Column>
-                    <Column field="perm" header="사원권한"></Column>
+                    <Column field="vendId" header="거래처번호"></Column>
+                    <Column field="vendName" header="거래처명"></Column>
+                    <Column field="bizNumber" header="사업자번호"></Column>
+                    <Column field="cntinfo" header="연락처"></Column>
+                    <Column field="vendType" header="거래처유형"></Column>
+                    <Column field="use" header="사용여부"></Column>
+                    <Column field="address" header="주소"></Column>
+                    <Column field="psch" header="담당자"></Column>
                     <Column field="remk" header="비고"></Column>
                 </DataTable>
             </div>
@@ -290,11 +230,6 @@ const perm = ref([
     { code: 'AD003', name: '일반 사용자' }
 ]);
 
-const search = () => {
-    searchForm.status = selectedStatus.value;
-    doSearch(searchForm);
-};
-
 // 선택된 값
 const selectedPermnCode = ref('');
 const selectedPermName = ref('');
@@ -304,62 +239,6 @@ const selectPerm = (item) => {
     selectedPermnCode.value = item.code;
     selectedPermName.value = item.name;
     isPermDialogOpen.value = false;
-};
-
-const productsList = ref([]); // 화면에 보여줄 리스트
-const allProducts = ref([]); // 전체 원본
-
-const onClickSearch = () => {
-    // 모달/픽커로 고른 값 폼에 반영
-    searchForm.value.status = selectedStatus.value;
-    searchForm.value.permName = selectedPermName.value;
-    searchAll(); //실제 검색 실행
-};
-
-// 검색 폼 모델
-const searchForm = ref({
-    name: '',
-    department: '',
-    phone: '',
-    joinDate: null, // YYYY-MM-DD or Date
-    leavDate: null,
-    status: '',
-    permName: ''
-});
-
-onMounted(async () => {
-    const data = await ProductService.getProductsMini();
-    allProducts.value = data;
-    products.value = data; // 기본 전체 표시
-});
-
-const searchAll = () => {
-    const f = searchForm.value;
-
-    // 아무 것도 안 넣었으면 전체 표시
-    const nothingFilled = !f.name && !f.department && !f.phone && !f.joinDate && !f.leavDate && !f.status && !f.permName;
-    if (nothingFilled) {
-        productsList.value = allProducts.value.slice();
-        return;
-    }
-
-    // productsList.value = allProducts.value.filter((row) => {
-    //     // row 필드 예시는 Column에 맞춰
-    //     if (f.name && !includesIC(row.empName, f.name)) return false;
-    //     if (f.department && !includesIC(row.deptId, f.department)) return false;
-    //     if (f.phone && !includesIC(row.phone, f.phone)) return false;
-    //     if (f.status && !includesIC(row.status, f.status)) return false;
-    //     if (f.permName && !includesIC(row.perm, f.permName)) return false;
-
-    //     // 날짜
-    //     if (f.joinDate) {
-    //         if (toYmd(row.join) !== toYmd(f.joinDate)) return false;
-    //     }
-    //     if (f.leavDate) {
-    //         if (toYmd(row.leav) !== toYmd(f.leavDate)) return false;
-    //     }
-    //     return true;
-    // });
 };
 </script>
 <style scoped>
