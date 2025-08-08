@@ -3,11 +3,10 @@
         <v-card elevation="10">
             <v-col cols="12" md="12">
                 <UiParentCard title="주문관리">
-                    <h3>주문관리</h3>
-                    <v-row justify="end" class="gap-2">
-                        <v-btn color="primary">수정</v-btn>
-                        <v-btn color="primary">삭제 </v-btn>
-                    </v-row>
+                    <v-card-item class="py-6 px-6">
+                        <CardHeader title="주문 등록" btn-text="수정" btn-variant="flat" btn-color="primary" @btn-click="" />
+                    </v-card-item>
+
                     <v-row dense>
                         <v-col cols="12" sm="3">
                             <v-text-field variant="outlined" label="주문코드" readonly />
@@ -79,6 +78,7 @@
     </v-row>
 </template>
 <script setup>
+import CardHeader from '@/components/production/card-header.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
