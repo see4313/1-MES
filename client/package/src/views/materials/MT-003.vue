@@ -1,55 +1,62 @@
 <template>
-    <v-row>
-        <v-col cols="12" md="12">
-            <UiParentCard title="재고 조회">
-                <h3>재고 조회</h3>
-                <v-row dense>
-                    <v-col cols="12" sm="4">
-                        <v-text-field label="품목 번호" v-model="selectedItem" readonly>
-                            <template #append-inner>
-                                <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
-                            </template>
-                        </v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field label="LOT 번호" v-model="selectedItem2" readonly>
-                            <template #append-inner>
-                                <v-icon @click="showModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
-                            </template>
-                        </v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field label="품목 구분" v-model="selectedItem3" readonly>
-                            <template #append-inner>
-                                <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
-                            </template>
-                        </v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="4"> </v-col>
-                    <v-col cols="12" sm="4"> </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="사원상태" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="권한" />
-                    </v-col>
-                </v-row>
-            </UiParentCard>
-        </v-col>
-    </v-row>
-    <v-row>
-        <v-col cols="12">
-            <div class="card">
-                <DataTable :value="products" tableStyle="min-width: 50rem">
-                    <Column field="code" header="Code"></Column>
-                    <Column field="name" header="Name"></Column>
-                    <Column field="category" header="Category"></Column>
-                    <Column field="quantity" header="Quantity"></Column>
-                </DataTable>
-            </div>
-        </v-col>
-    </v-row>
-
+    <v-card elevation="10">
+        <v-card-item class="py-6 px-6">
+            <CardHeader title="재고 조회" btn-text="조회" btn-variant="flat" btn-color="primary" @btn-click="planLoad" />
+            <v-row>
+                <v-col cols="12" md="12">
+                    <v-row justify="space-between">
+                        <v-col cols="12" sm="2">
+                            <v-text-field label="품목 번호" v-model="selectedItem" readonly>
+                                <template #append-inner>
+                                    <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="2">
+                            <v-text-field label="LOT 번호" v-model="selectedItem2" readonly>
+                                <template #append-inner>
+                                    <v-icon @click="showModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="2">
+                            <v-text-field label="품목 구분" v-model="selectedItem3" readonly>
+                                <template #append-inner>
+                                    <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="2">
+                            <v-text-field label="보관 조건" v-model="selectedItem3" readonly>
+                                <template #append-inner>
+                                    <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="2">
+                            <v-text-field label="창고 코드" v-model="selectedItem3" readonly>
+                                <template #append-inner>
+                                    <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col cols="12">
+                    <div class="card">
+                        <DataTable :value="products" tableStyle="min-width: 50rem">
+                            <Column field="code" header="Code"></Column>
+                            <Column field="name" header="Name"></Column>
+                            <Column field="category" header="Category"></Column>
+                            <Column field="quantity" header="Quantity"></Column>
+                        </DataTable>
+                    </div>
+                </v-col>
+            </v-row>
+        </v-card-item>
+    </v-card>
     <!-- 사원 모달 -->
     <ModalSearch
         :visible="showModal"
@@ -87,27 +94,15 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
 import { ProductService } from '@/service/ProductService';
-import dayjs from 'dayjs';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
+import CardHeader from '@/components/production/card-header-btn.vue';
 
 onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
 });
 
 const products = ref();
-const joinMenu = ref(false);
-const joinDate = ref(null);
-const leavMenu = ref(false);
-const leavDate = ref(null);
-
-const formattedJoinDate = computed(() => {
-    return joinDate.value ? dayjs(joinDate.value).format('YYYY-MM-DD') : '';
-});
-
-const formattedLeavDate = computed(() => {
-    return leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : '';
-});
 
 const showModal = ref(false);
 const showModal2 = ref(false);
