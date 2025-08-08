@@ -17,9 +17,9 @@ const MainRoutes = {
             component: () => import('@/views/basic/employee.vue')
         },
         {
-            name: 'Typography',
-            path: '/ui/typography',
-            component: () => import('@/views/components/Typography.vue')
+            name: '거래처관리',
+            path: '/vendor',
+            component: () => import('@/views/basic/vendor.vue')
         },
         {
             name: 'Shadow',
