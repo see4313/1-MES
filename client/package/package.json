@@ -13,6 +13,7 @@
         "@iconify/vue": "4.3.0",
         "@primeuix/themes": "^1.2.3",
         "apexcharts": "4.5.0",
+        "axios": "^1.11.0",
         "dayjs": "^1.11.13",
         "primevue": "^4.3.7",
         "vite-plugin-vuetify": "2.1.0",

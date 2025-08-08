@@ -3,7 +3,7 @@ const mariadb = require("../database/mapper.js");
 
 // 전체조회
 const findAll = async () => {
-  let list = await mariadb.query("selectBoardList");
+  let list = await mariadb.query("test");
   return list;
 };
 
