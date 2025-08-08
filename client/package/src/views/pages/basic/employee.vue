@@ -75,6 +75,8 @@ import { ref, onMounted, computed } from 'vue';
 import { ProductService } from '@/service/ProductService';
 import dayjs from 'dayjs';
 
+    
+
 onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
 });
