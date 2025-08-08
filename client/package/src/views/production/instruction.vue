@@ -1,7 +1,9 @@
 <!-- instruction.vue -->
-
 <script setup>
 import CardHeader from '@/components/production/card-header.vue';
+import { useFormatDate } from '@/composables/useFormatDate.js';
+
+
 </script>
 
 <template>
@@ -64,6 +66,24 @@ import CardHeader from '@/components/production/card-header.vue';
                             color="primary"
                         >품목 추가
                     </v-btn>
+                </v-row>
+                <v-row>
+                    <v-col cols="12" sm="12">
+                        <v-menu v-model="joinMenu1" :close-on-content-click="true" transition="scale-transition" offset-y min-width="auto">
+                            <template #activator="{ props }">
+                                <v-text-field
+                                    v-bind="props"
+                                    v-model="joinDate1"
+                                    label="목표 생산 일자"
+                                    append-inner-icon="mdi-calendar"
+                                    readonly
+                                    variant="outlined"
+                                    :model-value="a"
+                                />
+                            </template>
+                            <v-date-picker v-model="joinDate1" @update:model-value="joinMenu1 = false" />
+                        </v-menu>
+                    </v-col>
                 </v-row>
         </v-card-item>
     </v-card>
