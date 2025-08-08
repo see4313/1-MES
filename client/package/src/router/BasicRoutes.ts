@@ -14,7 +14,7 @@ const MainRoutes = {
         {
             name: '사원관리',
             path: '/emp',
-            component: () => import('@/views/pages/basic/employee.vue')
+            component: () => import('@/views/basic/employee.vue')
         },
         {
             name: 'Typography',
