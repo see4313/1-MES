@@ -1,54 +1,32 @@
 <template>
     <v-row>
         <v-col cols="12" md="12">
-            <UiParentCard title="사원조회">
-                <h3>사원조회</h3>
+            <UiParentCard title="재고 조회">
+                <h3>재고 조회</h3>
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field label="사원명" v-model="selectedItem" readonly>
+                        <v-text-field label="품목 번호" v-model="selectedItem" readonly>
                             <template #append-inner>
                                 <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                             </template>
                         </v-text-field>
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="부서명" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-menu v-model="joinMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
-                            <template #activator="{ props }">
-                                <v-text-field
-                                    v-bind="props"
-                                    v-model="joinDate"
-                                    label="입사일"
-                                    prepend-icon="mdi-calendar"
-                                    readonly
-                                    variant="outlined"
-                                    :model-value="formattedJoinDate"
-                                />
+                        <v-text-field label="LOT 번호" v-model="selectedItem2" readonly>
+                            <template #append-inner>
+                                <v-icon @click="showModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                             </template>
-                            <v-date-picker v-model="joinDate" @change="joinMenu = false" />
-                        </v-menu>
+                        </v-text-field>
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-menu v-model="leavMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
-                            <template #activator="{ props }">
-                                <v-text-field
-                                    v-bind="props"
-                                    v-model="leavDate"
-                                    label="퇴사일"
-                                    prepend-icon="mdi-calendar"
-                                    readonly
-                                    variant="outlined"
-                                    :model-value="formattedLeavDate"
-                                />
+                        <v-text-field label="품목 구분" v-model="selectedItem3" readonly>
+                            <template #append-inner>
+                                <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                             </template>
-                            <v-date-picker v-model="leavDate" @change="leavMenu = false" />
-                        </v-menu>
+                        </v-text-field>
                     </v-col>
+                    <v-col cols="12" sm="4"> </v-col>
+                    <v-col cols="12" sm="4"> </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="사원상태" />
                     </v-col>
@@ -87,6 +65,22 @@
         @select="onSelectItem"
         @close="showModal = false"
     />
+
+    <!-- 주문 모달 -->
+    <ModalSearch
+        :visible="showModal2"
+        title="주문 검색"
+        idField="order_id"
+        :columns="[
+            { key: 'order_id', label: '주문번호' },
+            { key: 'vend_id', label: '거래처번호' },
+            { key: 'ordr', label: '주문명' }
+        ]"
+        :fetchData="fetchItems2"
+        :pageSize="5"
+        @select="onSelectItem2"
+        @close="showModal2 = false"
+    />
 </template>
 <script setup>
 import DataTable from 'primevue/datatable';
@@ -116,7 +110,10 @@ const formattedLeavDate = computed(() => {
 });
 
 const showModal = ref(false);
+const showModal2 = ref(false);
 const selectedItem = ref(null);
+const selectedItem2 = ref(null);
+const selectedItem3 = ref(null);
 
 // DB에서 리스트 가져오기
 const fetchItems = async () => {
@@ -129,8 +126,22 @@ const fetchItems = async () => {
     }
 };
 
+const fetchItems2 = async () => {
+    try {
+        const response = await axios.get('/api/orderList');
+        return response.data; // 반드시 배열 형태여야 함
+    } catch (error) {
+        console.error('조회 실패', error);
+        return [];
+    }
+};
+
 // 선택한 값 처리
 const onSelectItem = (item) => {
     selectedItem.value = item.emp_name;
+};
+
+const onSelectItem2 = (item) => {
+    selectedItem2.value = item.order_id;
 };
 </script>
