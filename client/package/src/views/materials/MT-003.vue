@@ -1,21 +1,29 @@
 <template>
     <v-row>
         <v-col cols="12" md="12">
-            <UiParentCard title="사원조회">
-                <h3>사원조회</h3>
+            <UiParentCard title="재고 조회">
+                <h3>재고 조회</h3>
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field label="사원명" v-model="selectedItem" readonly>
+                        <v-text-field label="품목 번호" v-model="selectedItem" readonly>
                             <template #append-inner>
                                 <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                             </template>
                         </v-text-field>
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="부서명" />
+                        <v-text-field label="LOT 번호" v-model="selectedItem" readonly>
+                            <template #append-inner>
+                                <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                            </template>
+                        </v-text-field>
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" />
+                        <v-text-field label="품목 구분" v-model="selectedItem" readonly>
+                            <template #append-inner>
+                                <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                            </template>
+                        </v-text-field>
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-menu v-model="joinMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
