@@ -13,7 +13,21 @@ INSERT INTO t_board_board (title, writer, content)
 VALUES (?, ?, ?)
 `;
 
+const test = `
+SELECT emp_id
+     , emp_name
+     , status
+     , join_co
+     , leavdorm
+     , perm
+     , dept_id
+     , phone
+     , remk
+FROM   EMPLOYEE
+`;
+
 module.exports = {
   selectBoardList,
   boardInsert,
+  test,
 };

@@ -1,5 +1,5 @@
 const MainRoutes = {
-    path: '/main',
+    path: '/Materials',
     meta: {
         requiresAuth: true
     },
@@ -7,14 +7,9 @@ const MainRoutes = {
     component: () => import('@/layouts/full/FullLayout.vue'),
     children: [
         {
-            name: 'Dashboard',
-            path: '/',
-            component: () => import('@/views/dashboard/index.vue')
-        },
-        {
-            name: 'Typography',
-            path: '/ui/typography',
-            component: () => import('@/views/components/Typography.vue')
+            name: 'mt-003',
+            path: '/mt-003',
+            component: () => import('@/views/materials/MT-003.vue')
         },
         {
             name: 'Shadow',

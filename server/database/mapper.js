@@ -23,13 +23,13 @@ const query = async (alias, values) => {
   let conn = null;
   try {
     conn = await connectionPool.getConnection();
-    let executeSql = sqlList[alias];
-    let result = await conn.query(executeSql, values);
+    let exeuteSql = sqlList[alias];
+    let result = await conn.query(exeuteSql, values);
     return result;
   } catch (e) {
-    console.error(e);
+    console.log(e);
   } finally {
-    if (conn) conn.release(); // 커넥션 반환 필수
+    conn.release();
   }
 };
 
