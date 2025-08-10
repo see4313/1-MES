@@ -1,216 +1,280 @@
+<!-- src/views/employee.vue -->
 <template>
+    <!-- ================= 사원 조회 ================= -->
     <v-row>
-        <v-col cols="12" md="12">
-            <UiParentCard title="사원조회">
-                <h3>사원조회</h3>
+        <v-card elevation="10" class="pa-6">
+            <v-card-item class="py-6 px-6">
+                <CardHeader title="사원 조회" btn-text="조회" btn-variant="flat" btn-color="primary" @btn-click="onClickSearch" />
+            </v-card-item>
+
+            <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="사원명" v-model="searchForm.name" />
                     </v-col>
+
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="부서명" v-model="searchForm.dept" />
+                        <v-text-field
+                            variant="outlined"
+                            label="부서명"
+                            v-model="searchForm.dept"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner.stop="openDeptModal('search')"
+                        />
                     </v-col>
+
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="연락처" v-model="searchForm.phone" />
                     </v-col>
+
+                    <!-- 입사일(조회) -->
                     <v-col cols="12" sm="4">
                         <v-menu v-model="joinMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
-                                    v-model="joinDate"
                                     label="입사일"
                                     append-inner-icon="mdi-calendar"
-                                    readonly
                                     variant="outlined"
                                     :model-value="formattedJoinDate"
                                 />
                             </template>
                             <v-date-picker
-                                v-model="joinDate"
+                                v-model="searchJoinProxy"
                                 @update:model-value="
                                     (val) => {
-                                        joinDate = val;
-                                        searchForm.joinDate = val;
+                                        joinDate = asDate(val);
+                                        searchForm.joinDate = joinDate;
                                         joinMenu = false;
                                     }
                                 "
                             />
                         </v-menu>
                     </v-col>
+
+                    <!-- 퇴사일(조회) -->
                     <v-col cols="12" sm="4">
                         <v-menu v-model="leavMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
-                                    v-model="leavDate"
                                     label="퇴사일"
                                     append-inner-icon="mdi-calendar"
-                                    readonly
                                     variant="outlined"
                                     :model-value="formattedLeavDate"
                                 />
                             </template>
                             <v-date-picker
-                                v-model="leavDate"
+                                v-model="searchLeavProxy"
                                 @update:model-value="
                                     (val) => {
-                                        leavDate = val;
-                                        searchForm.leavDate = val;
+                                        leavDate = asDate(val);
+                                        searchForm.leavDate = leavDate;
                                         leavMenu = false;
                                     }
                                 "
                             />
                         </v-menu>
                     </v-col>
+
+                    <!-- 사원상태(조회) -->
                     <v-col cols="12" sm="4">
-                        <!-- 조회 폼: 상태 -->
                         <v-text-field
-                            v-model="searchSelectStatus"
+                            variant="outlined"
                             label="사원상태"
-                            readonly
+                            v-model="searchForm.status"
                             append-inner-icon="mdi-magnify"
-                            @click:append-inner="
-                                statusTarget = 'search';
-                                showStatusModal = true;
-                            "
+                            @click:append-inner.stop="openStatusModal('search')"
                         />
                     </v-col>
-                    <v-row class="d-flex justify-space-between align-center mb-4">
-                        <v-col cols="12" sm="4">
-                            <!-- 조회 폼: 권한 -->
-                            <v-text-field
-                                v-model="searchSelectPermName"
-                                label="권한"
-                                readonly
-                                append-inner-icon="mdi-magnify"
-                                @click:append-inner="
-                                    permTarget = 'search';
-                                    showPermModal = true;
-                                "
-                            />
-                        </v-col>
 
-                        <!-- 오른쪽: 버튼 -->
-                        <div class="d-flex">
-                            <v-col cols="12" class="d-flex justify-end ga-2">
-                                <v-btn color="primary" @click="onClickSearch">조회</v-btn>
-                            </v-col>
-                        </div>
-                    </v-row>
+                    <!-- 권한(조회) -->
+                    <v-col cols="12" sm="4">
+                        <v-text-field
+                            variant="outlined"
+                            label="권한"
+                            v-model="searchForm.permName"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner.stop="openPermModal('search')"
+                        />
+                    </v-col>
                 </v-row>
-            </UiParentCard>
-        </v-col>
-    </v-row>
-    <v-row>
-        <v-col cols="12">
-            <div class="card">
-                <DataTable :value="products" tableStyle="min-width: 50rem">
-                    <Column field="empId" header="사원번호"></Column>
-                    <Column field="empName" header="사원명"></Column>
-                    <Column field="deptId" header="소속부서"></Column>
-                    <Column field="phone" header="연락처"></Column>
-                    <Column field="join" header="입사일"></Column>
-                    <Column field="leav" header="퇴사일"></Column>
-                    <Column field="status" header="사원상태"></Column>
-                    <Column field="perm" header="사원권한"></Column>
-                    <Column field="remk" header="비고"></Column>
-                </DataTable>
-            </div>
-        </v-col>
+            </v-col>
+        </v-card>
     </v-row>
 
+    <!-- ================= 조회 결과 테이블 ================= -->
     <v-row>
-        <v-col cols="12" md="12">
-            <UiParentCard title="사원등록">
-                <v-row class="d-flex justify-space-between align-center mb-4">
-                    <!-- 왼쪽: 제목 -->
-                    <div>
-                        <h3>사원등록</h3>
-                    </div>
+        <v-card elevation="10" class="pa-6 mt-2">
+            <v-col cols="12">
+                <div class="card">
+                    <DataTable
+                        :value="products"
+                        tableStyle="min-width: 50rem"
+                        rowHover
+                        @row-click="onRowClick"
+                        :paginator="true"
+                        :rows="5"
+                        :rowsPerPageOptions="[5, 10, 20, 50]"
+                        paginatorTemplate="RowsPerPageDropdown PrevPageLink PageLinks NextPageLink"
+                    >
+                        <Column field="empId" header="사원번호" />
+                        <Column field="empName" header="사원명" />
+                        <Column field="deptName" header="소속부서" />
+                        <Column field="phone" header="연락처" />
+                        <Column field="join" header="입사일" />
+                        <Column field="leav" header="퇴사일" />
+                        <Column field="status" header="사원상태" />
+                        <Column field="perm" header="사원권한" />
+                        <Column field="remk" header="비고" />
+                    </DataTable>
+                </div>
+            </v-col>
+        </v-card>
+    </v-row>
 
-                    <!-- 오른쪽: 버튼 -->
-                    <div class="d-flex">
-                        <v-btn color="primary">등록</v-btn>
-                        <v-btn color="secondary" class="ml-2">취소</v-btn>
-                    </div>
-                </v-row>
+    <!-- ================= 사원 등록/수정 ================= -->
+    <v-row>
+        <v-card elevation="10" class="pa-6 mt-2">
+            <v-card-item class="py-6 px-6">
+                <CardHeader3
+                    title="사원 관리"
+                    btn-text1="등록"
+                    btn-color1="primary"
+                    btn-variant1="flat"
+                    @btn-click1="onClickCreate"
+                    btn-text2="수정"
+                    btn-color2="success"
+                    btn-variant2="flat"
+                    @btn-click2="onClickUpdate"
+                    btn-text3="신규"
+                    btn-color3="warning"
+                    btn-variant3="flat"
+                    @btn-click3="onClickReset"
+                />
+            </v-card-item>
+
+            <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="사원명" />
+                        <v-text-field
+                            variant="outlined"
+                            label="사원명"
+                            v-model="createForm.name"
+                            :rules="[(v) => !!v || '사원명은 필수입니다.']"
+                        />
                     </v-col>
+
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="부서명" />
+                        <v-text-field
+                            variant="outlined"
+                            label="부서명"
+                            v-model="createForm.dept"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner.stop="openDeptModal('create')"
+                            :rules="[(v) => !!v || '부서명은 필수입니다.']"
+                        />
                     </v-col>
+
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" />
+                        <v-text-field
+                            variant="outlined"
+                            label="연락처"
+                            v-model="createForm.phone"
+                            :rules="[(v) => !!v || '연락처는 필수입니다.']"
+                        />
                     </v-col>
+
+                    <!-- 입사일(등록/수정) -->
                     <v-col cols="12" sm="4">
                         <v-menu v-model="joinMenu1" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
-                                    v-model="joinDate1"
                                     label="입사일"
-                                    readonly
                                     append-inner-icon="mdi-calendar"
                                     variant="outlined"
                                     :model-value="formattedJoinDate1"
+                                    :rules="[(v) => !!createForm.joinDate || '입사일은 필수입니다.']"
                                 />
                             </template>
-                            <v-date-picker v-model="joinDate1" @update:model-value="joinMenu1 = false" />
+                            <v-date-picker
+                                v-model="createJoinProxy"
+                                @update:model-value="
+                                    (val) => {
+                                        createForm.joinDate = asDate(val);
+                                        joinMenu1 = false;
+                                    }
+                                "
+                            />
                         </v-menu>
                     </v-col>
+
+                    <!-- 퇴사일(등록/수정) -->
                     <v-col cols="12" sm="4">
                         <v-menu v-model="leavMenu1" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
-                                    v-model="leavDate1"
                                     label="퇴사일"
                                     append-inner-icon="mdi-calendar"
-                                    readonly
                                     variant="outlined"
                                     :model-value="formattedLeavDate1"
                                 />
                             </template>
-                            <v-date-picker v-model="leavDate1" @update:model-value="leavMenu1 = false" />
+                            <v-date-picker
+                                v-model="createLeavProxy"
+                                @update:model-value="
+                                    (val) => {
+                                        createForm.leavDate = asDate(val);
+                                        leavMenu1 = false;
+                                    }
+                                "
+                            />
                         </v-menu>
                     </v-col>
+
+                    <!-- 사원상태 -->
                     <v-col cols="12" sm="4">
-                        <!-- 등록 폼: 상태 -->
                         <v-text-field
-                            v-model="searchSelectStatus2"
+                            variant="outlined"
                             label="사원상태"
-                            readonly
+                            v-model="createForm.status"
                             append-inner-icon="mdi-magnify"
-                            @click:append-inner="
-                                statusTarget = 'register';
-                                showStatusModal = true;
-                            "
+                            @click:append-inner.stop="openStatusModal('create')"
+                            :rules="[(v) => !!v || '사원상태는 필수입니다.']"
                         />
                     </v-col>
+
+                    <!-- 권한 -->
                     <v-col cols="12" sm="4">
                         <v-text-field
-                            v-model="searchSelectPermName2"
+                            variant="outlined"
                             label="권한"
-                            readonly
+                            v-model="createForm.permName"
                             append-inner-icon="mdi-magnify"
-                            @click:append-inner="
-                                permTarget = 'register';
-                                showPermModal = true;
-                            "
+                            @click:append-inner.stop="openPermModal('create')"
+                            :rules="[(v) => !!v || '권한은 필수입니다.']"
                         />
                     </v-col>
+
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="비고" />
+                        <v-text-field variant="outlined" label="비고" v-model="createForm.remark" />
                     </v-col>
                 </v-row>
-            </UiParentCard>
-        </v-col>
+            </v-col>
+        </v-card>
     </v-row>
 
-    <!-- 상태 모달 1개만 -->
+    <!-- ================= 알림창(스낵바) ================= -->
+    <v-snackbar v-model="snackOpen" :timeout="2000" :color="snackColor" location="top right" rounded="pill">
+        {{ snackMessage }}
+        <template #actions>
+            <v-btn variant="text" @click="snackOpen = false">닫기</v-btn>
+        </template>
+    </v-snackbar>
+
+    <!-- ================= 공통 모달 ================= -->
     <ModalSearch
         :visible="showStatusModal"
         title="상태검색"
@@ -225,7 +289,6 @@
         @close="showStatusModal = false"
     />
 
-    <!-- 권한 모달 1개만 -->
     <ModalSearch
         :visible="showPermModal"
         title="권한검색"
@@ -239,38 +302,81 @@
         @select="onSelectPerm"
         @close="showPermModal = false"
     />
+
+    <ModalSearch
+        :visible="showDeptModal"
+        title="부서검색"
+        idField="dept"
+        :columns="[
+            { key: 'dept_id', label: '부서코드' },
+            { key: 'dept_name', label: '부서명' }
+        ]"
+        :fetchData="fetchDeptItems"
+        :pageSize="10"
+        @select="onSelectDept"
+        @close="showDeptModal = false"
+    />
 </template>
+
 <script setup>
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import { ref, onMounted, computed } from 'vue';
-import { ProductService } from '@/service/ProductService';
-import dayjs from 'dayjs';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
+import CardHeader3 from '@/components/production/card-header-btn3k.vue';
+import CardHeader from '@/components/production/card-header-btn.vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import { ref, onMounted, computed, nextTick } from 'vue';
+import { ProductService } from '@/service/ProductService';
+import dayjs from 'dayjs';
 
-// 날짜 포맷 함수
-const formatDate = (dateRef) => computed(() => (dateRef.value ? dayjs(dateRef.value).format('YYYY-MM-DD') : ''));
+/* ===== 유틸 ===== */
+const asDate = (v) => (!v ? null : v instanceof Date ? v : new Date(v));
+const toDateStr = (v) => (v ? dayjs(v).format('YYYY-MM-DD') : null);
 
+/* ===== 데이터 로드(데모) ===== */
 const products = ref([]);
+onMounted(() => {
+    ProductService.getProductsMini().then((data) => (products.value = data));
+});
+
+/* ===== 날짜(조회 폼) ===== */
 const joinMenu = ref(false);
 const leavMenu = ref(false);
+const joinDate = ref(null); // Date
+const leavDate = ref(null); // Date
+
+const formattedJoinDate = computed(() => (joinDate.value ? dayjs(joinDate.value).format('YYYY-MM-DD') : ''));
+const formattedLeavDate = computed(() => (leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : ''));
+
+// vuetify v-date-picker가 내부적으로 문자열로 세팅하는 경우를 대비한 프록시
+const searchJoinProxy = computed({
+    get: () => joinDate.value,
+    set: (v) => (joinDate.value = asDate(v))
+});
+const searchLeavProxy = computed({
+    get: () => leavDate.value,
+    set: (v) => (leavDate.value = asDate(v))
+});
+
+/* ===== 날짜(등록/수정 폼) ===== */
 const joinMenu1 = ref(false);
 const leavMenu1 = ref(false);
-const joinDate = ref(null);
-const leavDate = ref(null);
-const joinDate1 = ref(null);
-const leavDate1 = ref(null);
+const formattedJoinDate1 = computed(() => (createForm.value.joinDate ? dayjs(createForm.value.joinDate).format('YYYY-MM-DD') : ''));
+const formattedLeavDate1 = computed(() => (createForm.value.leavDate ? dayjs(createForm.value.leavDate).format('YYYY-MM-DD') : ''));
 
-const formattedJoinDate = formatDate(joinDate);
-const formattedLeavDate = formatDate(leavDate);
-const formattedJoinDate1 = formatDate(joinDate1);
-const formattedLeavDate1 = formatDate(leavDate1);
+const createJoinProxy = computed({
+    get: () => createForm.value.joinDate,
+    set: (v) => (createForm.value.joinDate = asDate(v))
+});
+const createLeavProxy = computed({
+    get: () => createForm.value.leavDate,
+    set: (v) => (createForm.value.leavDate = asDate(v))
+});
 
-// 검색 폼
+/* ===== 폼 상태 ===== */
 const searchForm = ref({
     name: '',
-    department: '',
+    dept: '',
     phone: '',
     joinDate: null,
     leavDate: null,
@@ -278,81 +384,194 @@ const searchForm = ref({
     permName: ''
 });
 
-// 조회용 입력란
-const searchSelectStatus = ref(null);
-const searchSelectPermName = ref(null);
+const createForm = ref({
+    id: null,
+    name: '',
+    dept: '',
+    phone: '',
+    joinDate: null, // Date
+    leavDate: null, // Date
+    status: '',
+    permName: '',
+    remark: ''
+});
 
-// 등록용 입력란
-const searchSelectStatus2 = ref(null);
-const searchSelectPermName2 = ref(null);
-
-// 모달 제어
+/* ===== 모달 ===== */
 const showStatusModal = ref(false);
 const showPermModal = ref(false);
-const statusTarget = ref(null); // 'search' | 'register'
-const permTarget = ref(null); // 'search' | 'register'
+const showDeptModal = ref(false);
+const modalTarget = ref('search');
 
-// 상태 데이터
-const fetchStatusItems = async (page, search) => {
-    const statusList = [
-        { status_id: 'S001', status: '재직' },
-        { status_id: 'S002', status: '휴직' },
-        { status_id: 'S003', status: '퇴직' }
-    ];
-    return search ? statusList.filter((item) => item.status.includes(search)) : statusList;
-};
-
-// 권한 데이터
-const fetchPermItems = async (page, search) => {
-    const permList = [
-        { perm_id: 'AD001', perm_name: '전체 관리자' },
-        { perm_id: 'AD002', perm_name: '부서 관리자' },
-        { perm_id: 'AD003', perm_name: '일반 사용자' }
-    ];
-    return search ? permList.filter((item) => item.perm_name.includes(search)) : permList;
-};
-
-// 상태 선택
-const onSelectStatus = (item) => {
-    if (statusTarget.value === 'search') {
-        searchSelectStatus.value = item.status;
-        searchForm.value.status = item.status;
-    } else if (statusTarget.value === 'register') {
-        searchSelectStatus2.value = item.status;
-    }
+const closeAllOverlays = async () => {
+    joinMenu.value = false;
+    leavMenu.value = false;
+    joinMenu1.value = false;
+    leavMenu1.value = false;
     showStatusModal.value = false;
-    statusTarget.value = null;
-};
-
-// 권한 선택
-const onSelectPerm = (item) => {
-    if (permTarget.value === 'search') {
-        searchSelectPermName.value = item.perm_name;
-        searchForm.value.permName = item.perm_name;
-    } else if (permTarget.value === 'register') {
-        searchSelectPermName2.value = item.perm_name;
-    }
     showPermModal.value = false;
-    permTarget.value = null;
+    showDeptModal.value = false;
+    await nextTick();
+    document.activeElement?.blur?.();
 };
 
-// 검색 버튼
-// 조회 버튼 클릭
+const openDeptModal = async (t) => {
+    await closeAllOverlays();
+    modalTarget.value = t;
+    await nextTick();
+    showDeptModal.value = true;
+};
+const openPermModal = async (t) => {
+    await closeAllOverlays();
+    modalTarget.value = t;
+    await nextTick();
+    showPermModal.value = true;
+};
+const openStatusModal = async (t) => {
+    await closeAllOverlays();
+    modalTarget.value = t;
+    await nextTick();
+    showStatusModal.value = true;
+};
+
+const onSelectStatus = (row) => {
+    const val = row?.status || '';
+    if (modalTarget.value === 'create') createForm.value.status = val;
+    else searchForm.value.status = val;
+    showStatusModal.value = false;
+};
+const onSelectPerm = (row) => {
+    const val = row?.perm_name || '';
+    if (modalTarget.value === 'create') createForm.value.permName = val;
+    else searchForm.value.permName = val;
+    showPermModal.value = false;
+};
+const onSelectDept = (row) => {
+    const val = row?.dept_name || '';
+    if (modalTarget.value === 'create') createForm.value.dept = val;
+    else searchForm.value.dept = val;
+    showDeptModal.value = false;
+};
+
+/* ===== 모달 API ===== */
+const fetchStatusItems = async (page = 1, size = 10, keyword = '') => {
+    const { data } = await axios.get('/api/status', { params: { page, size, keyword } });
+    return Array.isArray(data) ? data : (data.items ?? []);
+};
+const fetchPermItems = async (page = 1, size = 10, keyword = '') => {
+    const { data } = await axios.get('/api/perm', { params: { page, size, keyword } });
+    return Array.isArray(data) ? data : (data.items ?? []);
+};
+const fetchDeptItems = async (page = 1, size = 10, keyword = '') => {
+    const { data } = await axios.get('/api/dept', { params: { page, size, keyword } });
+    return Array.isArray(data) ? data : (data.items ?? []);
+};
+
+/* ===== 조회 버튼 ===== */
 const onClickSearch = async () => {
+    const payload = { ...searchForm.value };
+    const { data } = await axios.post('/api/emp/search', payload);
+    products.value = Array.isArray(data) ? data : (data.items ?? []);
+};
+
+/* ===== 행 클릭 -> 수정모드 세팅 ===== */
+const onRowClick = ({ data }) => {
+    createForm.value = {
+        id: data.empId ?? null,
+        name: data.empName ?? '',
+        dept: data.deptName ?? '',
+        phone: data.phone ?? '',
+        joinDate: asDate(data.join) ?? null,
+        leavDate: asDate(data.leav) ?? null,
+        status: data.status ?? '',
+        permName: data.perm ?? '',
+        remark: data.remk ?? ''
+    };
+};
+
+/* ===== 공용 ===== */
+const validateRequired = (f) => !!(f.name && f.dept && f.phone && f.joinDate && f.status && f.permName);
+
+/* ===== 등록 ===== */
+const snackOpen = ref(false);
+const snackMessage = ref('');
+const snackColor = ref('success');
+const notify = (message, color = 'success') => {
+    snackMessage.value = message;
+    snackColor.value = color;
+    snackOpen.value = true;
+};
+
+const onClickCreate = async () => {
+    if (!validateRequired(createForm.value)) {
+        notify('필수 항목을 확인하세요.', 'warning');
+        return;
+    }
+    const payload = {
+        ...createForm.value,
+        joinDate: toDateStr(createForm.value.joinDate),
+        leavDate: toDateStr(createForm.value.leavDate)
+    };
     try {
-        const res = await axios.post('http://localhost:3000/emp/search', searchForm.value);
-        products.value = res.data;
-    } catch (err) {
-        console.error(err);
+        await axios.post('/api/emp', payload);
+        notify('등록이 완료되었습니다.', 'success');
+        await onClickSearch();
+        await onClickReset();
+    } catch (e) {
+        const status = e?.response?.status;
+        const msg = e?.response?.data?.message;
+        if (status === 409) notify(msg || '이미 등록된 사원입니다!', 'warning');
+        else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
+        else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
+    } finally {
+        await closeAllOverlays();
     }
 };
 
-// 초기 데이터 로드
-onMounted(async () => {
-    const data = await ProductService.getProductsMini();
-    products.value = data;
-});
+/* ===== 수정 ===== */
+const onClickUpdate = async () => {
+    if (!createForm.value.id) {
+        notify('수정할 항목이 선택되지 않았습니다.', 'warning');
+        return;
+    }
+    if (!validateRequired(createForm.value)) {
+        notify('필수 항목을 확인하세요.', 'warning');
+        return;
+    }
+    const payload = {
+        ...createForm.value,
+        joinDate: toDateStr(createForm.value.joinDate),
+        leavDate: toDateStr(createForm.value.leavDate)
+    };
+    try {
+        await axios.put(`/api/emp/${createForm.value.id}`, payload);
+        notify('수정이 완료되었습니다.', 'success');
+        await onClickSearch();
+        await onClickReset();
+    } catch (e) {
+        console.error(e);
+        notify('수정 중 오류가 발생했습니다.', 'error');
+    } finally {
+        await closeAllOverlays();
+    }
+};
+
+/* ===== 초기화 ===== */
+const onClickReset = async () => {
+    createForm.value = {
+        id: null,
+        name: '',
+        dept: '',
+        phone: '',
+        joinDate: null,
+        leavDate: null,
+        status: '',
+        permName: '',
+        remark: ''
+    };
+    await closeAllOverlays();
+};
 </script>
+
 <style scoped>
 ::v-deep(.v-icon) {
     cursor: pointer;

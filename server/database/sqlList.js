@@ -7,5 +7,5 @@ module.exports = {
   ...boards,
   ...orders,
   ...vend,
-
+  ...employee,
 };

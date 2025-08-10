@@ -24,18 +24,12 @@ const employeeRouter = require("./routers/employee_router.js");
 const vendRouter = require("./routers/vend_router.js");
 const orderRouter = require("./routers/order_router.js");
 
-
 // 기본 라우팅
 app.get("/", (req, res) => {
   res.send("Welcome!!");
 });
 
-app.get("/emp", (req, res) => {
-  res.send("Welcome!!!");
-});
-
 app.use(boardRouter);
-app.use(employeeRouter);
 app.use(vendRouter);
 app.use(orderRouter);
-
+app.use(employeeRouter);
