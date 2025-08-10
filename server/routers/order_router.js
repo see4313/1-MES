@@ -9,5 +9,12 @@ router.get("/orderList", async (req, res) => {
   res.send(list); // 응답
 });
 
+// 등록
+router.post("/orderInsert", async (req, res) => {
+  let board = req.body;
+  let result = await orderInsert.addNew(board);
+  res.send(result);
+});
+
 // 가장 마지막에 존재해야 함
 module.exports = router;

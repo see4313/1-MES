@@ -20,7 +20,7 @@ SELECT emp_id
      , join_co
      , leavdorm
      , perm
-     , dept_id
+     ,dept_id
      , phone
      , remk
 FROM   EMPLOYEE

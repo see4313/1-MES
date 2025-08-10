@@ -1,43 +1,35 @@
 <template>
     <v-row>
         <v-card elevation="10">
-            <v-card-item class="py-4 px-6">
-                <v-col cols="12">
-                    <div class="d-sm-flex align-center justify-space-between">
-                        <v-card-title class="text-h5 mb-0">주문조회</v-card-title>
-                    </div>
-                </v-col>
-                <v-row no-gutters>
-                    <v-col>
-                        <v-sheet class="pa-2 ma-2">
-                            <v-text-field
-                                variant="outlined"
-                                label="담당자 검색"
-                                append-inner-icon="mdi-magnify"
-                                @click:append-inner="onSearchCompany"
-                            />
-                        </v-sheet>
-                    </v-col>
-                    <v-col>
-                        <v-sheet class="pa-2 ma-2">
-                            <v-text-field
-                                variant="outlined"
-                                label="주문명 검색"
-                                append-inner-icon="mdi-magnify"
-                                @click:append-inner="onSearchCompany"
-                            />
-                        </v-sheet>
-                    </v-col>
-                    <v-sheet class="pa-2 ma-2">
-                        <v-btn color="primary">주문일자📅</v-btn>
-                    </v-sheet>
-                    <v-col>
-                        <v-sheet class="pa-2 ma-2">
-                            <v-btn color="primary">조회</v-btn>
-                        </v-sheet>
-                    </v-col>
-                </v-row>
+            <v-card-item class="py-6 px-6">
+                <CardHeader title="주문 조회" btn-text="등록" btn-variant="flat" btn-color="primary" @btn-click="" />
             </v-card-item>
+
+            <v-row no-gutters>
+                <v-col>
+                    <v-sheet class="pa-2 ma-2">
+                        <v-text-field
+                            variant="outlined"
+                            label="담당자 검색"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner="onSearchCompany"
+                        />
+                    </v-sheet>
+                </v-col>
+                <v-col>
+                    <v-sheet class="pa-2 ma-2">
+                        <v-text-field
+                            variant="outlined"
+                            label="주문명 검색"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner="onSearchCompany"
+                        />
+                    </v-sheet>
+                </v-col>
+                <v-sheet class="pa-2 ma-2">
+                    <v-btn color="primary">주문일자📅</v-btn>
+                </v-sheet>
+            </v-row>
             <DataTable :value="products" tableStyle="min-width: 50rem">
                 <Column field="productId" header="주문코드"></Column>
                 <Column field="itemName" header="주문명"></Column>
@@ -67,6 +59,7 @@
     </v-row>
 </template>
 <script setup>
+import CardHeader from '@/components/production/card-header.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';

@@ -16,6 +16,7 @@ app.listen(3000, () => {
 
 // 라우팅
 const boardRouter = require("./routers/board_router.js");
+const vendRouter = require("./routers/vend_router.js");
 const orderRouter = require("./routers/order_router.js");
 const materialRouter = require("./routers/material_router.js");
 
@@ -25,5 +26,6 @@ app.get("/", (req, res) => {
 });
 
 app.use(boardRouter);
+app.use(vendRouter);
 app.use(orderRouter);
 app.use(materialRouter);

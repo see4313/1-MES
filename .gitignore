@@ -7,7 +7,6 @@ node_modules
 .env.local
 .env.*.local
 dbConfig.env
-.env
 
 # Log files
 npm-debug.log*
