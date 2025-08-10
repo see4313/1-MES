@@ -77,31 +77,35 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
+                title: '품목관리',
+                to: '/mt-001'
+            },
+            {
+                title: '자재 발주등록',
+                to: ''
+            },
+            {
+                title: '자재 입고등록',
+                to: ''
+            },
+            {
+                title: '자재 출고관리',
+                to: ''
+            },
+            {
+                title: '재고조회',
                 to: '/mt-003'
             },
             {
-                title: 'About Us',
+                title: '반품관리',
                 to: ''
             },
             {
-                title: 'Blog',
+                title: '폐기관리',
                 to: ''
             },
             {
-                title: 'Blog Details',
-                to: ''
-            },
-            {
-                title: 'Contact Us',
-                to: ''
-            },
-            {
-                title: 'Portfolio',
-                to: ''
-            },
-            {
-                title: 'Pricing',
+                title: '폐기/반품 조회',
                 to: ''
             }
         ]
