@@ -27,10 +27,6 @@ const sidebarItem = [
             {
                 title: '공정정보',
                 to: ''
-            },
-            {
-                title: 'Pricing',
-                to: ''
             }
         ]
     },
@@ -118,7 +114,7 @@ const sidebarItem = [
         children: [
             {
                 title: 'Homepage',
-                to: '/sample-page'
+                to: ''
             },
             {
                 title: 'About Us',
@@ -154,7 +150,7 @@ const sidebarItem = [
         children: [
             {
                 title: 'Homepage',
-                to: '/sample-page'
+                to: ''
             },
             {
                 title: 'About Us',
