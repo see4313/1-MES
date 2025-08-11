@@ -1,244 +1,423 @@
 <template>
+    <!-- ===== 거래처 조회 ===== -->
     <v-row>
-        <v-col cols="12" md="12">
-            <UiParentCard title="사원조회">
-                <h3>사원조회</h3>
+        <v-card elevation="10" class="pa-6">
+            <v-card-item class="py-6 px-6">
+                <CardHeader
+                    title="거래처 관리"
+                    btn-text1="조회"
+                    btn-color1="primary"
+                    btn-variant1="flat"
+                    @btn-click1="onClickSearch"
+                    btn-text2="초기화"
+                    btn-color2="warning"
+                    btn-variant2="flat"
+                    @btn-click2="onClickSearchReset"
+                />
+            </v-card-item>
+
+            <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="거래처코드"
-                            readonly
+                            label="거래처번호"
+                            v-model="searchForm.vendId"
                             append-inner-icon="mdi-magnify"
-                            v-model="selectedStatus"
-                            @click:append-inner="(searchStatus, (isStatusDialogOpen = true))"
+                            @click:append-inner.stop="openVendIdModal('search')"
                         />
                     </v-col>
+
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="거래처명" />
+                        <v-text-field variant="outlined" label="거래처명" v-model="searchForm.vendName" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="거래처 유형"
-                            readonly
+                            label="거래처유형"
+                            v-model="searchForm.vendType"
                             append-inner-icon="mdi-magnify"
-                            v-model="selectedPermName"
-                            @click:append-inner="(searchPerm, (isPermDialogOpen = true))"
+                            @click:append-inner.stop="openVendTypeModal('search')"
                         />
                     </v-col>
-                    <!-- 오른쪽: 버튼 -->
-                    <v-col cols="12" class="d-flex justify-end">
-                        <v-btn color="primary">조회</v-btn>
-                    </v-col>
                 </v-row>
-            </UiParentCard>
-        </v-col>
-    </v-row>
-    <v-row>
-        <v-col cols="12">
-            <div class="card">
-                <DataTable :value="products" tableStyle="min-width: 50rem">
-                    <Column field="vendId" header="거래처번호"></Column>
-                    <Column field="vendName" header="거래처명"></Column>
-                    <Column field="bizNumber" header="사업자번호"></Column>
-                    <Column field="cntinfo" header="연락처"></Column>
-                    <Column field="vendType" header="거래처유형"></Column>
-                    <Column field="use" header="사용여부"></Column>
-                    <Column field="address" header="주소"></Column>
-                    <Column field="psch" header="담당자"></Column>
-                    <Column field="remk" header="비고"></Column>
-                </DataTable>
-            </div>
-        </v-col>
+            </v-col>
+        </v-card>
     </v-row>
 
+    <!-- ===== 조회 결과 테이블 ===== -->
     <v-row>
-        <v-col cols="12" md="12">
-            <UiParentCard title="사원등록">
-                <v-row class="d-flex justify-space-between align-center mb-4">
-                    <!-- 왼쪽: 제목 -->
-                    <div>
-                        <h3>사원등록</h3>
-                    </div>
+        <v-card elevation="10" class="pa-6 mt-2">
+            <v-col cols="12">
+                <div class="card">
+                    <DataTable
+                        :value="rows"
+                        tableStyle="min-width: 50rem"
+                        rowHover
+                        :paginator="true"
+                        :rows="5"
+                        :rowsPerPageOptions="[5, 10, 20, 50]"
+                        paginatorTemplate="RowsPerPageDropdown PrevPageLink PageLinks NextPageLink"
+                        @row-click="onRowClick"
+                    >
+                        <Column field="vendId" header="거래처번호" />
+                        <Column field="vendName" header="거래처명" />
+                        <Column field="bizNumber" header="사업자번호" />
+                        <Column field="cntinfo" header="연락처" />
+                        <Column field="vendType" header="거래처유형" />
+                        <Column field="useYn" header="사용여부" />
+                        <Column field="address" header="주소" />
+                        <Column field="psch" header="담당자" />
+                        <Column field="remark" header="비고" />
+                    </DataTable>
+                </div>
+            </v-col>
+        </v-card>
+    </v-row>
 
-                    <!-- 오른쪽: 버튼 -->
-                    <div class="d-flex">
-                        <v-btn color="primary">등록</v-btn>
-                        <v-btn color="secondary" class="ml-2">취소</v-btn>
-                    </div>
-                </v-row>
+    <!-- ===== 거래처 등록/수정 ===== -->
+    <v-row>
+        <v-card elevation="10" class="pa-6 mt-2">
+            <v-card-item class="py-6 px-6">
+                <CardHeader3
+                    title="거래처 등록"
+                    btn-text1="등록"
+                    btn-color1="primary"
+                    btn-variant1="flat"
+                    @btn-click1="onClickCreate"
+                    btn-text2="수정"
+                    btn-color2="success"
+                    btn-variant2="flat"
+                    @btn-click2="onClickUpdate"
+                    btn-text3="신규"
+                    btn-color3="warning"
+                    btn-variant3="flat"
+                    @btn-click3="onClickReset"
+                />
+            </v-card-item>
+
+            <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="사원명" />
+                        <v-text-field
+                            variant="outlined"
+                            label="거래처명"
+                            v-model="createForm.vendName"
+                            :rules="[(v) => !!v || '거래처명은 필수입니다.']"
+                        />
+                    </v-col>
+
+                    <v-col cols="12" sm="4">
+                        <v-text-field
+                            variant="outlined"
+                            label="사업자번호"
+                            v-model="createForm.bizNumber"
+                            :rules="[(v) => !!v || '사업자번호는 필수입니다.']"
+                        />
+                    </v-col>
+
+                    <v-col cols="12" sm="4">
+                        <v-text-field
+                            variant="outlined"
+                            label="연락처"
+                            v-model="createForm.cntinfo"
+                            :rules="[(v) => !!v || '연락처는 필수입니다.']"
+                        />
+                    </v-col>
+
+                    <v-col cols="12" sm="4">
+                        <v-text-field
+                            variant="outlined"
+                            label="거래처유형"
+                            v-model="createForm.vendType"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner.stop="openVendTypeModal('create')"
+                            :rules="[(v) => !!v || '거래처유형은 필수입니다.']"
+                        />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="부서명" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-menu v-model="joinMenu1" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
-                            <template #activator="{ props }">
-                                <v-text-field
-                                    v-bind="props"
-                                    v-model="joinDate1"
-                                    label="입사일"
-                                    append-inner-icon="mdi-calendar"
-                                    readonly
-                                    variant="outlined"
-                                    :model-value="formattedJoinDate1"
-                                />
-                            </template>
-                            <v-date-picker v-model="joinDate1" @update:model-value="joinMenu1 = false" />
-                        </v-menu>
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-menu v-model="leavMenu1" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
-                            <template #activator="{ props }">
-                                <v-text-field
-                                    v-bind="props"
-                                    v-model="leavDate1"
-                                    label="퇴사일"
-                                    append-inner-icon="mdi-calendar"
-                                    readonly
-                                    variant="outlined"
-                                    :model-value="formattedLeavDate1"
-                                />
-                            </template>
-                            <v-date-picker v-model="leavDate1" @update:model-value="leavMenu1 = false" />
-                        </v-menu>
+                        <v-radio-group
+                            v-radio-group
+                            v-model="createForm.useYn"
+                            label="사용여부"
+                            variant="outlined"
+                            style="width: 100%; --v-input-gap: 4px"
+                        >
+                            <div style="display: flex; align-items: center; gap: 16px; margin-top: -16px">
+                                <v-radio label="사용" :value="'Y'" />
+                                <v-radio label="미사용" :value="'N'" />
+                            </div>
+                        </v-radio-group>
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="사원상태"
-                            required
+                            label="주소"
+                            v-model="createForm.address"
                             append-inner-icon="mdi-magnify"
-                            v-model="selectedStatus"
-                            @click:append-inner="(searchStatus, (isStatusDialogOpen = true))"
+                            @click:append-inner.stop="openAddressModal('create')"
+                            :rules="[(v) => !!v || '주소는 필수입니다.']"
                         />
                     </v-col>
+
                     <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="권한"
-                            readonly
-                            append-inner-icon="mdi-magnify"
-                            v-model="selectedPermName"
-                            @click:append-inner="(searchPerm, (isPermDialogOpen = true))"
-                        />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="비고" />
+                        <v-text-field variant="outlined" label="비고" v-model="createForm.remark" />
                     </v-col>
                 </v-row>
-            </UiParentCard>
-        </v-col>
+            </v-col>
+        </v-card>
     </v-row>
 
-    <v-dialog v-model="isStatusDialogOpen" max-width="400">
-        <v-card>
-            <v-card-title class="text-h6">사원상태 선택</v-card-title>
-            <v-list>
-                <v-list-item @click="selectStatus('재직')">
-                    <v-list-item-title>재직</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="selectStatus('휴직')">
-                    <v-list-item-title>휴직</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="selectStatus('퇴사')">
-                    <v-list-item-title>퇴사</v-list-item-title>
-                </v-list-item>
-            </v-list>
-        </v-card>
-    </v-dialog>
-    <!-- 모달 다이얼로그 -->
-    <v-dialog v-model="isPermDialogOpen" max-width="600" persistent>
-        <v-card class="rounded-lg">
-            <v-card-title class="text-h6 font-weight-bold"> 권한 검색 </v-card-title>
+    <!-- ===== 스낵바 ===== -->
+    <v-snackbar v-model="snackOpen" :timeout="2000" :color="snackColor" location="top right" rounded="pill">
+        {{ snackMessage }}
+        <template #actions>
+            <v-btn variant="text" @click="snackOpen = false">닫기</v-btn>
+        </template>
+    </v-snackbar>
 
-            <v-card-text>
-                <v-table dense>
-                    <thead>
-                        <tr>
-                            <th class="text-left">권한 코드</th>
-                            <th class="text-left">권한명</th>
-                            <th class="text-center"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in perm" :key="item.code">
-                            <td>{{ item.code }}</td>
-                            <td>{{ item.name }}</td>
-                            <td class="text-center">
-                                <v-btn color="primary" size="small" variant="tonal" @click="selectPerm(item)"> 선택 </v-btn>
-                            </td>
-                        </tr>
-                    </tbody>
-                </v-table>
-            </v-card-text>
-        </v-card>
-    </v-dialog>
+    <!-- ===== 공통 모달 ===== -->
+    <ModalSearch
+        v-model:visible="showVendTypeModal"
+        title="거래처유형 검색"
+        idField="vend_type"
+        :columns="[
+            { key: 'type_id', label: '유형번호' },
+            { key: 'vend_type', label: '거래처유형' }
+        ]"
+        :fetchData="fetchVendTypeItems"
+        :pageSize="10"
+        @select="onSelectVendType"
+    />
+
+    <ModalSearch
+        v-model:visible="showVendIdModal"
+        title="거래처번호 검색"
+        idField="vend_id"
+        :columns="[
+            { key: 'vend_id', label: '거래처번호' },
+            { key: 'vend_name', label: '거래처명' }
+        ]"
+        :fetchData="fetchVendIdItems"
+        :pageSize="10"
+        @select="onSelectVendId"
+    />
 </template>
+
 <script setup>
+import ModalSearch from '@/views/commons/CommonModal.vue';
+import axios from 'axios';
+import CardHeader3 from '@/components/production/card-header-btn3k.vue';
+import CardHeader from '@/components/production/card-header-btn2k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { ref, onMounted, computed } from 'vue';
-import { ProductService } from '@/service/ProductService';
-import dayjs from 'dayjs';
+import { ref, onMounted, nextTick } from 'vue';
 
-onMounted(() => {
-    ProductService.getProductsMini().then((data) => (products.value = data));
+// ===== 목록 데이터
+const rows = ref([]);
+onMounted(async () => {});
+
+const useYn = ref('Y');
+
+//==== 폼 상태
+const searchForm = ref({
+    vendId: '',
+    vendName: '',
+    vendType: ''
 });
 
-const products = ref();
-const joinMenu = ref(false);
-const joinDate = ref(null);
-const leavMenu = ref(false);
-const leavDate = ref(null);
-const joinMenu1 = ref(false);
-const joinDate1 = ref(null);
-const leavMenu1 = ref(false);
-const leavDate1 = ref(null);
+const createForm = ref({
+    id: null,
+    vendName: '',
+    bizNumber: '',
+    cntinfo: '',
+    vendType: '',
+    useYn: 'Y',
+    address: '',
+    remark: ''
+});
 
-// 공통 날짜 포맷 함수
-const formatDate = (dateRef) => computed(() => (dateRef.value ? dayjs(dateRef.value).format('YYYY-MM-DD') : ''));
+// ===== 모달
+const showVendIdModal = ref(false);
+const showVendTypeModal = ref(false);
+const modalTarget = ref('search');
 
-const formattedJoinDate = formatDate(joinDate);
-const formattedLeavDate = formatDate(leavDate);
-const formattedJoinDate1 = formatDate(joinDate1);
-const formattedLeavDate1 = formatDate(leavDate1);
-
-const selectedStatus = ref(''); // 입력 필드에 바인딩
-const isStatusDialogOpen = ref(false); // 모달 열림 여부
-
-const selectStatus = (status) => {
-    selectedStatus.value = status; // 필드에 값 입력
-    isStatusDialogOpen.value = false; // 모달 닫기
+const closeAllOverlays = async () => {
+    showVendIdModal.value = false;
+    showVendTypeModal.value = false;
+    await nextTick();
+    document.activeElement?.blur?.();
 };
 
-// 모달 상태
-const isPermDialogOpen = ref(false);
+const openVendIdModal = async (t) => {
+    await closeAllOverlays();
+    modalTarget.value = t;
+    showVendIdModal.value = true;
+};
+const openVendTypeModal = async (t) => {
+    await closeAllOverlays();
+    modalTarget.value = t;
+    showVendTypeModal.value = true;
+};
 
-// 권한 목록 데이터
-const perm = ref([
-    { code: 'AD001', name: '전체 관리자' },
-    { code: 'AD002', name: '부서 관리자' },
-    { code: 'AD003', name: '일반 사용자' }
-]);
+const openAddressModal = async (t) => {
+    // TODO: 주소 검색 모달 열기
+    console.log('openAddressModal', t);
+};
 
-// 선택된 값
-const selectedPermnCode = ref('');
-const selectedPermName = ref('');
+// ===== 모달 선택 핸들러
+const onSelectVendType = (row) => {
+    const val = row?.vend_type || row?.vendType || '';
+    if (modalTarget.value === 'create') createForm.value.vendType = val;
+    else searchForm.value.vendType = val;
+    showVendTypeModal.value = false;
+};
 
-// 선택 시 처리
-const selectPerm = (item) => {
-    selectedPermnCode.value = item.code;
-    selectedPermName.value = item.name;
-    isPermDialogOpen.value = false;
+const onSelectVendId = (row) => {
+    const val = row?.vend_id || row?.vendId || '';
+    if (modalTarget.value === 'create') {
+    } else {
+        searchForm.value.vendId = val;
+    }
+    showVendIdModal.value = false;
+};
+
+/* ===== 모달 API ===== */
+const fetchVendTypeItems = async (q, page, size) => {
+    try {
+        const { data } = await axios.get('/api/vendorType', { params: { q, page, size } });
+        return Array.isArray(data) ? data : (data.items ?? []);
+    } catch (error) {
+        console.error('유형 조회 실패', error);
+        return [];
+    }
+};
+
+const fetchVendIdItems = async (q, page, size) => {
+    try {
+        const { data } = await axios.get('/api/vendorId', { params: { q, page, size } });
+        return Array.isArray(data) ? data : (data.items ?? []);
+    } catch (error) {
+        console.error('번호 조회 실패', error);
+        return [];
+    }
+};
+
+/* ===== 조회 버튼 ===== */
+const onClickSearch = async () => {
+    const payload = { ...searchForm.value };
+    const { data } = await axios.post('/api/vendor/search', payload);
+    rows.value = Array.isArray(data) ? data : (data.items ?? []);
+};
+
+// 검색폼 초기화
+const onClickSearchReset = async () => {
+    // 폼 값 초기화
+    searchForm.value = {
+        vendId: '',
+        vendName: '',
+        vendType: ''
+    };
+
+    await nextTick();
+    // 필요하면 즉시 조회 갱신
+    await onClickSearch();
+};
+
+/* ===== 행 클릭 -> 수정모드 세팅 ===== */
+const onRowClick = ({ data }) => {
+    createForm.value = {
+        id: data?.vendId ?? null,
+        vendName: data?.vendName ?? '',
+        bizNumber: data?.bizNumber ?? '',
+        cntinfo: data?.cntinfo ?? '',
+        vendType: data?.vendType ?? '',
+        useYn: data?.useYn ?? 'Y',
+        address: data?.address ?? '',
+        psch: data?.psch ?? '',
+        remark: data?.remark ?? data?.remk ?? ''
+    };
+    if (typeof useYn !== 'undefined' && useYn?.value !== undefined) {
+        useYn.value = createForm.value.useYn || 'Y';
+    }
+};
+
+// 공용
+const validateRequired = (f) => !!(f.vendName && f.bizNumber && f.cntinfo && f.vendType && f.address);
+
+/* ===== 등록 ===== */
+const snackOpen = ref(false);
+const snackMessage = ref('');
+const snackColor = ref('success');
+const notify = (message, color = 'success') => {
+    snackMessage.value = message;
+    snackColor.value = color;
+    snackOpen.value = true;
+};
+
+const onClickCreate = async () => {
+    if (!validateRequired(createForm.value)) {
+        notify('필수 값을 확인하세요.', 'warning');
+        return;
+    }
+    const payload = {
+        ...createForm.value,
+        useYn: useYn?.value ?? createForm.value.useYn ?? 'Y'
+    };
+    try {
+        await axios.post('/api/vendor', payload);
+        notify('등록이 완료되었습니다.', 'success');
+        await onClickSearch();
+        await onClickReset();
+    } catch (e) {
+        console.error(e);
+        notify('등록 중 오류가 발생했습니다.', 'error');
+    } finally {
+        await closeAllOverlays();
+    }
+};
+
+/* ===== 수정 ===== */
+const onClickUpdate = async () => {
+    if (!createForm.value.id) {
+        notify('수정할 항목이 선택되지 않았습니다.', 'warning');
+        return;
+    }
+    if (!validateRequired(createForm.value)) {
+        notify('필수 값을 확인하세요.', 'warning');
+        return;
+    }
+    const payload = {
+        ...createForm.value,
+        useYn: useYn?.value ?? createForm.value.useYn ?? 'Y'
+    };
+    try {
+        await axios.put(`/api/vendor/${createForm.value.id}`, payload);
+        notify('수정이 완료되었습니다.', 'success');
+        await onClickSearch();
+        await onClickReset();
+    } catch (e) {
+        console.error(e);
+        notify('수정 중 오류가 발생했습니다.', 'error');
+    } finally {
+        await closeAllOverlays();
+    }
+};
+//--------초기화-------------
+const onClickReset = async () => {
+    createForm.value = {
+        id: null,
+        vendName: '',
+        bizNumber: '',
+        cntinfo: '',
+        vendType: '',
+        useYn: 'Y',
+        address: '',
+        remark: ''
+    };
+    useYn.value = 'Y'; // 라디오 값도 초기화
+    await closeAllOverlays();
 };
 </script>
 <style scoped>
