@@ -1,7 +1,17 @@
 <template>
     <v-card elevation="10">
         <v-card-item class="py-6 px-6">
-            <CardHeader title="재고 조회" btn-text="조회" btn-variant="flat" btn-color="primary" @btn-click="select()" />
+            <CardHeader
+                title="재고조회"
+                btn-text1="초기화"
+                btn-variant1="flat"
+                btn-color1="secondary"
+                @btn-click1="selectReset()"
+                btn-text2="조회"
+                btn-variant2="flat"
+                btn-color2="primary"
+                @btn-click2="select()"
+            />
             <v-row>
                 <v-col cols="12" md="12">
                     <v-row justify="space-between" dense>
@@ -171,7 +181,7 @@ import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
-import CardHeader from '@/components/production/card-header-btn.vue';
+import CardHeader from '@/components/production/card-header-btn2.vue';
 import dayjs from 'dayjs';
 
 onMounted(() => {});
@@ -193,6 +203,16 @@ const expDate = ref(null); // 유효기간
 const formattedexpDate = computed(() => {
     return expDate.value ? dayjs(expDate.value).format('YYYY-MM-DD') : '';
 });
+
+// 조회조건 초기화
+function selectReset() {
+    selectItemId.value = null;
+    selectLotId.value = null;
+    selectItemType.value = null;
+    selectCutd.value = null;
+    selectWhId.value = null;
+    formattedexpDate.value = null;
+}
 
 // 조회
 const select = async () => {

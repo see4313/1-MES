@@ -1,7 +1,17 @@
 <template>
     <v-card elevation="10">
         <v-card-item class="py-6 px-6">
-            <CardHeader1 title="품목조회" btn-text="조회" btn-variant="flat" btn-color="primary" @btn-click="select()" />
+            <CardHeader2
+                title="품목조회"
+                btn-text1="초기화"
+                btn-variant1="flat"
+                btn-color1="secondary"
+                @btn-click1="selectReset()"
+                btn-text2="조회"
+                btn-variant2="flat"
+                btn-color2="primary"
+                @btn-click2="select()"
+            />
             <v-row>
                 <v-col cols="12" md="12">
                     <v-row justify="space-between" dense>
@@ -68,16 +78,20 @@
 
     <v-card elevation="10" class="mt-3">
         <v-card-item class="py-6 px-6">
-            <CardHeader2
+            <CardHeader3
                 title="품목관리"
-                btn-text1="삭제"
+                btn-text1="초기화"
                 btn-variant1="flat"
-                btn-color1="error"
+                btn-color1="secondary"
                 @btn-click1="dataReset()"
-                btn-text2="저장"
+                btn-text2="삭제"
                 btn-variant2="flat"
-                btn-color2="primary"
+                btn-color2="error"
                 @btn-click2=""
+                btn-text3="저장"
+                btn-variant3="flat"
+                btn-color3="primary"
+                @btn-click3=""
             />
             <v-row>
                 <v-col cols="12" md="8">
@@ -159,13 +173,13 @@
 import CardHeader from '@/components/production/card-header.vue';
 import CardHeader1 from '@/components/production/card-header-btn.vue';
 import CardHeader2 from '@/components/production/card-header-btn2.vue';
+import CardHeader3 from '@/components/production/card-header-btn3k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
 
-const useYn = ref('Y');
 const itemId = ref(null);
 const itemName = ref(null);
 const itemType = ref(null);
@@ -177,10 +191,12 @@ const itemList = ref(); // 조회 목록
 const itemNameModal = ref(false); // 품목명 모달
 const itemTypeModal = ref(false); // 품목구분 모달
 const cutdModal = ref(false); // 보관조건 모달
+const useYn = ref(null); // 사용여부
 const selectItemName = ref(null); // 품목번호 선택
 const selectItemType = ref(null); // 품목구분 선택
 const selectCutd = ref(null); // 보관조건 선택
 
+// 목록 상세
 function onRowClick(event) {
     itemId.value = event.data.item_id;
     itemName.value = event.data.item_name;
@@ -191,6 +207,15 @@ function onRowClick(event) {
     itemUseYn.value = event.data.uon;
 }
 
+// 조회조건 초기화
+function selectReset() {
+    selectItemName.value = null;
+    selectItemType.value = null;
+    selectCutd.value = null;
+    useYn.value = null;
+}
+
+// 상세 입력 초기화
 function dataReset() {
     itemId.value = null;
     itemName.value = null;
@@ -201,7 +226,7 @@ function dataReset() {
     itemUseYn.value = null;
 }
 
-// 조회
+// 품목목록 조회
 const select = async () => {
     try {
         const params = {
