@@ -1,3 +1,4 @@
+<!-- 제품 관리-->
 <template>
     <v-card elevation="10">
         <v-col cols="12" md="12">
