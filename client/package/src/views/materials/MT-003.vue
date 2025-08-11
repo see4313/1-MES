@@ -6,37 +6,37 @@
                 <v-col cols="12" md="12">
                     <v-row justify="space-between" dense>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="품목 번호" v-model="selectedItem" variant="outlined" readonly>
+                            <v-text-field label="품목 번호" v-model="selectItemId" variant="outlined" readonly>
                                 <template #append-inner>
-                                    <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                    <v-icon @click="itemIdModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="LOT 번호" v-model="selectedItem2" variant="outlined" readonly>
+                            <v-text-field label="LOT 번호" v-model="selectLotId" variant="outlined" readonly>
                                 <template #append-inner>
-                                    <v-icon @click="showModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                    <v-icon @click="lotIdModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="품목 구분" v-model="selectedItem3" variant="outlined" readonly>
+                            <v-text-field label="품목 구분" v-model="selectItemType" variant="outlined" readonly>
                                 <template #append-inner>
-                                    <v-icon @click="showModal3 = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                    <v-icon @click="itemTypeModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="보관 조건" v-model="selectedItem4" variant="outlined" readonly>
+                            <v-text-field label="보관 조건" v-model="selectCutd" variant="outlined" readonly>
                                 <template #append-inner>
-                                    <v-icon @click="showModal4 = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                    <v-icon @click="cutdModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="창고 코드" v-model="selectedItem5" variant="outlined" readonly>
+                            <v-text-field label="창고 코드" v-model="selectWhId" variant="outlined" readonly>
                                 <template #append-inner>
-                                    <v-icon @click="showModal5 = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                    <v-icon @click="whIdModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
@@ -71,11 +71,12 @@
                         <DataTable :value="inventoryList" tableStyle="min-width: 50rem">
                             <Column field="lot_id" header="LOT번호"></Column>
                             <Column field="item_id" header="품목번호"></Column>
-                            <Column field="wh_id" header="창고번호"></Column>
-                            <Column field="crea_date" header="생성일"></Column>
-                            <Column field="vald_date" header="종료일"></Column>
-                            <Column field="bnt" header="잔량"></Column>
-                            <Column field="status" header="상태"></Column>
+                            <Column field="item_name" header="품목명"></Column>
+                            <Column field="item_type" header="품목구분"></Column>
+                            <Column field="wh_name" header="위치"></Column>
+                            <Column field="cutd_cond" header="보관조건"></Column>
+                            <Column field="qty" header="수량"></Column>
+                            <Column field="vald_date" header="유효기한"></Column>
                         </DataTable>
                     </div>
                 </v-col>
@@ -85,55 +86,55 @@
 
     <!-- 품목번호 모달 -->
     <ModalSearch
-        :visible="showModal"
-        title="사원 검색"
-        idField="emp_id"
+        :visible="itemIdModal"
+        title="품목 검색"
+        idField="item_id"
         :columns="[
-            { key: 'emp_id', label: '사원번호' },
-            { key: 'emp_name', label: '사원명' },
-            { key: 'status', label: '상태' }
+            { key: 'item_id', label: '품목번호' },
+            { key: 'item_name', label: '품목명' },
+            { key: 'item_type', label: '품목구분' }
         ]"
-        :fetchData="fetchItems"
+        :fetchData="fetchItemId"
         :pageSize="5"
-        @select="onSelectItem"
-        @close="showModal = false"
+        @select="onSelectItemId"
+        @close="itemIdModal = false"
     />
 
     <!-- LOT번호 모달 -->
     <ModalSearch
-        :visible="showModal2"
-        title="주문 검색"
-        idField="order_id"
+        :visible="lotIdModal"
+        title="LOT 검색"
+        idField="lot_id"
         :columns="[
-            { key: 'order_id', label: '주문번호' },
-            { key: 'vend_id', label: '거래처번호' },
-            { key: 'ordr', label: '주문명' }
+            { key: 'lot_id', label: 'LOT번호' },
+            { key: 'item_id', label: '품목번호' },
+            { key: 'wh_id', label: '창고번호' }
         ]"
-        :fetchData="fetchItems2"
+        :fetchData="fetchLotId"
         :pageSize="5"
-        @select="onSelectItem2"
-        @close="showModal2 = false"
+        @select="onSelectLotId"
+        @close="lotIdModal = false"
     />
 
     <!-- 품목구분 모달 -->
     <ModalSearch
-        :visible="showModal3"
-        title="주문 검색"
+        :visible="itemTypeModal"
+        title="품목구분 검색"
         idField="order_id"
         :columns="[
             { key: 'order_id', label: '주문번호' },
             { key: 'vend_id', label: '거래처번호' },
             { key: 'ordr', label: '주문명' }
         ]"
-        :fetchData="fetchItems3"
+        :fetchData="fetchItemType"
         :pageSize="5"
-        @select="onSelectItem3"
-        @close="showModal3 = false"
+        @select="onSelectItemType"
+        @close="itemTypeModal = false"
     />
 
     <!-- 보관조건 모달 -->
     <ModalSearch
-        :visible="showModal4"
+        :visible="cutdModal"
         title="주문 검색"
         idField="order_id"
         :columns="[
@@ -141,26 +142,27 @@
             { key: 'vend_id', label: '거래처번호' },
             { key: 'ordr', label: '주문명' }
         ]"
-        :fetchData="fetchItems4"
+        :fetchData="fetchCutd"
         :pageSize="5"
-        @select="onSelectItem4"
-        @close="showModal4 = false"
+        @select="onSelectCutd"
+        @close="cutdModal = false"
     />
 
     <!-- 창고코드 모달 -->
     <ModalSearch
-        :visible="showModal5"
-        title="주문 검색"
-        idField="order_id"
+        :visible="whIdModal"
+        title="창고번호 검색"
+        idField="wh_id"
         :columns="[
-            { key: 'order_id', label: '주문번호' },
-            { key: 'vend_id', label: '거래처번호' },
-            { key: 'ordr', label: '주문명' }
+            { key: 'wh_id', label: '창고번호' },
+            { key: 'wh_name', label: '창고이름' },
+            { key: 'wh_type', label: '창고유형' },
+            { key: 'loca', label: '소재지' }
         ]"
-        :fetchData="fetchItems5"
+        :fetchData="fetchWhId"
         :pageSize="5"
-        @select="onSelectItem5"
-        @close="showModal5 = false"
+        @select="onSelectWhId"
+        @close="whIdModal = false"
     />
 </template>
 <script setup>
@@ -175,16 +177,16 @@ import dayjs from 'dayjs';
 onMounted(() => {});
 
 const inventoryList = ref(); // 조회 목록
-const showModal = ref(false); // 품목번호 모달
-const showModal2 = ref(false); // LOT번호 모달
-const showModal3 = ref(false); // 품목구분 모달
-const showModal4 = ref(false); // 보관조건 모달
-const showModal5 = ref(false); // 창고코드 모달
-const selectedItem = ref(null); // 품목번호 선택
-const selectedItem2 = ref(null); // LOT번호 선택
-const selectedItem3 = ref(null); // 품목구분 선택
-const selectedItem4 = ref(null); // 보관조건 선택
-const selectedItem5 = ref(null); // 창고코드 선택
+const itemIdModal = ref(false); // 품목번호 모달
+const lotIdModal = ref(false); // LOT번호 모달
+const itemTypeModal = ref(false); // 품목구분 모달
+const cutdModal = ref(false); // 보관조건 모달
+const whIdModal = ref(false); // 창고코드 모달
+const selectItemId = ref(null); // 품목번호 선택
+const selectLotId = ref(null); // LOT번호 선택
+const selectItemType = ref(null); // 품목구분 선택
+const selectCutd = ref(null); // 보관조건 선택
+const selectWhId = ref(null); // 창고코드 선택
 const expMenu = ref(false); // 유효기간
 const expDate = ref(null); // 유효기간
 
@@ -196,12 +198,12 @@ const formattedexpDate = computed(() => {
 const select = async () => {
     try {
         const params = {
-            item_id: selectedItem.value,
-            lot_id: selectedItem2.value,
-            type: selectedItem3.value,
-            storage: selectedItem4.value,
-            wh_id: selectedItem5.value,
-            exp_date: formattedexpDate.value
+            item_id: selectItemId.value, // 품목번호
+            lot_id: selectLotId.value, // LOT번호
+            item_type: selectItemType.value, // 품목구분
+            cutd_cond: selectCutd.value, // 보관조건
+            wh_id: selectWhId.value, // 창고번호
+            vald_date: formattedexpDate.value // 유효기간
         };
 
         const response = await axios.get('/api/inventoryList', { params });
@@ -212,9 +214,9 @@ const select = async () => {
 };
 
 // 모달조회 fetchItems
-const fetchItems = async () => {
+const fetchItemId = async () => {
     try {
-        const response = await axios.get('/api/boards');
+        const response = await axios.get('/api/itemId');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);
@@ -222,9 +224,9 @@ const fetchItems = async () => {
     }
 };
 
-const fetchItems2 = async () => {
+const fetchLotId = async () => {
     try {
-        const response = await axios.get('/api/orderList');
+        const response = await axios.get('/api/lotId');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);
@@ -232,9 +234,9 @@ const fetchItems2 = async () => {
     }
 };
 
-const fetchItems3 = async () => {
+const fetchItemType = async () => {
     try {
-        const response = await axios.get('/api/orderList');
+        const response = await axios.get('/api/itemType');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);
@@ -242,9 +244,9 @@ const fetchItems3 = async () => {
     }
 };
 
-const fetchItems4 = async () => {
+const fetchCutd = async () => {
     try {
-        const response = await axios.get('/api/orderList');
+        const response = await axios.get('/api/cutdCond');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);
@@ -252,9 +254,9 @@ const fetchItems4 = async () => {
     }
 };
 
-const fetchItems5 = async () => {
+const fetchWhId = async () => {
     try {
-        const response = await axios.get('/api/orderList');
+        const response = await axios.get('/api/whId');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);
@@ -263,23 +265,23 @@ const fetchItems5 = async () => {
 };
 
 // 모달에서 선택한 값 처리 onSelectItem
-const onSelectItem = (item) => {
-    selectedItem.value = item.emp_name; // 품목번호
+const onSelectItemId = (item) => {
+    selectItemId.value = item.item_id; // 품목번호
 };
 
-const onSelectItem2 = (item) => {
-    selectedItem2.value = item.order_id; // LOT번호
+const onSelectLotId = (item) => {
+    selectLotId.value = item.lot_id; // LOT번호
 };
 
-const onSelectItem3 = (item) => {
-    selectedItem3.value = item; // 품목구분
+const onSelectItemType = (item) => {
+    selectItemType.value = item.type; // 품목구분
 };
 
-const onSelectItem4 = (item) => {
-    selectedItem4.value = item; // 보관조건
+const onSelectCutd = (item) => {
+    selectCutd.value = item.cutd_cond; // 보관조건
 };
 
-const onSelectItem5 = (item) => {
-    selectedItem5.value = item; // 창고코드
+const onSelectWhId = (item) => {
+    selectWhId.value = item.wh_id; // 창고코드
 };
 </script>
