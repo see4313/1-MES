@@ -1,9 +1,8 @@
 <template>
     <v-dialog v-model="dialog" max-width="800">
         <v-card>
-            <v-card-title>
+            <v-card-title class="d-flex justify-space-between align-center">
                 <span class="text-h6">{{ title }}</span>
-                <v-spacer />
                 <v-btn icon @click="close">
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
@@ -17,6 +16,7 @@
                     :items="filteredData"
                     :search="search"
                     :items-per-page="pageSize"
+                    :items-per-page-options="[5, 10, 15, 20]"
                     :page.sync="page"
                     class="elevation-1"
                 >
@@ -86,4 +86,10 @@ watch(
         if (val) loadData();
     }
 );
+
+watch(dialog, (val) => {
+    if (!val) {
+        emit('close');
+    }
+});
 </script>
