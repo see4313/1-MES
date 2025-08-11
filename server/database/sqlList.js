@@ -3,6 +3,7 @@ const employee = require("./sqls/employee.js");
 const vend = require("./sqls/vend.js");
 const orders = require("./sqls/order.js");
 const materials = require("./sqls/material.js");
+const vendor = require("./sqls/vendor.js");
 const item = require("./sqls/item.js");
 
 module.exports = {
@@ -11,5 +12,6 @@ module.exports = {
   ...materials,
   ...vend,
   ...employee,
+  ...vendor,
   ...item
 };

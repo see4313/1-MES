@@ -4,7 +4,17 @@
     <v-row>
         <v-card elevation="10" class="pa-6">
             <v-card-item class="py-6 px-6">
-                <CardHeader title="사원 조회" btn-text="조회" btn-variant="flat" btn-color="primary" @btn-click="onClickSearch" />
+                <CardHeader
+                    title="사원 관리"
+                    btn-text1="조회"
+                    btn-color1="primary"
+                    btn-variant1="flat"
+                    @btn-click1="onClickSearch"
+                    btn-text2="초기화"
+                    btn-color2="warning"
+                    btn-variant2="flat"
+                    @btn-click2="onClickSearchReset"
+                />
             </v-card-item>
 
             <v-col cols="12" md="12">
@@ -138,7 +148,7 @@
         <v-card elevation="10" class="pa-6 mt-2">
             <v-card-item class="py-6 px-6">
                 <CardHeader3
-                    title="사원 관리"
+                    title="사원 등록"
                     btn-text1="등록"
                     btn-color1="primary"
                     btn-variant1="flat"
@@ -322,7 +332,7 @@
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
 import CardHeader3 from '@/components/production/card-header-btn3k.vue';
-import CardHeader from '@/components/production/card-header-btn.vue';
+import CardHeader from '@/components/production/card-header-btn2k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, computed, nextTick } from 'vue';
@@ -453,17 +463,34 @@ const onSelectDept = (row) => {
 };
 
 /* ===== 모달 API ===== */
-const fetchStatusItems = async (page = 1, size = 10, keyword = '') => {
-    const { data } = await axios.get('/api/status', { params: { page, size, keyword } });
-    return Array.isArray(data) ? data : (data.items ?? []);
+const fetchStatusItems = async () => {
+    try {
+        const response = await axios.get('/api/status');
+        return Array.isArray(response.data) ? response.data : (response.data.items ?? []);
+    } catch (error) {
+        console.error('상태 조회 실패', error);
+        return [];
+    }
 };
-const fetchPermItems = async (page = 1, size = 10, keyword = '') => {
-    const { data } = await axios.get('/api/perm', { params: { page, size, keyword } });
-    return Array.isArray(data) ? data : (data.items ?? []);
+
+const fetchPermItems = async () => {
+    try {
+        const response = await axios.get('/api/perm');
+        return Array.isArray(response.data) ? response.data : (response.data.items ?? []);
+    } catch (error) {
+        console.error('권한 조회 실패', error);
+        return [];
+    }
 };
-const fetchDeptItems = async (page = 1, size = 10, keyword = '') => {
-    const { data } = await axios.get('/api/dept', { params: { page, size, keyword } });
-    return Array.isArray(data) ? data : (data.items ?? []);
+
+const fetchDeptItems = async () => {
+    try {
+        const response = await axios.get('/api/dept');
+        return Array.isArray(response.data) ? response.data : (response.data.items ?? []);
+    } catch (error) {
+        console.error('부서 조회 실패', error);
+        return [];
+    }
 };
 
 /* ===== 조회 버튼 ===== */
@@ -569,6 +596,29 @@ const onClickReset = async () => {
         remark: ''
     };
     await closeAllOverlays();
+};
+
+// 검색폼 초기화
+const onClickSearchReset = async () => {
+    // 폼 값 초기화
+    searchForm.value = {
+        name: '',
+        dept: '',
+        phone: '',
+        joinDate: null,
+        leavDate: null,
+        status: '',
+        permName: ''
+    };
+    // 달력 v-menu도 닫고 값 비우기
+    joinDate.value = null;
+    leavDate.value = null;
+    joinMenu.value = false;
+    leavMenu.value = false;
+
+    await nextTick();
+    // 필요하면 즉시 조회 갱신
+    await onClickSearch();
 };
 </script>
 
