@@ -149,31 +149,35 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
+                title: '검사항목 관리',
+                to: '/insp'
+            },
+            {
+                title: '불량코드 관리',
+                to: '/badnlist'
+            },
+            {
+                title: '입고 품질 검사 등록',
                 to: ''
             },
             {
-                title: 'About Us',
+                title: '입고 품질 검사 조회',
                 to: ''
             },
             {
-                title: 'Blog',
+                title: '불량이력서 확인',
                 to: ''
             },
             {
-                title: 'Blog Details',
+                title: '공정 품질 검사 등록',
                 to: ''
             },
             {
-                title: 'Contact Us',
+                title: '공정 품질 검사 조회',
                 to: ''
             },
             {
-                title: 'Portfolio',
-                to: ''
-            },
-            {
-                title: 'Pricing',
+                title: '검사서 관리',
                 to: ''
             }
         ]

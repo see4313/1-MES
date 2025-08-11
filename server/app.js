@@ -24,6 +24,7 @@ const employeeRouter = require("./routers/employee_router.js");
 const vendRouter = require("./routers/vend_router.js");
 const orderRouter = require("./routers/order_router.js");
 const materialRouter = require("./routers/material_router.js");
+const inspItemRouter = require("./routers/inspItem_router.js");
 const vendorRouter = require("./routers/vendor_router.js");
 const productionRouter = require("./routers/productionRouter.js");
 
@@ -37,5 +38,7 @@ app.use(vendRouter);
 app.use(orderRouter);
 app.use(employeeRouter);
 app.use(materialRouter);
+app.use(inspItemRouter);
 app.use(vendorRouter);
 app.use(productionRouter);
+
