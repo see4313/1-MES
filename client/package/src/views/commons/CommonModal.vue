@@ -76,6 +76,7 @@ function selectItem(item) {
 
 function close() {
     emit('close');
+    search.value = '';
     dialog.value = false;
 }
 
@@ -90,6 +91,7 @@ watch(
 watch(dialog, (val) => {
     if (!val) {
         emit('close');
+        search.value = '';
     }
 });
 </script>
