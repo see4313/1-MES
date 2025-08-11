@@ -208,7 +208,7 @@
             { key: 'emp_name', label: '사원명' }
         ]"
         :fetchData="(q, p, s) => fetchModal('/api/vendorPsch', q, p, s)"
-        :pageSize="10"
+        :pageSize="5"
         @select="onSelectVendPsch"
     />
 </template>
