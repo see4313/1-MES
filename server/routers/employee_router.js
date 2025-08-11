@@ -1,91 +1,105 @@
+// server/routers/employee_router.js
 const express = require("express");
 const router = express.Router();
 const mapper = require("../database/mapper.js");
-const empService = require("../services/employee_service.js");
+const {
+  pagedQuery,
+  empSearchParams,
+  empInsertParams,
+  ensureInsertedOr409,
+  isDupError,
+} = require("../services/employee_service.js");
 
-// async 에러 핸들러
+// 공용: async 핸들러
 const asyncH = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
-// 상태 목록
+// 공용: 결과 → 배열만 꺼내기
+const rowsOnly = (r) => (Array.isArray(r) ? r : r?.rows ?? []);
+
+// ===== 모달 소스 =====
 router.get(
   "/status",
   asyncH(async (req, res) => {
     const { page, size } = req.query;
-    res.json(await empService.pagedQuery("selectStatus", page, size));
+    res.json(await pagedQuery("selectStatus", page, size));
   })
 );
 
-// 권한 목록
 router.get(
   "/perm",
   asyncH(async (req, res) => {
     const { page, size } = req.query;
-    res.json(await empService.pagedQuery("selectPerm", page, size));
+    res.json(await pagedQuery("selectPerm", page, size));
   })
 );
 
-// 부서 목록
 router.get(
   "/dept",
   asyncH(async (req, res) => {
     const { page, size } = req.query;
-    res.json(await empService.pagedQuery("selectDept", page, size));
+    res.json(await pagedQuery("selectDept", page, size));
   })
 );
 
-// 사원 조회
+// ===== 사원 조회 =====
 router.post(
   "/emp/search",
   asyncH(async (req, res) => {
     const rows = await mapper.query(
       "EMP.SEARCH",
-      empService.empSearchParams(req.body)
+      empSearchParams(req.body || {})
     );
-    res.json(Array.isArray(rows) ? rows : rows?.rows ?? []);
+    res.json(rowsOnly(rows));
   })
 );
 
-// 사원 등록
+// ===== 사원 등록 =====
 router.post(
   "/emp",
   asyncH(async (req, res) => {
     const b = req.body ?? {};
-
-    // INSERT 시도
-    let result;
     try {
-      result = await mapper.query("EMP.INSERT", empService.empInsertParams(b));
+      const result = await mapper.query("EMP.INSERT", empInsertParams(b));
+      // insert 영향행 없거나 정의 안됐으면 로직으로 이중확인
+      const verdict = await ensureInsertedOr409(b, result);
+      if (verdict) return res.status(verdict.status).json(verdict.body);
+      return res
+        .status(201)
+        .json({ ok: true, affectedRows: result?.affectedRows ?? 1 });
     } catch (e) {
-      if (empService.isDupError(e)) {
+      if (isDupError(e))
         return res.status(409).json({ message: "이미 등록된 사원입니다!" });
-      }
       throw e;
     }
-
-    // 중복 재확인
-    const verdict = await empService.ensureInsertedOr409(b, result);
-    if (verdict) return res.status(verdict.status).json(verdict.body);
-
-    res.status(201).json({ ok: true, affectedRows: result?.affectedRows ?? 1 });
   })
 );
 
-// 사원 수정
+// ===== 사원 수정 =====
 router.put(
   "/emp/:id",
   asyncH(async (req, res) => {
     const id = req.params.id;
-    const b = req.body || {};
+    const {
+      name = "",
+      dept = "",
+      phone = "",
+      joinDate = null,
+      leavDate = null,
+      status = "",
+      permName = "",
+      remark = "",
+    } = req.body || {};
+
     const params = [
-      b.name ?? "",
-      b.dept ?? "",
-      b.phone ?? "",
-      b.joinDate ?? null,
-      b.leavDate ?? null,
-      b.status ?? "",
-      b.permName ?? "",
-      b.remark ?? "",
+      name,
+      dept,
+      phone,
+      joinDate,
+      leavDate,
+      status,
+      permName,
+      remark,
       id,
     ];
     const r = await mapper.query("EMP.UPDATE", params);
@@ -93,13 +107,12 @@ router.put(
   })
 );
 
-// 에러 핸들러
-router.use((err, req, res, _next) => {
-  if (empService.isDupError(err)) {
+// ===== 공용 에러 핸들러 =====
+router.use((err, _req, res, _next) => {
+  if (isDupError(err))
     return res.status(409).json({ message: "이미 등록된 사원입니다!" });
-  }
   console.error("[EMP ROUTER ERROR]", err);
-  res.status(500).json({ message: "서버 오류" });
+  res.status(500).json({ message: err?.message || "서버 오류" });
 });
 
 module.exports = router;

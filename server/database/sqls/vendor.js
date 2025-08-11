@@ -47,25 +47,21 @@ const VENDOR_INSERT = `
 INSERT INTO VENDOR
   (VEND_NAME, BIZ_NUMBER, CNTINFO, VEND_TYPE, \`USE\`, ADDRESS, PSCH, REMK)
 VALUES
-  (?, ?, ?,
-   (SELECT CMMN_ID FROM CMMN_CODE
-    WHERE GROUP_ID = 'VENDOR_TYPE' AND CMMN_NAME = ? LIMIT 1),
-   ?, ?, ?, ?);
+  (?, ?, ?, ?, ?, ?, ?, ?);
 `;
 
 // ===== 수정 (ID 기준) =====
 const VENDOR_UPDATE = `
 UPDATE VENDOR
-   SET VEND_NAME  = ?,
-       BIZ_NUMBER = ?,
-       CNTINFO    = ?,
-       VEND_TYPE  = (SELECT CMMN_ID FROM CMMN_CODE
-                     WHERE GROUP_ID = 'VENDOR_TYPE' AND CMMN_NAME = ? LIMIT 1),
-       \`USE\`     = ?,
-       ADDRESS    = ?,
-       PSCH       = ?,
-       REMK       = ?
- WHERE VEND_ID    = ?;
+   SET VEND_NAME  = ?,   
+       BIZ_NUMBER = ?,    
+       CNTINFO    = ?,    
+       VEND_TYPE  = ?,   
+       \`USE\`      = ?,  
+       ADDRESS    = ?,   
+       PSCH       = ?,    
+       REMK       = ?    
+ WHERE VEND_ID    = ?;     
 `;
 
 // ===== 모달: 유형 =====
@@ -96,6 +92,19 @@ WHERE \`USE\` = 'Y'
 ORDER BY V.VEND_ID
 LIMIT ? OFFSET ?;
 `;
+//=======모달: 사원(담당자) ======
+const selectVendPsch = `
+SELECT 
+  E.EMP_ID   AS emp_id,
+  E.EMP_NAME AS emp_name
+FROM EMPLOYEE E
+WHERE STATUS = '재직'
+  AND (COALESCE(?, '') = '' 
+       OR E.EMP_ID   LIKE CONCAT('%', ?, '%') 
+       OR E.EMP_NAME LIKE CONCAT('%', ?, '%'))
+ORDER BY E.EMP_ID
+LIMIT ? OFFSET ?;
+`;
 
 module.exports = {
   // mapper 별칭 키에 맞춰 export
@@ -103,8 +112,7 @@ module.exports = {
   "VENDOR.SEARCH_EXACT": VENDOR_SEARCH_EXACT,
   "VENDOR.INSERT": VENDOR_INSERT,
   "VENDOR.UPDATE": VENDOR_UPDATE,
-
-  // 모달 쿼리 키 (서비스에서 직접 이 키로 호출)
+  selectVendPsch,
   selectVendType,
   selectVendId,
 };

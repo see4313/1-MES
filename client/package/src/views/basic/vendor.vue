@@ -24,7 +24,7 @@
                             label="거래처번호"
                             v-model="searchForm.vendId"
                             append-inner-icon="mdi-magnify"
-                            @click:append-inner.stop="openVendIdModal('search')"
+                            @click:append-inner.stop="openModal('vendId', 'search')"
                         />
                     </v-col>
 
@@ -38,7 +38,7 @@
                             label="거래처유형"
                             v-model="searchForm.vendType"
                             append-inner-icon="mdi-magnify"
-                            @click:append-inner.stop="openVendTypeModal('search')"
+                            @click:append-inner.stop="openModal('vendType', 'search')"
                         />
                     </v-col>
                 </v-row>
@@ -100,30 +100,15 @@
             <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="거래처명"
-                            v-model="createForm.vendName"
-                            :rules="[(v) => !!v || '거래처명은 필수입니다.']"
-                        />
+                        <v-text-field variant="outlined" label="거래처명" v-model="createForm.vendName" :rules="[req]" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="사업자번호"
-                            v-model="createForm.bizNumber"
-                            :rules="[(v) => !!v || '사업자번호는 필수입니다.']"
-                        />
+                        <v-text-field variant="outlined" label="사업자번호" v-model="createForm.bizNumber" :rules="[req]" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="연락처"
-                            v-model="createForm.cntinfo"
-                            :rules="[(v) => !!v || '연락처는 필수입니다.']"
-                        />
+                        <v-text-field variant="outlined" label="연락처" v-model="createForm.cntinfo" :rules="[req]" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -132,13 +117,13 @@
                             label="거래처유형"
                             v-model="createForm.vendType"
                             append-inner-icon="mdi-magnify"
-                            @click:append-inner.stop="openVendTypeModal('create')"
-                            :rules="[(v) => !!v || '거래처유형은 필수입니다.']"
+                            @click:append-inner.stop="openModal('vendType', 'create')"
+                            :rules="[req]"
                         />
                     </v-col>
+
                     <v-col cols="12" sm="4">
                         <v-radio-group
-                            v-radio-group
                             v-model="createForm.useYn"
                             label="사용여부"
                             variant="outlined"
@@ -150,6 +135,7 @@
                             </div>
                         </v-radio-group>
                     </v-col>
+
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
@@ -157,7 +143,18 @@
                             v-model="createForm.address"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openAddressModal('create')"
-                            :rules="[(v) => !!v || '주소는 필수입니다.']"
+                            :rules="[req]"
+                        />
+                    </v-col>
+
+                    <v-col cols="12" sm="4">
+                        <v-text-field
+                            variant="outlined"
+                            label="담당자"
+                            v-model="createForm.psch"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner.stop="openModal('psch', 'create')"
+                            :rules="[req]"
                         />
                     </v-col>
 
@@ -172,9 +169,7 @@
     <!-- ===== 스낵바 ===== -->
     <v-snackbar v-model="snackOpen" :timeout="2000" :color="snackColor" location="top right" rounded="pill">
         {{ snackMessage }}
-        <template #actions>
-            <v-btn variant="text" @click="snackOpen = false">닫기</v-btn>
-        </template>
+        <template #actions><v-btn variant="text" @click="snackOpen = false">닫기</v-btn></template>
     </v-snackbar>
 
     <!-- ===== 공통 모달 ===== -->
@@ -186,7 +181,7 @@
             { key: 'type_id', label: '유형번호' },
             { key: 'vend_type', label: '거래처유형' }
         ]"
-        :fetchData="fetchVendTypeItems"
+        :fetchData="(q, p, s) => fetchModal('/api/vendorType', q, p, s)"
         :pageSize="10"
         @select="onSelectVendType"
     />
@@ -199,9 +194,22 @@
             { key: 'vend_id', label: '거래처번호' },
             { key: 'vend_name', label: '거래처명' }
         ]"
-        :fetchData="fetchVendIdItems"
+        :fetchData="(q, p, s) => fetchModal('/api/vendorId', q, p, s)"
         :pageSize="10"
         @select="onSelectVendId"
+    />
+
+    <ModalSearch
+        v-model:visible="showVendPschModal"
+        title="사원 검색"
+        idField="emp_id"
+        :columns="[
+            { key: 'emp_id', label: '사원번호' },
+            { key: 'emp_name', label: '사원명' }
+        ]"
+        :fetchData="(q, p, s) => fetchModal('/api/vendorPsch', q, p, s)"
+        :pageSize="10"
+        @select="onSelectVendPsch"
     />
 </template>
 
@@ -212,20 +220,16 @@ import CardHeader3 from '@/components/production/card-header-btn3k.vue';
 import CardHeader from '@/components/production/card-header-btn2k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 
-// ===== 목록 데이터
 const rows = ref([]);
-onMounted(async () => {});
+onMounted(() => {
+    onClickSearch();
+}); // 첫 진입 시 서버에서 목록 조회
 
-const useYn = ref('Y');
+/* ===== 상태 ===== */
 
-//==== 폼 상태
-const searchForm = ref({
-    vendId: '',
-    vendName: '',
-    vendType: ''
-});
+const searchForm = ref({ vendId: '', vendName: '', vendType: '' });
 
 const createForm = ref({
     id: null,
@@ -235,38 +239,37 @@ const createForm = ref({
     vendType: '',
     useYn: 'Y',
     address: '',
+    psch: '',
     remark: ''
 });
 
-// ===== 모달
+/* ===== 모달 상태 & 툴 ===== */
 const showVendIdModal = ref(false);
 const showVendTypeModal = ref(false);
+const showVendPschModal = ref(false);
 const modalTarget = ref('search');
 
-const closeAllOverlays = async () => {
+const closeAll = async () => {
     showVendIdModal.value = false;
     showVendTypeModal.value = false;
+    showVendPschModal.value = false;
     await nextTick();
     document.activeElement?.blur?.();
 };
 
-const openVendIdModal = async (t) => {
-    await closeAllOverlays();
-    modalTarget.value = t;
-    showVendIdModal.value = true;
-};
-const openVendTypeModal = async (t) => {
-    await closeAllOverlays();
-    modalTarget.value = t;
-    showVendTypeModal.value = true;
+const openModal = async (type, target) => {
+    await closeAll();
+    modalTarget.value = target;
+    if (type === 'vendId') showVendIdModal.value = true;
+    else if (type === 'vendType') showVendTypeModal.value = true;
+    else if (type === 'psch') showVendPschModal.value = true;
 };
 
-const openAddressModal = async (t) => {
-    // TODO: 주소 검색 모달 열기
-    console.log('openAddressModal', t);
+const openAddressModal = (t) => {
+    console.log('openAddressModal', t); // TODO: 주소 검색 모달 연결
 };
 
-// ===== 모달 선택 핸들러
+/* ===== 모달 선택 ===== */
 const onSelectVendType = (row) => {
     const val = row?.vend_type || row?.vendType || '';
     if (modalTarget.value === 'create') createForm.value.vendType = val;
@@ -276,56 +279,40 @@ const onSelectVendType = (row) => {
 
 const onSelectVendId = (row) => {
     const val = row?.vend_id || row?.vendId || '';
-    if (modalTarget.value === 'create') {
-    } else {
-        searchForm.value.vendId = val;
-    }
+    if (modalTarget.value !== 'create') searchForm.value.vendId = val;
     showVendIdModal.value = false;
 };
 
-/* ===== 모달 API ===== */
-const fetchVendTypeItems = async (q, page, size) => {
+const onSelectVendPsch = (row) => {
+    const name = row?.emp_name || row?.empName || '';
+    if (modalTarget.value === 'create') createForm.value.psch = name;
+    showVendPschModal.value = false;
+};
+
+/* ===== 모달 API 공통 헬퍼 ===== */
+const fetchModal = async (url, q, page, size) => {
     try {
-        const { data } = await axios.get('/api/vendorType', { params: { q, page, size } });
+        const { data } = await axios.get(url, { params: { q, page, size } });
         return Array.isArray(data) ? data : (data.items ?? []);
-    } catch (error) {
-        console.error('유형 조회 실패', error);
+    } catch (e) {
+        console.error('모달 조회 실패', url, e);
         return [];
     }
 };
 
-const fetchVendIdItems = async (q, page, size) => {
-    try {
-        const { data } = await axios.get('/api/vendorId', { params: { q, page, size } });
-        return Array.isArray(data) ? data : (data.items ?? []);
-    } catch (error) {
-        console.error('번호 조회 실패', error);
-        return [];
-    }
-};
-
-/* ===== 조회 버튼 ===== */
+/* ===== 조회 ===== */
 const onClickSearch = async () => {
-    const payload = { ...searchForm.value };
-    const { data } = await axios.post('/api/vendor/search', payload);
+    const { data } = await axios.post('/api/vendor/search', { ...searchForm.value });
     rows.value = Array.isArray(data) ? data : (data.items ?? []);
 };
 
-// 검색폼 초기화
 const onClickSearchReset = async () => {
-    // 폼 값 초기화
-    searchForm.value = {
-        vendId: '',
-        vendName: '',
-        vendType: ''
-    };
-
+    searchForm.value = { vendId: '', vendName: '', vendType: '' };
     await nextTick();
-    // 필요하면 즉시 조회 갱신
     await onClickSearch();
 };
 
-/* ===== 행 클릭 -> 수정모드 세팅 ===== */
+/* ===== 테이블 행 클릭 -> 수정 폼 세팅 ===== */
 const onRowClick = ({ data }) => {
     createForm.value = {
         id: data?.vendId ?? null,
@@ -338,15 +325,13 @@ const onRowClick = ({ data }) => {
         psch: data?.psch ?? '',
         remark: data?.remark ?? data?.remk ?? ''
     };
-    if (typeof useYn !== 'undefined' && useYn?.value !== undefined) {
-        useYn.value = createForm.value.useYn || 'Y';
-    }
 };
 
-// 공용
-const validateRequired = (f) => !!(f.vendName && f.bizNumber && f.cntinfo && f.vendType && f.address);
+/* ===== 공용 ===== */
+const req = (v) => !!v || '필수 값입니다.';
+const isValid = (f) => !!(f.vendName && f.bizNumber && f.cntinfo && f.vendType && f.address);
 
-/* ===== 등록 ===== */
+/* ===== 스낵바 ===== */
 const snackOpen = ref(false);
 const snackMessage = ref('');
 const snackColor = ref('success');
@@ -356,55 +341,52 @@ const notify = (message, color = 'success') => {
     snackOpen.value = true;
 };
 
+/* ===== payload 빌더 ===== */
+const buildPayload = () => ({
+    vendName: createForm.value.vendName,
+    bizNumber: createForm.value.bizNumber,
+    cntinfo: createForm.value.cntinfo,
+    vendType: createForm.value.vendType, // 코드명/코드ID 둘 다 가능
+    useYn: createForm.value.useYn ?? 'Y',
+    address: createForm.value.address,
+    psch: createForm.value.psch,
+    remark: createForm.value.remark ?? null
+});
+
+/* ===== 등록 ===== */
 const onClickCreate = async () => {
-    if (!validateRequired(createForm.value)) {
-        notify('필수 값을 확인하세요.', 'warning');
-        return;
-    }
-    const payload = {
-        ...createForm.value,
-        useYn: useYn?.value ?? createForm.value.useYn ?? 'Y'
-    };
+    if (!isValid(createForm.value)) return notify('필수 값을 확인하세요.', 'warning');
+    const payload = buildPayload();
     try {
         await axios.post('/api/vendor', payload);
         notify('등록이 완료되었습니다.', 'success');
         await onClickSearch();
         await onClickReset();
     } catch (e) {
-        console.error(e);
-        notify('등록 중 오류가 발생했습니다.', 'error');
-    } finally {
-        await closeAllOverlays();
+        const msg =
+            e?.response?.status === 409
+                ? e?.response?.data?.message || '이미 등록된 거래처입니다!'
+                : e?.response?.data?.message || '등록 중 오류가 발생했습니다.';
+        notify(msg, 'warning');
     }
 };
 
 /* ===== 수정 ===== */
 const onClickUpdate = async () => {
-    if (!createForm.value.id) {
-        notify('수정할 항목이 선택되지 않았습니다.', 'warning');
-        return;
-    }
-    if (!validateRequired(createForm.value)) {
-        notify('필수 값을 확인하세요.', 'warning');
-        return;
-    }
-    const payload = {
-        ...createForm.value,
-        useYn: useYn?.value ?? createForm.value.useYn ?? 'Y'
-    };
+    if (!createForm.value.id) return notify('수정할 항목이 선택되지 않았습니다.', 'warning');
+    if (!isValid(createForm.value)) return notify('필수 값을 확인하세요.', 'warning');
+
     try {
-        await axios.put(`/api/vendor/${createForm.value.id}`, payload);
+        await axios.put(`/api/vendor/${createForm.value.id}`, { ...buildPayload() });
         notify('수정이 완료되었습니다.', 'success');
         await onClickSearch();
         await onClickReset();
     } catch (e) {
-        console.error(e);
-        notify('수정 중 오류가 발생했습니다.', 'error');
-    } finally {
-        await closeAllOverlays();
+        notify(e?.response?.data?.message || '수정 중 오류가 발생했습니다.', 'error');
     }
 };
-//--------초기화-------------
+
+/* ===== 신규(폼 리셋) ===== */
 const onClickReset = async () => {
     createForm.value = {
         id: null,
@@ -414,12 +396,13 @@ const onClickReset = async () => {
         vendType: '',
         useYn: 'Y',
         address: '',
+        psch: '',
         remark: ''
     };
-    useYn.value = 'Y'; // 라디오 값도 초기화
-    await closeAllOverlays();
+    await closeAll();
 };
 </script>
+
 <style scoped>
 ::v-deep(.v-icon) {
     cursor: pointer;
