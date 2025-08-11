@@ -113,8 +113,8 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
-                to: ''
+                title: '생산 지시',
+                to: '/instructions'
             },
             {
                 title: 'About Us',
