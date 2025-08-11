@@ -12,10 +12,7 @@ const sidebarItem = [
                 title: '거래처관리',
                 to: '/vendor'
             },
-            {
-                title: '품목관리',
-                to: ''
-            },
+
             {
                 title: 'BOM관리',
                 to: ''
