@@ -223,9 +223,10 @@ import Column from 'primevue/column';
 import { ref, nextTick, onMounted } from 'vue';
 
 const rows = ref([]);
+// 첫 진입 시 서버에서 목록 조회
 onMounted(() => {
     onClickSearch();
-}); // 첫 진입 시 서버에서 목록 조회
+});
 
 /* ===== 상태 ===== */
 
