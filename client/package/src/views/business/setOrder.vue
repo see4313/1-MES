@@ -35,7 +35,6 @@
                     <v-text-field variant="outlined" label="비고" v-model="remk" readonly />
                 </v-col>
             </v-row>
-
             <v-row dense>
                 <v-col cols="12" sm="3">
                     <v-text-field variant="outlined" label="업체명" v-model="vendName" readonly />
@@ -117,8 +116,10 @@ const vendName = ref(null);
 const empName = ref(null);
 const orderName = ref(null);
 const remk = ref(null);
+
 const showModal = ref(false); // 주문모달
 const selectOrder = ref(null); // 주문선택
+
 watch(selectOrder, async (newOrderId) => {
     if (newOrderId) {
         try {
@@ -132,6 +133,7 @@ watch(selectOrder, async (newOrderId) => {
         products.value = [];
     }
 });
+
 const fetchItems = async () => {
     try {
         const response = await axios.get('/api/orderModal');
@@ -141,6 +143,7 @@ const fetchItems = async () => {
         return [];
     }
 };
+
 const onSelectItem = (item) => {
     selectOrder.value = item.order_id;
     orderName.value = item.ordr;

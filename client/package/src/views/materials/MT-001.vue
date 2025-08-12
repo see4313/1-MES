@@ -49,6 +49,7 @@
             </v-row>
         </v-card-item>
     </v-card>
+
     <v-card elevation="10" class="mt-3">
         <v-card-item class="py-6 px-6">
             <CardHeader title="품목목록" />
@@ -91,6 +92,7 @@
             </v-row>
         </v-card-item>
     </v-card>
+
     <v-card elevation="10" class="mt-3">
         <v-card-item class="py-6 px-6">
             <CardHeader3
@@ -155,6 +157,7 @@
                         </v-col>
                     </v-row>
                 </v-col>
+
                 <v-col cols="12" md="4">
                     <v-row>
                         <v-col cols="12">
@@ -165,6 +168,7 @@
             </v-row>
         </v-card-item>
     </v-card>
+
     <ModalSearch
         :visible="itemNameModal"
         title="품목명"
@@ -179,6 +183,7 @@
         @select="onSelectItemName"
         @close="itemNameModal = false"
     />
+
     <ModalSearch
         :visible="itemTypeModal"
         title="품목유형"
@@ -192,6 +197,7 @@
         @select="onSelectItemType"
         @close="itemTypeModal = false"
     />
+
     <ModalSearch
         :visible="cutdModal"
         title="보관유형"
@@ -205,6 +211,7 @@
         @select="onSelectCutd"
         @close="cutdModal = false"
     />
+
     <ModalSearch
         :visible="itemTypeModal2"
         title="품목유형"
@@ -218,6 +225,7 @@
         @select="onSelectItemType2"
         @close="itemTypeModal2 = false"
     />
+
     <ModalSearch
         :visible="cutdModal2"
         title="보관유형"
@@ -231,6 +239,7 @@
         @select="onSelectCutd2"
         @close="cutdModal2 = false"
     />
+
     <ModalSearch
         :visible="itemUnitModal"
         title="단위"
@@ -245,6 +254,7 @@
         @close="itemUnitModal = false"
     />
 </template>
+
 <script setup>
 import CardHeader from '@/components/production/card-header.vue';
 import CardHeader2 from '@/components/production/card-header-btn2.vue';
@@ -254,6 +264,7 @@ import Column from 'primevue/column';
 import { ref, onMounted, computed, watch } from 'vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
+
 const selectItemList = ref(null);
 const itemId = ref(null);
 const itemName = ref(null);
@@ -275,6 +286,7 @@ const selectItemName = ref(null); // 품목번호 선택
 const selectItemType = ref(null); // 품목구분 선택
 const selectCutd = ref(null); // 보관조건 선택
 const selectUnit = ref(null); // 단위 선택
+
 // 조회조건 초기화
 function selectReset() {
     selectItemName.value = null;
@@ -282,6 +294,7 @@ function selectReset() {
     selectCutd.value = null;
     useYn.value = null;
 }
+
 // 상세 입력 초기화
 function dataReset() {
     selectItemList.value = null;
@@ -294,6 +307,7 @@ function dataReset() {
     itemUseYn.value = null;
     itemRemk.value = null;
 }
+
 // 행 선택
 watch(selectItemList, (newVal) => {
     if (!newVal) {
@@ -310,28 +324,33 @@ watch(selectItemList, (newVal) => {
         itemRemk.value = newVal.remk;
     }
 });
+
 // 품목 삭제
 const itemDelete = async () => {
     let response = await axios.delete('/api/itemDelete', { data: { item_id: itemId.value } }).catch((err) => console.log(err));
+
     if (response.data.result) {
         alert('삭제되었습니다.');
         select();
         dataReset();
     }
 };
+
 // 품목 저장
 const itemSave = async () => {
     if (!itemId.value) {
         let obj = {
             item_name: itemName.value,
             item_type: itemType.value,
-            unit: itemUnit.value,
+            unit: selectUnit.value,
             spec: itemSpec.value,
             cutd_cond: itemCutd.value,
             uon: itemUseYn.value,
             remk: itemRemk.value
         };
+
         let response = await axios.post('/api/itemInsert', obj).catch((err) => console.log(err));
+
         if (response.data.result) {
             alert('등록되었습니다.');
             select();
@@ -341,14 +360,16 @@ const itemSave = async () => {
         let obj = {
             item_name: itemName.value,
             item_type: itemType.value,
-            unit: itemUnit.value,
+            unit: selectUnit.value,
             spec: itemSpec.value,
             cutd_cond: itemCutd.value,
             uon: itemUseYn.value,
             remk: itemRemk.value,
             item_id: itemId.value
         };
+
         let response = await axios.put('/api/itemUpdate', obj).catch((err) => console.log(err));
+
         if (response.data.result) {
             alert('수정되었습니다.');
             select();
@@ -356,6 +377,7 @@ const itemSave = async () => {
         }
     }
 };
+
 // 품목목록 조회
 const select = async () => {
     try {
@@ -365,12 +387,14 @@ const select = async () => {
             cutd_cond: selectCutd.value, // 보관조건
             uon: useYn.value // 사용여부
         };
+
         const response = await axios.get('/api/itemList', { params });
         itemList.value = response.data;
     } catch (error) {
         console.error('조회 실패', error);
     }
 };
+
 // 모달조회
 const fetchItemName = async () => {
     try {
@@ -381,6 +405,7 @@ const fetchItemName = async () => {
         return [];
     }
 };
+
 const fetchItemType = async () => {
     try {
         const response = await axios.get('/api/itemType');
@@ -390,6 +415,7 @@ const fetchItemType = async () => {
         return [];
     }
 };
+
 const fetchCutd = async () => {
     try {
         const response = await axios.get('/api/cutdCond');
@@ -399,6 +425,7 @@ const fetchCutd = async () => {
         return [];
     }
 };
+
 const fetchUnit = async () => {
     try {
         const response = await axios.get('/api/itemUnit');
@@ -408,21 +435,27 @@ const fetchUnit = async () => {
         return [];
     }
 };
+
 const onSelectItemName = (item) => {
     selectItemName.value = item.item_name; // 품목번호
 };
+
 const onSelectItemType = (item) => {
     selectItemType.value = item.cmmn_name;
 };
+
 const onSelectCutd = (item) => {
     selectCutd.value = item.cmmn_name;
 };
+
 const onSelectItemType2 = (item) => {
     itemType.value = item.cmmn_name;
 };
+
 const onSelectCutd2 = (item) => {
     itemCutd.value = item.cmmn_name;
 };
+
 const onSelectUnit = (item) => {
     selectUnit.value = item.cmmn_name;
 };
