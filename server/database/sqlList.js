@@ -6,4 +6,6 @@ module.exports = {
   ...boards,
   ...orders,
   ...vend,
+  ...facility,
+
 };
