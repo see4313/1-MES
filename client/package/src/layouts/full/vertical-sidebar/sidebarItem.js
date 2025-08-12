@@ -155,11 +155,7 @@ const sidebarItem = [
             },
             {
                 title: '입고 품질 검사 등록',
-                to: ''
-            },
-            {
-                title: '입고 품질 검사 조회',
-                to: ''
+                to: '/iqii'
             },
             {
                 title: '불량이력서 확인',

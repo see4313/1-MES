@@ -66,8 +66,8 @@ WHERE emp.status = '재직'
 // 모달(주문)
 const orderModal = `
 SELECT ord.order_id,
-       ord.vend_id,
-       ord.ordr,
+      ord.vend_id,
+      ord.ordr,
        ord.emp_id,
        emp.emp_name,
        vend.vend_name,

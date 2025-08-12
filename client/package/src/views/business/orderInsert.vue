@@ -302,17 +302,21 @@ const addRow = () => {
         allamt: 0
     });
 };
+
 //합산금액
 const allamt = (event) => {
     const { data, field, newValue } = event;
+
     if (data[field] !== newValue) {
         // 기존값과 입력한 값이 다르면
         data[field] = newValue; // 바뀐 값으로 변경.
+
         if (field === 'qty' || field === 'amt') {
             data.allamt = data.qty * data.amt;
         }
     }
 };
+
 // 상세 입력 초기화
 function dataReset() {
     orderinfo.value.ordr = null;
