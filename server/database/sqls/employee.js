@@ -14,15 +14,7 @@ SELECT
 FROM EMPLOYEE E
 LEFT JOIN DEPARTMENT D ON D.DEPT_ID = E.DEPT_ID
 WHERE 1=1
-  AND (? IS NULL OR E.EMP_NAME  LIKE CONCAT('%', ?, '%'))
-  AND (? IS NULL OR D.DEPT_NAME LIKE CONCAT('%', ?, '%'))
-  AND (? IS NULL OR E.PHONE     LIKE CONCAT('%', ?, '%'))
-  AND (? IS NULL OR E.JOIN_CO   >= ?)
-  AND (? IS NULL OR E.LEAVDORM  <= ?)
-  AND (? IS NULL OR E.STATUS = ?)
-  AND (? IS NULL OR E.PERM   = ?)
-ORDER BY E.EMP_ID DESC
-LIMIT ?;
+
 `;
 //등록 INSERT (부서명으로 넘어오면 DEPT_ID 서브쿼리로 매핑)
 const insertEmp = `
@@ -52,7 +44,7 @@ const selectStatus = `
          C.CMMN_NAME AS status
   FROM CMMN_CODE C
   WHERE C.GROUP_ID = 'EMP_STATUS'
-    AND \`USE\` = 'Y'
+    AND \`UON\` = 'Y'
   ORDER BY C.CMMN_ID
   LIMIT ? OFFSET ?;
 `;
@@ -63,7 +55,7 @@ const selectPerm = `
          C.CMMN_NAME AS perm_name
   FROM CMMN_CODE C
   WHERE C.GROUP_ID = 'EMP_PERM'
-    AND \`USE\` = 'Y'
+    AND \`UON\` = 'Y'
   ORDER BY C.CMMN_ID
   LIMIT ? OFFSET ?;
 `;
@@ -74,7 +66,7 @@ SELECT
   D.DEPT_ID   AS dept_id,
   D.DEPT_NAME AS dept_name
 FROM DEPARTMENT D
-WHERE \`USE\` = 'Y'
+WHERE \`UON\` = 'Y'
 ORDER BY D.DEPT_ID
 LIMIT ? OFFSET ?;
 `;

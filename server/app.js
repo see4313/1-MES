@@ -43,3 +43,4 @@ app.use(inspItemRouter);
 app.use(vendorRouter);
 app.use(productionRouter);
 app.use(bomRouter);
+app.use(inspItemRouter);
