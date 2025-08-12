@@ -119,7 +119,7 @@
             <v-col cols="12">
                 <div class="card">
                     <DataTable
-                        :value="products"
+                        :value="rows"
                         tableStyle="min-width: 50rem"
                         rowHover
                         @row-click="onRowClick"
@@ -336,17 +336,15 @@ import CardHeader from '@/components/production/card-header-btn2k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, computed, nextTick } from 'vue';
-import { ProductService } from '@/service/ProductService';
 import dayjs from 'dayjs';
 
 /* ===== 유틸 ===== */
 const asDate = (v) => (!v ? null : v instanceof Date ? v : new Date(v));
 const toDateStr = (v) => (v ? dayjs(v).format('YYYY-MM-DD') : null);
 
-/* ===== 데이터 로드(데모) ===== */
-const products = ref([]);
+const rows = ref([]);
 onMounted(() => {
-    ProductService.getProductsMini().then((data) => (products.value = data));
+    onClickSearch(); // 첫 진입 시 서버에서 조회
 });
 
 /* ===== 날짜(조회 폼) ===== */
@@ -497,7 +495,7 @@ const fetchDeptItems = async () => {
 const onClickSearch = async () => {
     const payload = { ...searchForm.value };
     const { data } = await axios.post('/api/emp/search', payload);
-    products.value = Array.isArray(data) ? data : (data.items ?? []);
+    rows.value = Array.isArray(data) ? data : (data.items ?? []);
 };
 
 /* ===== 행 클릭 -> 수정모드 세팅 ===== */
