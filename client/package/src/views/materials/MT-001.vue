@@ -342,7 +342,7 @@ const itemSave = async () => {
         let obj = {
             item_name: itemName.value,
             item_type: itemType.value,
-            unit: itemUnit.value,
+            unit: selectUnit.value,
             spec: itemSpec.value,
             cutd_cond: itemCutd.value,
             uon: itemUseYn.value,
@@ -360,7 +360,7 @@ const itemSave = async () => {
         let obj = {
             item_name: itemName.value,
             item_type: itemType.value,
-            unit: itemUnit.value,
+            unit: selectUnit.value,
             spec: itemSpec.value,
             cutd_cond: itemCutd.value,
             uon: itemUseYn.value,
