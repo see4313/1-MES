@@ -29,6 +29,12 @@ router.get("/orderModal", async (req, res) => {
   res.send(list); // 응답
 });
 
+// 모달(상세주문)
+router.get("/itemModal", async (req, res) => {
+  let list = await orderService.itemModal();
+  res.send(list); // 응답
+});
+
 // 등록
 router.post("/orderInsert", async (req, res) => {
   let board = req.body;
