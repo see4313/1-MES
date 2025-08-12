@@ -90,7 +90,8 @@ const instructionsBtn = async () => {
         return;
     }
     try {
-        const result = await axios.post();
+        const result = await axios.post('api//instructions');
+        
     } catch (e) {
         console.error(e);
     }
