@@ -7,11 +7,6 @@ const MainRoutes = {
     component: () => import('@/layouts/full/FullLayout.vue'),
     children: [
         {
-            name: 'Dashboard',
-            path: '/',
-            component: () => import('@/views/dashboard/index.vue')
-        },
-        {
             name: '사원관리',
             path: '/emp',
             component: () => import('@/views/basic/employee.vue')
@@ -22,9 +17,9 @@ const MainRoutes = {
             component: () => import('@/views/basic/vendor.vue')
         },
         {
-            name: 'Shadow',
-            path: '/ui/shadow',
-            component: () => import('@/views/components/Shadow.vue')
+            name: 'BOM관리',
+            path: '/bom',
+            component: () => import('@/views/basic/bom.vue')
         },
         {
             name: 'Alert',

@@ -1,12 +1,118 @@
+// server/routers/employee_router.js
 const express = require("express");
 const router = express.Router();
-// 라우팅 = 사용자의 요청(URI + METHOD) + Service + 응답형태(View or Data)
-const basicService = require("../services/basic_service.js");
+const mapper = require("../database/mapper.js");
+const {
+  pagedQuery,
+  empSearchParams,
+  empInsertParams,
+  ensureInsertedOr409,
+  isDupError,
+} = require("../services/employee_service.js");
 
-router.get("/emp/search", async (req, res) => {
-  const filters = req.query; // 넘어온 값만 사용
-  const list = await basicService.findByFilters(filters);
-  res.send(list);
+// 공용: async 핸들러
+const asyncH = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
+
+// 공용: 결과 → 배열만 꺼내기
+const rowsOnly = (r) => (Array.isArray(r) ? r : r?.rows ?? []);
+
+// ===== 모달 소스 =====
+router.get(
+  "/status",
+  asyncH(async (req, res) => {
+    const { page, size } = req.query;
+    res.json(await pagedQuery("selectStatus", page, size));
+  })
+);
+
+router.get(
+  "/perm",
+  asyncH(async (req, res) => {
+    const { page, size } = req.query;
+    res.json(await pagedQuery("selectPerm", page, size));
+  })
+);
+
+router.get(
+  "/dept",
+  asyncH(async (req, res) => {
+    const { page, size } = req.query;
+    res.json(await pagedQuery("selectDept", page, size));
+  })
+);
+
+// ===== 사원 조회 =====
+router.post(
+  "/emp/search",
+  asyncH(async (req, res) => {
+    const rows = await mapper.query(
+      "EMP.SEARCH",
+      empSearchParams(req.body || {})
+    );
+    res.json(rowsOnly(rows));
+  })
+);
+
+// ===== 사원 등록 =====
+router.post(
+  "/emp",
+  asyncH(async (req, res) => {
+    const b = req.body ?? {};
+    try {
+      const result = await mapper.query("EMP.INSERT", empInsertParams(b));
+      // insert 영향행 없거나 정의 안됐으면 로직으로 이중확인
+      const verdict = await ensureInsertedOr409(b, result);
+      if (verdict) return res.status(verdict.status).json(verdict.body);
+      return res
+        .status(201)
+        .json({ ok: true, affectedRows: result?.affectedRows ?? 1 });
+    } catch (e) {
+      if (isDupError(e))
+        return res.status(409).json({ message: "이미 등록된 사원입니다!" });
+      throw e;
+    }
+  })
+);
+
+// ===== 사원 수정 =====
+router.put(
+  "/emp/:id",
+  asyncH(async (req, res) => {
+    const id = req.params.id;
+    const {
+      name = "",
+      dept = "",
+      phone = "",
+      joinDate = null,
+      leavDate = null,
+      status = "",
+      permName = "",
+      remark = "",
+    } = req.body || {};
+
+    const params = [
+      name,
+      dept,
+      phone,
+      joinDate,
+      leavDate,
+      status,
+      permName,
+      remark,
+      id,
+    ];
+    const r = await mapper.query("EMP.UPDATE", params);
+    res.json({ ok: true, affectedRows: r?.affectedRows ?? 0 });
+  })
+);
+
+// ===== 공용 에러 핸들러 =====
+router.use((err, _req, res, _next) => {
+  if (isDupError(err))
+    return res.status(409).json({ message: "이미 등록된 사원입니다!" });
+  console.error("[EMP ROUTER ERROR]", err);
+  res.status(500).json({ message: err?.message || "서버 오류" });
 });
 
 module.exports = router;

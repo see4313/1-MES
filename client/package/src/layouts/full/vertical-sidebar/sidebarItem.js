@@ -12,25 +12,18 @@ const sidebarItem = [
                 title: '거래처관리',
                 to: '/vendor'
             },
-            {
-                title: '품목관리',
-                to: ''
-            },
+
             {
                 title: 'BOM관리',
-                to: ''
+                to: '/bom'
             },
             {
                 title: '창고관리',
-                to: ''
+                to: '/warehouse'
             },
             {
                 title: '공정정보',
-                to: ''
-            },
-            {
-                title: 'Pricing',
-                to: ''
+                to: '/process'
             }
         ]
     },
@@ -77,31 +70,35 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
+                title: '품목관리',
+                to: '/mt-001'
+            },
+            {
+                title: '자재 발주등록',
+                to: ''
+            },
+            {
+                title: '자재 입고등록',
+                to: ''
+            },
+            {
+                title: '자재 출고관리',
+                to: ''
+            },
+            {
+                title: '재고조회',
                 to: '/mt-003'
             },
             {
-                title: 'About Us',
+                title: '반품관리',
                 to: ''
             },
             {
-                title: 'Blog',
+                title: '폐기관리',
                 to: ''
             },
             {
-                title: 'Blog Details',
-                to: ''
-            },
-            {
-                title: 'Contact Us',
-                to: ''
-            },
-            {
-                title: 'Portfolio',
-                to: ''
-            },
-            {
-                title: 'Pricing',
+                title: '폐기/반품 조회',
                 to: ''
             }
         ]
@@ -113,8 +110,8 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
-                to: '/sample-page'
+                title: '생산 지시',
+                to: '/instructions'
             },
             {
                 title: 'About Us',
@@ -149,31 +146,31 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: 'Homepage',
-                to: '/sample-page'
+                title: '검사항목 관리',
+                to: '/insp'
             },
             {
-                title: 'About Us',
+                title: '불량코드 관리',
+                to: '/badnlist'
+            },
+            {
+                title: '입고 품질 검사 등록',
+                to: '/iqii'
+            },
+            {
+                title: '불량이력서 확인',
                 to: ''
             },
             {
-                title: 'Blog',
+                title: '공정 품질 검사 등록',
                 to: ''
             },
             {
-                title: 'Blog Details',
+                title: '공정 품질 검사 조회',
                 to: ''
             },
             {
-                title: 'Contact Us',
-                to: ''
-            },
-            {
-                title: 'Portfolio',
-                to: ''
-            },
-            {
-                title: 'Pricing',
+                title: '검사서 관리',
                 to: ''
             }
         ]

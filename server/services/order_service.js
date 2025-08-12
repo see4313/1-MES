@@ -2,12 +2,59 @@ const mariadb = require("../database/mapper.js");
 // 실제로 제공하는 기능 : 요구사항에 따라 달라짐
 
 // 전체조회
-const findAll = async () => {
-  let list = await mariadb.query("orderList");
+const orderList = async (filters) => {
+  let list = await mariadb.query("orderList", filters);
   return list;
 };
 
-function convertToArray(obj, columns) {
+// 상세조회
+const detailOrder = async (order_id) => {
+  let list = await mariadb.query("detailOrder", order_id);
+  return list;
+};
+
+// 모달(담당자)
+const empModal = async () => {
+  let list = await mariadb.query("empModal");
+  return list;
+};
+
+// 모달(주문)
+const orderModal = async () => {
+  let list = await mariadb.query("orderModal");
+  return list;
+};
+
+// 모달(상세주문)
+const itemModal = async () => {
+  let list = await mariadb.query("itemModal");
+  return list;
+};
+
+//등록
+const orderInsert = async (obj) => {
+  let insertData = orderToArray(obj, [
+    "ordr",
+    "emp_id",
+    "vend_id",
+    "ordr_date",
+    "paprd_date",
+    "remk",
+  ]);
+  let resInfo = await mariadb.query("orderInsert", insertData);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
+function orderToArray(obj, columns) {
   let result = [];
   for (let column of columns) {
     result.push(obj[column]);
@@ -16,5 +63,10 @@ function convertToArray(obj, columns) {
 }
 
 module.exports = {
-  findAll,
+  orderList,
+  orderInsert,
+  empModal,
+  orderModal,
+  detailOrder,
+  itemModal,
 };
