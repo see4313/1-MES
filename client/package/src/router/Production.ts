@@ -12,9 +12,14 @@ const MainRoutes = {
             component: () => import('@/views/production/test.vue')
         },
         {
-            name: 'instructions',
+            name: 'Instructions',
             path: '/instructions',
             component: () => import('@/views/production/instruction.vue')
+        },
+        {
+            name: 'instructionsList',
+            path: '/instructionslist',
+            component: () => import('@/views/production/instructionList.vue')
         }
     ]
 };

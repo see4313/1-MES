@@ -6,6 +6,7 @@ const materials = require("./sqls/material.js");
 const inspitemSqls = require("./sqls/inspitem.js");
 const vendor = require("./sqls/vendor.js");
 const item = require("./sqls/item.js");
+const production = require("./sqls/production.js");
 
 module.exports = {
   ...boards,
@@ -15,5 +16,6 @@ module.exports = {
   ...employee,
   ...inspitemSqls,
   ...vendor,
-  ...item
+  ...item,
+  ...production
 };
