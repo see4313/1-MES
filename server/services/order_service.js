@@ -25,10 +25,16 @@ const orderModal = async () => {
   return list;
 };
 
+// 모달(상세주문)
+const itemModal = async () => {
+  let list = await mariadb.query("itemModal");
+  return list;
+};
+
 //등록
-const orderInsert = async () => {
-  let insertData = orderToArray([
-    "order_name",
+const orderInsert = async (obj) => {
+  let insertData = orderToArray(obj, [
+    "ordr",
     "emp_id",
     "vend_id",
     "ordr_date",
@@ -36,7 +42,16 @@ const orderInsert = async () => {
     "remk",
   ]);
   let resInfo = await mariadb.query("orderInsert", insertData);
-  return resInfo;
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
 };
 
 function orderToArray(obj, columns) {
@@ -53,4 +68,5 @@ module.exports = {
   empModal,
   orderModal,
   detailOrder,
+  itemModal,
 };
