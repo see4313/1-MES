@@ -114,8 +114,8 @@ const sidebarItem = [
                 to: '/instructions'
             },
             {
-                title: 'About Us',
-                to: ''
+                title: '생산 지시 조회',
+                to: '/instructionslist'
             },
             {
                 title: 'Blog',
