@@ -27,9 +27,9 @@ LIMIT ?;
 //등록 INSERT (부서명으로 넘어오면 DEPT_ID 서브쿼리로 매핑)
 const insertEmp = `
   INSERT INTO EMPLOYEE
-  (EMP_NAME, DEPT_ID, PHONE, JOIN_CO, LEAVDORM, STATUS, PERM, REMK)
+  (EMP_ID,EMP_NAME, DEPT_ID, PHONE, JOIN_CO, LEAVDORM, STATUS, PERM, REMK)
 VALUES
-  (?, (SELECT DEPT_ID FROM DEPARTMENT WHERE DEPT_NAME = ? LIMIT 1), ?, ?, ?, ?, ?,?);
+  (next_code('E'), ?, (SELECT DEPT_ID FROM DEPARTMENT WHERE DEPT_NAME = ? LIMIT 1), ?, ?, ?, ?, ?,?);
 `;
 
 //수정 UPDATE (id 기준 수정)

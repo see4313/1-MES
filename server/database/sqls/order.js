@@ -48,7 +48,7 @@ WHERE order_id = ?
 //주문등록
 const orderInsert = `
 INSERT INTO ORDER_INFO(order_id, ordr, emp_id, vend_id, ordr_date, paprd_date, remk)
-VALUES (next_code('OD'), ?,?,?,?,?,?)
+VALUSE (CONCAT('ord', +1), ?,?,?,?,?,?)
 `;
 
 // 모달(담당자)
@@ -66,27 +66,15 @@ WHERE emp.status = '재직'
 // 모달(주문)
 const orderModal = `
 SELECT ord.order_id,
-      ord.vend_id,
-      ord.ordr,
        ord.emp_id,
        emp.emp_name,
        vend.vend_name,
-       ord.ordr_date,
-       ord.paprd_date,
-       ord.remk,
-       ord.st
+       ord.vend_id,
+       ord.ordr_date
 FROM ORDER_INFO ord JOIN VENDOR vend
                     ON ord.vend_id = vend.vend_id
 JOIN EMPLOYEE emp
                    ON ord.emp_id = emp.emp_id
-`;
-
-// 모달 (상세주문)
-const itemModal = `
-SELECT item_id,
-       item_name
-FROM ITEM 
-WHERE item_type = '완제품'
 `;
 
 module.exports = {
@@ -95,5 +83,4 @@ module.exports = {
   empModal,
   orderModal,
   detailOrder,
-  itemModal,
 };

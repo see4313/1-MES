@@ -4,7 +4,7 @@
         <v-col cols="12" md="12">
             <v-card-item class="py-6 px-6">
                 <CardHeader
-                    title="주문 관리"
+                    title="주문 등록"
                     btn-text1="수정"
                     btn-variant1="flat"
                     btn-color1="warning"
@@ -17,27 +17,22 @@
             </v-card-item>
             <v-row dense>
                 <v-col cols="12" sm="3">
-                    <v-text-field
-                        variant="outlined"
-                        label="주문코드"
-                        append-inner-icon="mdi-magnify"
-                        @click:append-inner="showModal = true"
-                        v-model="selectOrder"
-                    />
+                    <v-text-field variant="outlined" label="주문코드" readonly />
                 </v-col>
                 <v-col cols="12" sm="3">
-                    <v-text-field variant="outlined" label="주문명" v-model="orderName" readonly />
+                    <v-text-field variant="outlined" label="주문명" readonly />
                 </v-col>
                 <v-col cols="12" sm="3">
-                    <v-text-field variant="outlined" label="담당자" v-model="empName" readonly />
+                    <v-text-field variant="outlined" label="담당자" readonly />
                 </v-col>
                 <v-col cols="12" sm="3" :rowspan="2" class="merged-cell">
-                    <v-text-field variant="outlined" label="비고" v-model="remk" readonly />
+                    <v-text-field variant="outlined" label="비고" readonly />
                 </v-col>
             </v-row>
+
             <v-row dense>
                 <v-col cols="12" sm="3">
-                    <v-text-field variant="outlined" label="업체명" v-model="vendName" readonly />
+                    <v-text-field variant="outlined" label="업체명" readonly />
                 </v-col>
 
                 <v-col cols="12" sm="3">
@@ -75,22 +70,6 @@
             </v-col>
         </v-card>
     </v-row>
-
-    <ModalSearch
-        :visible="showModal"
-        title="주문 검색"
-        idField="order_id"
-        :columns="[
-            { key: 'order_id', label: '주문번호' },
-            { key: 'vend_name', label: '업체명' },
-            { key: 'emp_name', label: '담당자' },
-            { key: 'ordr_date', label: '주문일자' }
-        ]"
-        :fetchData="fetchItems"
-        :pageSize="5"
-        @select="onSelectItem"
-        @close="showModal = false"
-    />
 </template>
 <script setup>
 import CardHeader from '@/components/production/card-header-btn2.vue';
@@ -99,60 +78,24 @@ import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
 import { ProductService } from '@/service/ProductService';
 import dayjs from 'dayjs';
-import ModalSearch from '@/views/commons/CommonModal.vue';
-import axios from 'axios';
-import { watch } from 'vue';
 
 onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
 });
 
-const products = ref([]);
+function onSearchEmployee() {
+    console.log('담당자 검색 클릭!');
+}
+
+function onSearchCompany() {
+    console.log('업체명 검색 클릭!');
+}
+
+const products = ref();
 const joinMenu = ref(false);
 const joinDate = ref(null);
 const leavMenu = ref(false);
 const leavDate = ref(null);
-const vendName = ref(null);
-const empName = ref(null);
-const orderName = ref(null);
-const remk = ref(null);
-
-const showModal = ref(false); // 주문모달
-const selectOrder = ref(null); // 주문선택
-
-watch(selectOrder, async (newOrderId) => {
-    if (newOrderId) {
-        try {
-            const response = await axios.get(`/api/orderDetails/${newOrderId}`);
-            products.value = response.data;
-        } catch (error) {
-            console.error('주문상세 불러오기 실 패', error);
-            products.value = [];
-        }
-    } else {
-        products.value = [];
-    }
-});
-
-const fetchItems = async () => {
-    try {
-        const response = await axios.get('/api/orderModal');
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        console.error('조회 실패', error);
-        return [];
-    }
-};
-
-const onSelectItem = (item) => {
-    selectOrder.value = item.order_id;
-    orderName.value = item.ordr;
-    empName.value = item.emp_name;
-    vendName.value = item.vend_id;
-    joinDate.value = item.ordr_date;
-    leavDate.value = item.paprd_date;
-    remk.value = item.remk;
-};
 
 const formattedJoinDate = computed(() => {
     return joinDate.value ? dayjs(joinDate.value).format('YYYY-MM-DD') : '';

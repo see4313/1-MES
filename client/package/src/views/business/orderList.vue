@@ -44,18 +44,7 @@
                     </v-sheet>
                 </v-col>
             </v-row>
-            <DataTable
-                v-model:selection="selectOrder"
-                :value="orderList"
-                tableStyle="min-width: 50rem"
-                @row-click="onRowClick"
-                class="cursor-pointer"
-                selectionMode="single"
-                :metaKeySelection="false"
-                dataKey="order_id"
-                paginator
-                :rows="5"
-            >
+            <DataTable :value="orderList" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
                 <Column field="order_id" header="주문코드"></Column>
                 <Column field="ordr" header="주문명"></Column>
                 <Column field="ordr_date" header="주문일자"></Column>
@@ -71,7 +60,7 @@
                 <v-card-title class="text-h5 mb-0">상세 주문조회</v-card-title>
             </div>
 
-            <DataTable :value="detailOrder" tableStyle="min-width: 50rem" paginator :rows="5">
+            <DataTable :value="detailOrder" tableStyle="min-width: 50rem">
                 <Column field="detail_id" header="주문상세코드"></Column>
                 <Column field="order_id" header="주문코드"></Column>
                 <Column field="item_id" header="제품코드"></Column>
@@ -125,7 +114,6 @@ import dayjs from 'dayjs';
 
 onMounted(() => {});
 
-const selectOrder = ref(null); // 선택된 행
 const orderList = ref(); // 조회목록
 const detailOrder = ref(); // 조회목록
 const showModal1 = ref(false); // 담당자모달

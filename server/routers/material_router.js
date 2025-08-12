@@ -47,30 +47,10 @@ router.get("/whId", async (req, res) => {
   res.send(list); // 응답
 });
 
-// 단위 조회
-router.get("/itemUnit", async (req, res) => {
-  let list = await materialService.itemUnit();
-  res.send(list); // 응답
-});
-
-// 품목 삭제
-router.delete("/itemDelete", async (req, res) => {
-  const { item_id } = req.body;
-  let result = await materialService.deleteItem(item_id);
-  res.send(result);
-});
-
-// 품목 수정
-router.put("/itemUpdate", async (req, res) => {
-  let item = req.body;
-  let result = await materialService.modifyItem(item);
-  res.send(result);
-});
-
-// 품목 등록
-router.post("/itemInsert", async (req, res) => {
-  let item = req.body;
-  let result = await materialService.addItem(item);
+// 등록
+router.post("/boards", async (req, res) => {
+  let board = req.body;
+  let result = await boardService.addNew(board);
   res.send(result);
 });
 

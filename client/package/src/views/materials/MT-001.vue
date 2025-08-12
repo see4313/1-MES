@@ -69,14 +69,7 @@
                                     tableStyle="min-width: 50rem"
                                     class="cursor-pointer"
                                 >
-                                    <Column field="item_id" sortable header="품목번호">
-                                        <template #body="slotProps">
-                                            <v-icon class="cursor-pointer" @click="openModal(slotProps.data)" style="margin-left: 8px">
-                                                mdi-magnify
-                                            </v-icon>
-                                            {{ slotProps.data.item_id }}
-                                        </template>
-                                    </Column>
+                                    <Column field="item_id" sortable header="품목번호"></Column>
                                     <Column field="item_name" header="품목명"></Column>
                                     <Column field="item_type" header="품목구분"></Column>
                                     <Column field="cutd_cond" header="보관조건"></Column>
@@ -105,11 +98,11 @@
                 btn-variant2="flat"
                 btn-color2="error"
                 :btn-disabled2="!itemId"
-                @btn-click2="itemDelete()"
+                @btn-click2=""
                 btn-text3="저장"
                 btn-variant3="flat"
                 btn-color3="primary"
-                @btn-click3="itemSave()"
+                @btn-click3=""
             />
             <v-row>
                 <v-col cols="12" md="8">
@@ -120,16 +113,16 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="품목구분" v-model="itemType" variant="outlined">
+                            <v-text-field label="품목구분" v-model="itemType" variant="outlined" readonly>
                                 <template #append-inner>
-                                    <v-icon @click="itemTypeModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                    <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="단위" v-model="selectUnit" variant="outlined">
+                            <v-text-field label="단위" v-model="itemUnit" variant="outlined" readonly>
                                 <template #append-inner>
-                                    <v-icon @click="itemUnitModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                    <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
@@ -141,9 +134,9 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="보관조건" v-model="itemCutd" variant="outlined">
+                            <v-text-field label="보관조건" v-model="itemCutd" variant="outlined" readonly>
                                 <template #append-inner>
-                                    <v-icon @click="cutdModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                    <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
@@ -183,76 +176,6 @@
         @select="onSelectItemName"
         @close="itemNameModal = false"
     />
-
-    <ModalSearch
-        :visible="itemTypeModal"
-        title="품목유형"
-        idField="cmmn_id"
-        :columns="[
-            { key: 'cmmn_id', label: '공통코드 번호' },
-            { key: 'cmmn_name', label: '공통코드명' }
-        ]"
-        :fetchData="fetchItemType"
-        :pageSize="5"
-        @select="onSelectItemType"
-        @close="itemTypeModal = false"
-    />
-
-    <ModalSearch
-        :visible="cutdModal"
-        title="보관유형"
-        idField="cmmn_id"
-        :columns="[
-            { key: 'cmmn_id', label: '공통코드 번호' },
-            { key: 'cmmn_name', label: '공통코드명' }
-        ]"
-        :fetchData="fetchCutd"
-        :pageSize="5"
-        @select="onSelectCutd"
-        @close="cutdModal = false"
-    />
-
-    <ModalSearch
-        :visible="itemTypeModal2"
-        title="품목유형"
-        idField="cmmn_id"
-        :columns="[
-            { key: 'cmmn_id', label: '공통코드 번호' },
-            { key: 'cmmn_name', label: '공통코드명' }
-        ]"
-        :fetchData="fetchItemType"
-        :pageSize="5"
-        @select="onSelectItemType2"
-        @close="itemTypeModal2 = false"
-    />
-
-    <ModalSearch
-        :visible="cutdModal2"
-        title="보관유형"
-        idField="cmmn_id"
-        :columns="[
-            { key: 'cmmn_id', label: '공통코드 번호' },
-            { key: 'cmmn_name', label: '공통코드명' }
-        ]"
-        :fetchData="fetchCutd"
-        :pageSize="5"
-        @select="onSelectCutd2"
-        @close="cutdModal2 = false"
-    />
-
-    <ModalSearch
-        :visible="itemUnitModal"
-        title="단위"
-        idField="cmmn_id"
-        :columns="[
-            { key: 'cmmn_id', label: '공통코드 번호' },
-            { key: 'cmmn_name', label: '공통코드명' }
-        ]"
-        :fetchData="fetchUnit"
-        :pageSize="5"
-        @select="onSelectUnit"
-        @close="itemUnitModal = false"
-    />
 </template>
 
 <script setup>
@@ -264,6 +187,7 @@ import Column from 'primevue/column';
 import { ref, onMounted, computed, watch } from 'vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 const selectItemList = ref(null);
 const itemId = ref(null);
@@ -278,14 +202,10 @@ const itemList = ref(); // 조회 목록
 const itemNameModal = ref(false); // 품목명 모달
 const itemTypeModal = ref(false); // 품목구분 모달
 const cutdModal = ref(false); // 보관조건 모달
-const itemTypeModal2 = ref(false); // 품목구분 모달
-const cutdModal2 = ref(false); // 보관조건 모달
-const itemUnitModal = ref(false); // 단위 모달
 const useYn = ref(null); // 사용여부
 const selectItemName = ref(null); // 품목번호 선택
 const selectItemType = ref(null); // 품목구분 선택
 const selectCutd = ref(null); // 보관조건 선택
-const selectUnit = ref(null); // 단위 선택
 
 // 조회조건 초기화
 function selectReset() {
@@ -308,7 +228,7 @@ function dataReset() {
     itemRemk.value = null;
 }
 
-// 행 선택
+// 행 선택 취소
 watch(selectItemList, (newVal) => {
     if (!newVal) {
         itemId.value = null;
@@ -325,61 +245,11 @@ watch(selectItemList, (newVal) => {
     }
 });
 
-// 품목 삭제
-const itemDelete = async () => {
-    let response = await axios.delete('/api/itemDelete', { data: { item_id: itemId.value } }).catch((err) => console.log(err));
-
-    if (response.data.result) {
-        alert('삭제되었습니다.');
-        select();
-        dataReset();
-    }
-};
-
-// 품목 저장
-const itemSave = async () => {
-    if (!itemId.value) {
-        let obj = {
-            item_name: itemName.value,
-            item_type: itemType.value,
-            unit: selectUnit.value,
-            spec: itemSpec.value,
-            cutd_cond: itemCutd.value,
-            uon: itemUseYn.value,
-            remk: itemRemk.value
-        };
-
-        let response = await axios.post('/api/itemInsert', obj).catch((err) => console.log(err));
-
-        if (response.data.result) {
-            alert('등록되었습니다.');
-            select();
-            dataReset();
-        }
-    } else {
-        let obj = {
-            item_name: itemName.value,
-            item_type: itemType.value,
-            unit: selectUnit.value,
-            spec: itemSpec.value,
-            cutd_cond: itemCutd.value,
-            uon: itemUseYn.value,
-            remk: itemRemk.value,
-            item_id: itemId.value
-        };
-
-        let response = await axios.put('/api/itemUpdate', obj).catch((err) => console.log(err));
-
-        if (response.data.result) {
-            alert('수정되었습니다.');
-            select();
-            dataReset();
-        }
-    }
-};
-
 // 품목목록 조회
 const select = async () => {
+    // 현재 날짜
+    console.log(dayjs().format('YYYY-MM-DD HH:mm'));
+
     try {
         const params = {
             item_name: selectItemName.value, // 품목명
@@ -426,37 +296,15 @@ const fetchCutd = async () => {
     }
 };
 
-const fetchUnit = async () => {
-    try {
-        const response = await axios.get('/api/itemUnit');
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        console.error('조회 실패', error);
-        return [];
-    }
-};
-
 const onSelectItemName = (item) => {
     selectItemName.value = item.item_name; // 품목번호
 };
 
 const onSelectItemType = (item) => {
-    selectItemType.value = item.cmmn_name;
+    selectItemName.value = item.item_name; // 품목번호
 };
 
 const onSelectCutd = (item) => {
-    selectCutd.value = item.cmmn_name;
-};
-
-const onSelectItemType2 = (item) => {
-    itemType.value = item.cmmn_name;
-};
-
-const onSelectCutd2 = (item) => {
-    itemCutd.value = item.cmmn_name;
-};
-
-const onSelectUnit = (item) => {
-    selectUnit.value = item.cmmn_name;
+    selectItemName.value = item.item_name; // 품목번호
 };
 </script>

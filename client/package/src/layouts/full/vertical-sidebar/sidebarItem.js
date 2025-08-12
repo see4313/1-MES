@@ -15,15 +15,15 @@ const sidebarItem = [
 
             {
                 title: 'BOM관리',
-                to: ''
+                to: '/bom'
             },
             {
                 title: '창고관리',
-                to: ''
+                to: '/warehouse'
             },
             {
                 title: '공정정보',
-                to: ''
+                to: '/process'
             }
         ]
     },
@@ -114,8 +114,8 @@ const sidebarItem = [
                 to: '/instructions'
             },
             {
-                title: '생산 지시 조회',
-                to: '/instructionslist'
+                title: 'About Us',
+                to: ''
             },
             {
                 title: 'Blog',
@@ -159,7 +159,7 @@ const sidebarItem = [
             },
             {
                 title: '입고 품질 검사 조회',
-                to: '/iqii'
+                to: ''
             },
             {
                 title: '불량이력서 확인',

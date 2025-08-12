@@ -7,7 +7,6 @@ const getItemList = async (type) => {
     return result;
   } catch (e) {
     console.error(e);
-    return { err : e };
   }
 };
 

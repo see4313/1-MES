@@ -6,14 +6,14 @@
             <v-card-item class="py-6 px-6">
                 <CardHeader
                     title="사원 관리"
-                    btn-text1="조회"
-                    btn-color1="primary"
-                    btn-variant1="flat"
-                    @btn-click1="onClickSearch"
-                    btn-text2="초기화"
-                    btn-color2="warning"
+                    btn-text2="조회"
+                    btn-color2="primary"
                     btn-variant2="flat"
-                    @btn-click2="onClickSearchReset"
+                    @btn-click2="onClickSearch"
+                    btn-text1="초기화"
+                    btn-color1="secondary"
+                    btn-variant1="flat"
+                    @btn-click1="onClickSearchReset"
                 />
             </v-card-item>
 
@@ -120,15 +120,17 @@
                 <div class="card">
                     <DataTable
                         :value="rows"
+                        v-model:selection="selectedRow"
+                        selectionMode="single"
+                        dataKey="empId"
                         tableStyle="min-width: 50rem"
                         rowHover
-                        @row-click="onRowClick"
                         :paginator="true"
                         :rows="5"
                         :rowsPerPageOptions="[5, 10, 20, 50]"
                         paginatorTemplate="RowsPerPageDropdown PrevPageLink PageLinks NextPageLink"
                     >
-                        <Column field="empId" header="사원번호" />
+                        <Column field="empId" sortable header="사원번호" />
                         <Column field="empName" header="사원명" />
                         <Column field="deptName" header="소속부서" />
                         <Column field="phone" header="연락처" />
@@ -149,18 +151,18 @@
             <v-card-item class="py-6 px-6">
                 <CardHeader3
                     title="사원 등록"
-                    btn-text1="등록"
-                    btn-color1="primary"
-                    btn-variant1="flat"
-                    @btn-click1="onClickCreate"
+                    btn-text3="저장"
+                    btn-color3="primary"
+                    btn-variant3="flat"
+                    @btn-click3="onClickCreate"
                     btn-text2="수정"
-                    btn-color2="success"
+                    btn-color2="warning"
                     btn-variant2="flat"
                     @btn-click2="onClickUpdate"
-                    btn-text3="신규"
-                    btn-color3="warning"
-                    btn-variant3="flat"
-                    @btn-click3="onClickReset"
+                    btn-text1="초기화"
+                    btn-color1="secondary"
+                    btn-variant1="flat"
+                    @btn-click1="onClickReset"
                 />
             </v-card-item>
 
@@ -335,7 +337,7 @@ import CardHeader3 from '@/components/production/card-header-btn3k.vue';
 import CardHeader from '@/components/production/card-header-btn2k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { ref, onMounted, computed, nextTick } from 'vue';
+import { ref, onMounted, computed, nextTick, watch } from 'vue';
 import dayjs from 'dayjs';
 
 /* ===== 유틸 ===== */
@@ -499,20 +501,38 @@ const onClickSearch = async () => {
 };
 
 /* ===== 행 클릭 -> 수정모드 세팅 ===== */
-const onRowClick = ({ data }) => {
-    createForm.value = {
-        id: data.empId ?? null,
-        name: data.empName ?? '',
-        dept: data.deptName ?? '',
-        phone: data.phone ?? '',
-        joinDate: asDate(data.join) ?? null,
-        leavDate: asDate(data.leav) ?? null,
-        status: data.status ?? '',
-        permName: data.perm ?? '',
-        remark: data.remk ?? ''
-    };
-};
+const selectedRow = ref(null);
 
+// 폼 초기화 함수
+function resetForm() {
+    createForm.value = {
+        id: null,
+        name: '',
+        dept: '',
+        phone: '',
+        joinDate: null,
+        leavDate: null,
+        status: '',
+        permName: '',
+        remark: ''
+    };
+}
+
+// 선택된 행 감시 -> 폼 채우기
+watch(selectedRow, (row) => {
+    if (!row) return resetForm();
+    createForm.value = {
+        id: row.empId ?? null,
+        name: row.empName ?? '',
+        dept: row.deptName ?? '',
+        phone: row.phone ?? '',
+        joinDate: asDate(row.join) ?? null,
+        leavDate: asDate(row.leav) ?? null,
+        status: row.status ?? '',
+        permName: row.perm ?? '',
+        remark: row.remk ?? ''
+    };
+});
 /* ===== 공용 ===== */
 const validateRequired = (f) => !!(f.name && f.dept && f.phone && f.joinDate && f.status && f.permName);
 

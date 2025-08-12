@@ -45,9 +45,9 @@ WHERE 1=1
 // ===== 등록 =====
 const VENDOR_INSERT = `
 INSERT INTO VENDOR
-  (VEND_NAME, BIZ_NUMBER, CNTINFO, VEND_TYPE, \`USE\`, ADDRESS, PSCH, REMK)
+  (VEND_ID, VEND_NAME, BIZ_NUMBER, CNTINFO, VEND_TYPE, \`USE\`, ADDRESS, PSCH, REMK)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?, ?);
+  (next_code('VD'), ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 // ===== 수정 (ID 기준) =====

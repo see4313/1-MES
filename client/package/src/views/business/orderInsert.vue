@@ -4,21 +4,11 @@
         <v-card elevation="10">
             <v-col cols="12" md="12">
                 <v-card-item class="py-6 px-6">
-                    <CardHeader2
-                        title="주문 등록"
-                        btn-text1="등록"
-                        btn-variant1="flat"
-                        btn-color1="primary"
-                        @btn-click1="orderInsert()"
-                        btn-text2="초기화"
-                        btn-variant2="flat"
-                        btn-color2="error"
-                        @btn-click2="dataReset()"
-                    />
+                    <CardHeader title="주문 등록" btn-text="등록" btn-variant="flat" btn-color="primary" @btn-click="orderInsert()" />
                 </v-card-item>
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="주문명" v-model="orderinfo.ordr" />
+                        <v-text-field variant="outlined" label="주문명" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field
@@ -71,7 +61,7 @@
                         </v-menu>
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="비고" v-model="orderinfo.remk" />
+                        <v-text-field variant="outlined" label="비고" />
                     </v-col>
                 </v-row>
             </v-col>
@@ -82,33 +72,20 @@
             <v-col cols="12">
                 <div class="order">
                     <v-card-item class="py-6 px-6">
-                        <CardHeader1
+                        <CardHeader
                             title="상세 주문등록"
                             btn-icon="mdi-plus-circle"
                             btn-text="행추가"
                             btn-variant="flat"
                             btn-color="primary"
-                            @btn-click="addRow"
+                            @btn-click="planLoad"
                     /></v-card-item>
 
-                    <DataTable :value="productsDetail" tableStyle="min-width: 50rem" editMode="cell" @cell-edit-complete="allamt">
-                        <Column field="item_id" sortable header="제품번호">
-                            <template #body="slotProps">
-                                <v-icon class="cursor-pointer" @click="openProductModal(slotProps.index)" style="margin-left: 8px">
-                                    mdi-magnify
-                                </v-icon>
-                                {{ slotProps.data.item_id }}
-                            </template>
-                        </Column>
-                        <Column field="item_name" header="제품명"></Column>
-                        <Column field="qty" header="수량">
-                            <template #editor="{ data, field }">
-                                <input type="number" v-model.number="data[field]" class="custom-input" style="width: 80px" /> </template
-                        ></Column>
-                        <Column field="amt" header="금액">
-                            <template #editor="{ data, field }">
-                                <input type="number" v-model.number="data[field]" class="custom-input" style="width: 80px" /> </template
-                        ></Column>
+                    <DataTable :value="products" tableStyle="min-width: 50rem">
+                        <Column field="productId" header="제품번호"></Column>
+                        <Column field="itemName" header="제품명"></Column>
+                        <Column field="qty" header="수량"></Column>
+                        <Column field="amt" header="금액"></Column>
                         <Column field="allamt" header="총금액"></Column>
                     </DataTable>
                 </div>
@@ -146,24 +123,9 @@
         @select="onSelectItem2"
         @close="showModal2 = false"
     />
-
-    <ModalSearch
-        :visible="showModal3"
-        title="제품코드"
-        idField="item_id"
-        :columns="[
-            { key: 'item_id', label: '제품코드' },
-            { key: 'item_name', label: '제품명' }
-        ]"
-        :fetchData="fetchItems3"
-        :pageSize="5"
-        @select="onSelectItem3"
-        @close="showModal3 = false"
-    />
 </template>
 <script setup>
-import CardHeader2 from '@/components/production/card-header-btn2.vue';
-import CardHeader1 from '@/components/production/card-header-btn.vue';
+import CardHeader from '@/components/production/card-header-btn.vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -177,18 +139,10 @@ onMounted(() => {
 });
 
 const products = ref();
-const productsDetail = ref([]);
 const joinMenu = ref(false);
 const joinDate = ref(null);
 const leavMenu = ref(false);
 const leavDate = ref(null);
-
-const selectedRowIndex = ref(null);
-
-const openProductModal = (index) => {
-    selectedRowIndex.value = index;
-    showModal3.value = true;
-};
 
 const formattedJoinDate = computed(() => {
     return joinDate.value ? dayjs(joinDate.value).format('YYYY-MM-DD') : '';
@@ -199,12 +153,10 @@ const formattedLeavDate = computed(() => {
 });
 
 // 모달
-const showModal = ref(false); // 사원모달
-const showModal2 = ref(false); // 업체모달
-const showModal3 = ref(false); // 제품코드모달
+const showModal = ref(false);
+const showModal2 = ref(false);
 const selectedItem = ref(null);
 const selectedItem2 = ref(null);
-const selectedItem3 = ref(null);
 const empId = ref(null);
 const vendId = ref(null);
 
@@ -229,16 +181,6 @@ const fetchItems2 = async () => {
     }
 };
 
-const fetchItems3 = async () => {
-    try {
-        const response = await axios.get('/api/itemModal');
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        console.error('조회 실패', error);
-        return [];
-    }
-};
-
 // 선택한 값 처리
 const onSelectItem = (item) => {
     selectedItem.value = item.emp_name;
@@ -250,18 +192,8 @@ const onSelectItem2 = (item) => {
     vendId.value = item.vend_id;
 };
 
-const onSelectItem3 = (item) => {
-    if (selectedRowIndex.value !== null) {
-        const row = productsDetail.value[selectedRowIndex.value];
-        row.item_id = item.item_id;
-        row.item_name = item.item_name;
-    }
-    showModal3.value = false;
-};
-
 let orderinfo = ref({
     order_id: '',
-    ordr: '',
     emp_id: '',
     vend_id: '',
     ordr_date: '',
@@ -272,69 +204,31 @@ const isUpdated = ref(false);
 
 const orderInsert = async () => {
     let obj = {
-        ordr: orderinfo.value.ordr,
+        order_id: orderinfo.value.order_id,
         emp_id: empId.value,
         vend_id: vendId.value,
-        ordr_date: formattedJoinDate.value,
-        paprd_date: formattedLeavDate.value,
+        emp_id: empId.value,
+        vend_id: vendId.value,
+        order_date: orderinfo.value.ordr_date,
+        paprd_date: orderinfo.value.paprd_date,
         remk: orderinfo.value.remk
     };
-    console.log('보낼 테이터:', obj);
 
     try {
         const resDate = await axios.post('/api/orderInsert', obj);
         if (resDate.data.result) {
             alert('등록');
         } else {
-            alert('등록실패');
+            alert('등록실패 ㅗㅗㅗ');
         }
     } catch (err) {
         console.error('에러', err);
     }
 };
-// 상세주문
-const addRow = () => {
-    productsDetail.value.push({
-        item_id: '',
-        item_name: '',
-        qty: 0,
-        amt: 0,
-        allamt: 0
-    });
-};
-
-//합산금액
-const allamt = (event) => {
-    const { data, field, newValue } = event;
-
-    if (data[field] !== newValue) {
-        // 기존값과 입력한 값이 다르면
-        data[field] = newValue; // 바뀐 값으로 변경.
-
-        if (field === 'qty' || field === 'amt') {
-            data.allamt = data.qty * data.amt;
-        }
-    }
-};
-
-// 상세 입력 초기화
-function dataReset() {
-    orderinfo.value.ordr = null;
-    selectedItem.value = null;
-    selectedItem2.value = null;
-    joinDate.value = null;
-    leavDate.value = null;
-    orderinfo.value.remk = null;
-}
 </script>
 
 <style scoped>
 ::v-deep(.v-field__append-inner) {
     cursor: pointer;
-}
-
-.custom-input {
-    width: 80px;
-    padding: 4px;
 }
 </style>
