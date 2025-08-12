@@ -208,7 +208,7 @@
             { key: 'emp_name', label: '사원명' }
         ]"
         :fetchData="(q, p, s) => fetchModal('/api/vendorPsch', q, p, s)"
-        :pageSize="10"
+        :pageSize="5"
         @select="onSelectVendPsch"
     />
 </template>
@@ -223,9 +223,10 @@ import Column from 'primevue/column';
 import { ref, nextTick, onMounted } from 'vue';
 
 const rows = ref([]);
+// 첫 진입 시 서버에서 목록 조회
 onMounted(() => {
     onClickSearch();
-}); // 첫 진입 시 서버에서 목록 조회
+});
 
 /* ===== 상태 ===== */
 
