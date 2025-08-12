@@ -15,6 +15,11 @@ const MainRoutes = {
             name: 'badnlist',
             path: '/badnlist',
             component: () => import('@/views/qc/badn.vue')
+        },
+        {
+            name: 'iqii',
+            path: '/iqii',
+            component: () => import('@/views/qc/iqii.vue')
         }
     ]
 };

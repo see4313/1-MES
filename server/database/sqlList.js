@@ -6,6 +6,7 @@ const materials = require("./sqls/material.js");
 const inspitemSqls = require("./sqls/inspitem.js");
 const item = require("./sqls/item.js");
 const vendor = require("./sqls/vendor.js");
+const badncode = require("./sqls/badncode.js");
 
 module.exports = {
   ...boards,
@@ -16,4 +17,5 @@ module.exports = {
   ...inspitemSqls,
   ...item,
   ...vendor,
+  ...badncode,
 };
