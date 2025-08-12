@@ -23,4 +23,5 @@ module.exports = {
   ...item,
   ...production,
   ...bom,
+  ...facility,
 };
