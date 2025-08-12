@@ -17,9 +17,9 @@ const MainRoutes = {
             component: () => import('@/views/basic/vendor.vue')
         },
         {
-            name: 'Shadow',
-            path: '/ui/shadow',
-            component: () => import('@/views/components/Shadow.vue')
+            name: 'BOM관리',
+            path: '/bom',
+            component: () => import('@/views/basic/bom.vue')
         },
         {
             name: 'Alert',

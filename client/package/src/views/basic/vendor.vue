@@ -4,15 +4,15 @@
         <v-card elevation="10" class="pa-6">
             <v-card-item class="py-6 px-6">
                 <CardHeader
-                    title="거래처 관리"
-                    btn-text1="조회"
-                    btn-color1="primary"
-                    btn-variant1="flat"
-                    @btn-click1="onClickSearch"
-                    btn-text2="초기화"
-                    btn-color2="warning"
+                    title="사원 관리"
+                    btn-text2="조회"
+                    btn-color2="primary"
                     btn-variant2="flat"
-                    @btn-click2="onClickSearchReset"
+                    @btn-click2="onClickSearch"
+                    btn-text1="초기화"
+                    btn-color1="secondary"
+                    btn-variant1="flat"
+                    @btn-click1="onClickSearchReset"
                 />
             </v-card-item>
 
@@ -53,15 +53,17 @@
                 <div class="card">
                     <DataTable
                         :value="rows"
+                        v-model:selection="selectedRow"
+                        selectionMode="single"
+                        dataKey="vendId"
                         tableStyle="min-width: 50rem"
                         rowHover
                         :paginator="true"
                         :rows="5"
                         :rowsPerPageOptions="[5, 10, 20, 50]"
                         paginatorTemplate="RowsPerPageDropdown PrevPageLink PageLinks NextPageLink"
-                        @row-click="onRowClick"
                     >
-                        <Column field="vendId" header="거래처번호" />
+                        <Column field="vendId" sortable header="거래처번호" />
                         <Column field="vendName" header="거래처명" />
                         <Column field="bizNumber" header="사업자번호" />
                         <Column field="cntinfo" header="연락처" />
@@ -82,18 +84,18 @@
             <v-card-item class="py-6 px-6">
                 <CardHeader3
                     title="거래처 등록"
-                    btn-text1="등록"
-                    btn-color1="primary"
-                    btn-variant1="flat"
-                    @btn-click1="onClickCreate"
+                    btn-text3="저장"
+                    btn-color3="primary"
+                    btn-variant3="flat"
+                    @btn-click3="onClickCreate"
                     btn-text2="수정"
-                    btn-color2="success"
+                    btn-color2="warning"
                     btn-variant2="flat"
                     @btn-click2="onClickUpdate"
-                    btn-text3="신규"
-                    btn-color3="warning"
-                    btn-variant3="flat"
-                    @btn-click3="onClickReset"
+                    btn-text1="초기화"
+                    btn-color1="secondary"
+                    btn-variant1="flat"
+                    @btn-click1="onClickReset"
                 />
             </v-card-item>
 
@@ -136,25 +138,16 @@
                         </v-radio-group>
                     </v-col>
 
+                    <!-- 주소 -->
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
                             label="주소"
                             v-model="createForm.address"
                             append-inner-icon="mdi-magnify"
-                            @click:append-inner.stop="openAddressModal('create')"
-                            :rules="[req]"
-                        />
-                    </v-col>
-
-                    <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="담당자"
-                            v-model="createForm.psch"
-                            append-inner-icon="mdi-magnify"
-                            @click:append-inner.stop="openModal('psch', 'create')"
-                            :rules="[req]"
+                            @click:append-inner.stop="openAddressModal"
+                            :rules="[(v) => !!v || '필수 입력입니다.']"
+                            readonly
                         />
                     </v-col>
 
@@ -208,7 +201,7 @@
             { key: 'emp_name', label: '사원명' }
         ]"
         :fetchData="(q, p, s) => fetchModal('/api/vendorPsch', q, p, s)"
-        :pageSize="5"
+        :pageSize="10"
         @select="onSelectVendPsch"
     />
 </template>
@@ -220,7 +213,7 @@ import CardHeader3 from '@/components/production/card-header-btn3k.vue';
 import CardHeader from '@/components/production/card-header-btn2k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, watch } from 'vue';
 
 const rows = ref([]);
 onMounted(() => {
@@ -237,9 +230,9 @@ const createForm = ref({
     bizNumber: '',
     cntinfo: '',
     vendType: '',
-    useYn: 'Y',
-    address: '',
-    psch: '',
+    useYn: '',
+    address: '', // 최종 주소(기본주소 + 상세주소)
+    psch: '', // 담당자
     remark: ''
 });
 
@@ -265,10 +258,27 @@ const openModal = async (type, target) => {
     else if (type === 'psch') showVendPschModal.value = true;
 };
 
-const openAddressModal = (t) => {
-    console.log('openAddressModal', t); // TODO: 주소 검색 모달 연결
-};
+/*----주소 모달 ----*/
+async function openAddressModal() {
+    // 스크립트 없으면 로드
+    if (!window.daum?.Postcode) {
+        await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+            s.onload = resolve;
+            document.head.appendChild(s);
+        });
+    }
 
+    // 주소 검색
+    new window.daum.Postcode({
+        oncomplete: (data) => {
+            const baseAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+            const detail = prompt('상세주소를 입력하세요', '') || '';
+            createForm.value.address = detail ? `${baseAddr} ${detail}` : baseAddr;
+        }
+    }).open();
+}
 /* ===== 모달 선택 ===== */
 const onSelectVendType = (row) => {
     const val = row?.vend_type || row?.vendType || '';
@@ -313,19 +323,37 @@ const onClickSearchReset = async () => {
 };
 
 /* ===== 테이블 행 클릭 -> 수정 폼 세팅 ===== */
-const onRowClick = ({ data }) => {
+const selectedRow = ref(null);
+//폼 초기화
+function resetVendorForm() {
     createForm.value = {
-        id: data?.vendId ?? null,
-        vendName: data?.vendName ?? '',
-        bizNumber: data?.bizNumber ?? '',
-        cntinfo: data?.cntinfo ?? '',
-        vendType: data?.vendType ?? '',
-        useYn: data?.useYn ?? 'Y',
-        address: data?.address ?? '',
-        psch: data?.psch ?? '',
-        remark: data?.remark ?? data?.remk ?? ''
+        id: null,
+        vendName: '',
+        bizNumber: '',
+        cntinfo: '',
+        vendType: '',
+        useYn: '',
+        address: '',
+        psch: '',
+        remark: ''
     };
-};
+}
+
+// 선택 변경 → 폼 채우기
+watch(selectedRow, (row) => {
+    if (!row) return resetVendorForm();
+    createForm.value = {
+        id: row?.vendId ?? null,
+        vendName: row?.vendName ?? '',
+        bizNumber: row?.bizNumber ?? '',
+        cntinfo: row?.cntinfo ?? '',
+        vendType: row?.vendType ?? '',
+        useYn: row?.useYn ?? '',
+        address: row?.address ?? '',
+        psch: row?.psch ?? '',
+        remark: row?.remark ?? row?.remk ?? ''
+    };
+});
 
 /* ===== 공용 ===== */
 const req = (v) => !!v || '필수 값입니다.';
@@ -394,7 +422,7 @@ const onClickReset = async () => {
         bizNumber: '',
         cntinfo: '',
         vendType: '',
-        useYn: 'Y',
+        useYn: '',
         address: '',
         psch: '',
         remark: ''

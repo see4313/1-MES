@@ -78,15 +78,15 @@
             <v-row>
                 <v-col cols="12">
                     <div class="card">
-                        <DataTable :value="inventoryList" tableStyle="min-width: 50rem">
-                            <Column field="lot_id" header="LOT번호"></Column>
-                            <Column field="item_id" header="품목번호"></Column>
+                        <DataTable :value="inventoryList" paginator :rows="10" tableStyle="min-width: 50rem">
+                            <Column field="lot_id" sortable header="LOT번호"></Column>
+                            <Column field="item_id" sortable header="품목번호"></Column>
                             <Column field="item_name" header="품목명"></Column>
                             <Column field="item_type" header="품목구분"></Column>
                             <Column field="wh_name" header="위치"></Column>
                             <Column field="cutd_cond" header="보관조건"></Column>
                             <Column field="qty" header="수량"></Column>
-                            <Column field="vald_date" header="유효기한"></Column>
+                            <Column field="vald_date" sortable header="유효기한"></Column>
                         </DataTable>
                     </div>
                 </v-col>
