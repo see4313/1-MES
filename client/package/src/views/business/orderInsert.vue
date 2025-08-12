@@ -3,7 +3,7 @@
         <v-card elevation="10">
             <v-col cols="12" md="12">
                 <v-card-item class="py-6 px-6">
-                    <CardHeader title="주문 등록" btn-text="등록" btn-variant="flat" btn-color="primary" @btn-click="" />
+                    <CardHeader title="주문 등록" btn-text="등록" btn-variant="flat" btn-color="primary" @btn-click="orderInsert()" />
                 </v-card-item>
                 <v-row dense>
                     <v-col cols="12" sm="4">
@@ -72,7 +72,7 @@
                 <div class="order">
                     <v-card-item class="py-6 px-6">
                         <CardHeader
-                            title="주문등록"
+                            title="상세 주문등록"
                             btn-icon="mdi-plus-circle"
                             btn-text="행추가"
                             btn-variant="flat"
@@ -137,14 +137,6 @@ onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
 });
 
-function onSearchEmployee() {
-    console.log('담당자 검색 클릭!');
-}
-
-function onSearchCompany() {
-    console.log('업체명 검색 클릭!');
-}
-
 const products = ref();
 const joinMenu = ref(false);
 const joinDate = ref(null);
@@ -164,6 +156,8 @@ const showModal = ref(false);
 const showModal2 = ref(false);
 const selectedItem = ref(null);
 const selectedItem2 = ref(null);
+const empId = ref(null);
+const vendId = ref(null);
 
 // DB에서 리스트 가져오기
 const fetchItems = async () => {
@@ -189,10 +183,46 @@ const fetchItems2 = async () => {
 // 선택한 값 처리
 const onSelectItem = (item) => {
     selectedItem.value = item.emp_name;
+    empId.value = item.emp_id;
 };
 
 const onSelectItem2 = (item) => {
     selectedItem2.value = item.vend_name;
+    vendId.value = item.vend_id;
+};
+
+let orderinfo = ref({
+    order_id: '',
+    emp_id: '',
+    vend_id: '',
+    ordr_date: '',
+    paprd_date: '',
+    remk: ''
+});
+const isUpdated = ref(false);
+
+const orderInsert = async () => {
+    let obj = {
+        order_id: orderinfo.value.order_id,
+        emp_id: empId.value,
+        vend_id: vendId.value,
+        emp_id: empId.value,
+        vend_id: vendId.value,
+        order_date: orderinfo.value.ordr_date,
+        paprd_date: orderinfo.value.paprd_date,
+        remk: orderinfo.value.remk
+    };
+
+    try {
+        const resDate = await axios.post('/api/orderInsert', obj);
+        if (resDate.data.result) {
+            alert('등록');
+        } else {
+            alert('등록실패 ㅗㅗㅗ');
+        }
+    } catch (err) {
+        console.error('에러', err);
+    }
 };
 </script>
 
