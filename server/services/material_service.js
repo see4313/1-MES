@@ -43,16 +43,68 @@ const whId = async () => {
   return list;
 };
 
-// 등록
-const addNew = async (boardInfo) => {
-  // boardInfo : { 'title', : '', 'writer' : '', 'content' : '' }
-  let insertData = convertToArray(boardInfo, ["title", "writer", "content"]);
-  let resInfo = await mariadb.query("boardInsert", insertData);
+// 단위 조회
+const itemUnit = async () => {
+  let list = await mariadb.query("itemUnit");
+  return list;
+};
 
-  if (resInfo.insertId > 0) {
+// 품목 삭제
+const deleteItem = async (itemId) => {
+  let resInfo = await mariadb.query("itemDelete", [itemId]);
+
+  if (resInfo.affectedRows > 0) {
     return {
       result: true,
-      no: resInfo.insertId,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
+// 품목 수정
+const modifyItem = async (item) => {
+  let updateData = convertToArray(item, [
+    "item_name",
+    "item_type",
+    "unit",
+    "spec",
+    "cutd_cond",
+    "uon",
+    "remk",
+    "item_id",
+  ]);
+  let resInfo = await mariadb.query("itemUpdate", updateData);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
+// 품목 등록
+const addItem = async (item) => {
+  let insertData = convertToArray(item, [
+    "item_name",
+    "item_type",
+    "unit",
+    "spec",
+    "cutd_cond",
+    "uon",
+    "remk",
+  ]);
+  let resInfo = await mariadb.query("itemInsert", insertData);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
     };
   } else {
     return {
@@ -71,11 +123,14 @@ function convertToArray(obj, columns) {
 
 module.exports = {
   inventoryList,
-  addNew,
+  addItem,
   itemId,
   lotId,
   itemtype,
   cutdCond,
   whId,
   itemList,
+  modifyItem,
+  deleteItem,
+  itemUnit,
 };
