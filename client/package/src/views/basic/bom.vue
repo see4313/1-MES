@@ -328,6 +328,22 @@
         @close="showBomModal = false"
         max-width="1100px"
     />
+    <!-- 품목 선택 모달 -->
+    <ModalSearch
+        v-model:visible="showItemModal"
+        title="품목 검색"
+        idField="item_id"
+        :columns="[
+            { key: 'item_id', label: '품목번호' },
+            { key: 'item_name', label: '품목명' },
+            { key: 'usage', label: '사용량' },
+            { key: 'unit', label: '단위' },
+            { key: 'loss', label: '손실률' }
+        ]"
+        :pageSize="10"
+        :fetchData="fetchItemsForModal"
+        @select="onSelectItem"
+    />
 </template>
 <script setup>
 import ModalSearch from '@/views/commons/CommonModal.vue';
