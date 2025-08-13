@@ -111,11 +111,11 @@ const sidebarItem = [
         children: [
             {
                 title: '생산 지시',
-                to: '/instructions'
+                to: '/instruction'
             },
             {
-                title: 'About Us',
-                to: ''
+                title: '생산 지시 조회',
+                to: '/instructionlist'
             },
             {
                 title: 'Blog',
@@ -185,14 +185,12 @@ const sidebarItem = [
                 title: '대시보드',
                 to: '/facility/dashboard'
             },
+
             {
-                title: '설비목록',
-                to: '/facility/list'
+                title: '설비 관리',
+                to: '/facility/management'
             },
-            {
-                title: '설비 상태 조회',
-                to: '/facility/status'
-            },
+
             {
                 title: '점검 이력 등록',
                 to: '/facility/inspect/add'

@@ -9,6 +9,7 @@ const production = require("./sqls/production.js");
 const vendor = require("./sqls/vendor.js");
 const badncode = require("./sqls/badncode.js");
 const bom = require("./sqls/bom.js");
+const facility = require("./sqls/facility.js");
 
 module.exports = {
   ...boards,
@@ -23,4 +24,5 @@ module.exports = {
   ...item,
   ...production,
   ...bom,
+  ...facility,
 };
