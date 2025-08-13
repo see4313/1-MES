@@ -20,6 +20,11 @@ const MainRoutes = {
             name: 'iqii',
             path: '/iqii',
             component: () => import('@/views/qc/iqii.vue')
+        },
+        {
+            name: 'iqc',
+            path: '/iqc',
+            component: () => import('@/views/qc/iqc.vue')
         }
     ]
 };

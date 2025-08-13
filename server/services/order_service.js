@@ -13,6 +13,18 @@ const detailOrder = async (order_id) => {
   return list;
 };
 
+// 주문수정
+const setOrder = async () => {
+  let list = await mariadb.query("setOrder");
+  return list;
+};
+
+// 상세단건삭제
+const deleteOrder = async (detail_id) => {
+  let list = await mariadb.query("deleteOrder", [detail_id]);
+  return list;
+};
+
 // 모달(담당자)
 const empModal = async () => {
   let list = await mariadb.query("empModal");
@@ -32,16 +44,16 @@ const itemModal = async () => {
 };
 
 //등록
-const orderInsert = async (obj) => {
-  let insertData = orderToArray(obj, [
-    "ordr",
-    "emp_id",
-    "vend_id",
-    "ordr_date",
-    "paprd_date",
-    "remk",
+const orderInsert = async (data) => {
+  let resInfo = await mariadb.query("orderInsert", [
+    data.ordr,
+    data.emp_id,
+    data.vend_id,
+    data.ordr_date,
+    data.paprd_date,
+    data.remk,
+    JSON.stringify(data.details), // 프로시저에서 JSON 파싱
   ]);
-  let resInfo = await mariadb.query("orderInsert", insertData);
 
   if (resInfo.affectedRows > 0) {
     return {
@@ -69,4 +81,6 @@ module.exports = {
   orderModal,
   detailOrder,
   itemModal,
+  setOrder,
+  orderToArray,
 };

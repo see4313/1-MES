@@ -1,4 +1,3 @@
-const boards = require("./sqls/board.js");
 const employee = require("./sqls/employee.js");
 const vend = require("./sqls/vend.js");
 const orders = require("./sqls/order.js");
@@ -12,17 +11,15 @@ const bom = require("./sqls/bom.js");
 const facility = require("./sqls/facility.js");
 
 module.exports = {
-  ...boards,
   ...orders,
   ...materials,
   ...vend,
   ...employee,
   ...inspitemSqls,
   ...item,
+  ...production,
   ...vendor,
   ...badncode,
-  ...item,
-  ...production,
   ...bom,
   ...facility,
 };

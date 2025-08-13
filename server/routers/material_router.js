@@ -53,6 +53,18 @@ router.get("/itemUnit", async (req, res) => {
   res.send(list); // 응답
 });
 
+// 거래처 조회
+router.get("/selectVend", async (req, res) => {
+  let list = await materialService.selectVend();
+  res.send(list); // 응답
+});
+
+// 사원 조회
+router.get("/selectEmp", async (req, res) => {
+  let list = await materialService.selectEmp();
+  res.send(list); // 응답
+});
+
 // 품목 삭제
 router.delete("/itemDelete", async (req, res) => {
   const { item_id } = req.body;
@@ -71,6 +83,13 @@ router.put("/itemUpdate", async (req, res) => {
 router.post("/itemInsert", async (req, res) => {
   let item = req.body;
   let result = await materialService.addItem(item);
+  res.send(result);
+});
+
+// 발주 등록
+router.post("/procInsert", async (req, res) => {
+  let item = req.body;
+  let result = await materialService.procInsert(item);
   res.send(result);
 });
 

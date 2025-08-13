@@ -1,18 +1,18 @@
 const badnSelect = `
-SELECT badn_code
-     , badn_name
-     , badn_resn
-     , insp_mthd
-     , regist_de
-     , uon
-     , prcs_number
-     FROM  BADN
+SELECT BADN_CODE
+     , BADN_NAME
+     , BADN_RESN
+     , INSP_MTHD
+     , REGIST_DE
+     , UON
+FROM BADN
+ORDER BY REGIST_DE DESC
 `;
-
 const badnInsert = `
-INSERT INTO badn
-  (badn_code, badn_name, badn_resn, insp_mthd, regist_de, uon, prcs_number)
+INSERT INTO BADN
+  (BADN_CODE, BADN_NAME, BADN_RESN, INSP_MTHD, REGIST_DE, UON)
 VALUES
-  (?, ?, ?, ?, NOW(), ?, ?)`;
+  (next_code('BADN'), ?, ?, ?, NOW(), ?)
+`;
 
 module.exports = { badnSelect, badnInsert };

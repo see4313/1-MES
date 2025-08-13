@@ -108,7 +108,7 @@
                 @btn-click2="itemDelete()"
                 btn-text3="저장"
                 btn-variant3="flat"
-                btn-color3="primary"
+                btn-color3="warning"
                 @btn-click3="itemSave()"
             />
             <v-row>
@@ -120,14 +120,14 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="품목구분" v-model="itemType" variant="outlined">
+                            <v-text-field label="품목구분" v-model="itemType" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemTypeModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="단위" v-model="selectUnit" variant="outlined">
+                            <v-text-field label="단위" v-model="selectUnit" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemUnitModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -141,7 +141,7 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="보관조건" v-model="itemCutd" variant="outlined">
+                            <v-text-field label="보관조건" v-model="itemCutd" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="cutdModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -286,6 +286,8 @@ const selectItemName = ref(null); // 품목번호 선택
 const selectItemType = ref(null); // 품목구분 선택
 const selectCutd = ref(null); // 보관조건 선택
 const selectUnit = ref(null); // 단위 선택
+
+onMounted(() => {});
 
 // 조회조건 초기화
 function selectReset() {

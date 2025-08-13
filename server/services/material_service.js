@@ -49,6 +49,18 @@ const itemUnit = async () => {
   return list;
 };
 
+// 거래처 조회
+const selectVend = async () => {
+  let list = await mariadb.query("selectVend");
+  return list;
+};
+
+// 사원 조회
+const selectEmp = async () => {
+  let list = await mariadb.query("selectEmp");
+  return list;
+};
+
 // 품목 삭제
 const deleteItem = async (itemId) => {
   let resInfo = await mariadb.query("itemDelete", [itemId]);
@@ -113,6 +125,28 @@ const addItem = async (item) => {
   }
 };
 
+// 발주 등록
+const procInsert = async (data) => {
+  let resInfo = await mariadb.query("procInsert", [
+    data.vend_id,
+    data.emp_id,
+    data.reg_date,
+    data.pap_date,
+    data.remark,
+    JSON.stringify(data.details), // 프로시저에서 JSON 파싱
+  ]);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
 function convertToArray(obj, columns) {
   let result = [];
   for (let column of columns) {
@@ -133,4 +167,7 @@ module.exports = {
   modifyItem,
   deleteItem,
   itemUnit,
+  selectVend,
+  selectEmp,
+  procInsert,
 };
