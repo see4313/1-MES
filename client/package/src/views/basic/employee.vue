@@ -560,7 +560,6 @@ const onClickCreate = async () => {
         await axios.post('/api/emp', payload);
         notify('등록이 완료되었습니다.', 'success');
         await onClickSearch();
-        await onClickReset();
     } catch (e) {
         const status = e?.response?.status;
         const msg = e?.response?.data?.message;
@@ -591,7 +590,6 @@ const onClickUpdate = async () => {
         await axios.put(`/api/emp/${createForm.value.id}`, payload);
         notify('수정이 완료되었습니다.', 'success');
         await onClickSearch();
-        await onClickReset();
     } catch (e) {
         console.error(e);
         notify('수정 중 오류가 발생했습니다.', 'error');
