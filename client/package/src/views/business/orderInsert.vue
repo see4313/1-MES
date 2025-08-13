@@ -123,8 +123,7 @@
         :columns="[
             { key: 'emp_id', label: '사원번호' },
             { key: 'dept_id', label: '부서' },
-            { key: 'emp_name', label: '사원명' },
-            { key: 'status', label: '상태' }
+            { key: 'emp_name', label: '사원명' }
         ]"
         :fetchData="fetchItems"
         :pageSize="5"
@@ -204,14 +203,13 @@ const showModal2 = ref(false); // 업체모달
 const showModal3 = ref(false); // 제품코드모달
 const selectedItem = ref(null);
 const selectedItem2 = ref(null);
-const selectedItem3 = ref(null);
 const empId = ref(null);
 const vendId = ref(null);
 
 // DB에서 리스트 가져오기
 const fetchItems = async () => {
     try {
-        const response = await axios.get('/api/boards');
+        const response = await axios.get('/api/empModal');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);
@@ -271,25 +269,32 @@ let orderinfo = ref({
 const isUpdated = ref(false);
 
 const orderInsert = async () => {
-    let obj = {
-        ordr: orderinfo.value.ordr,
-        emp_id: empId.value,
-        vend_id: vendId.value,
-        ordr_date: formattedJoinDate.value,
-        paprd_date: formattedLeavDate.value,
-        remk: orderinfo.value.remk
-    };
-    console.log('보낼 테이터:', obj);
-
     try {
-        const resDate = await axios.post('/api/orderInsert', obj);
-        if (resDate.data.result) {
-            alert('등록');
+        const payload = {
+            ordr: orderinfo.value.ordr,
+            emp_id: empId.value,
+            vend_id: vendId.value,
+            ordr_date: formattedJoinDate.value,
+            paprd_date: formattedLeavDate.value,
+            remk: orderinfo.value.remk,
+            details: productsDetail.value.map((item) => ({
+                item_id: item.item_id,
+                qty: item.qty,
+                amt: item.amt
+            }))
+        };
+
+        const response = await axios.post('/api/orderInsert', payload);
+        if (response.data.result) {
+            alert('등록 성공');
+            dataReset();
+            productsDetail.value = [];
         } else {
-            alert('등록실패');
+            alert('등록 실패');
         }
     } catch (err) {
-        console.error('에러', err);
+        console.error(err);
+        alert('에러 발생');
     }
 };
 // 상세주문

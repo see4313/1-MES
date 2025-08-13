@@ -41,20 +41,10 @@
                 </v-col>
 
                 <v-col cols="12" sm="3">
-                    <v-menu v-model="joinMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
-                        <template #activator="{ props }">
-                            <v-text-field v-bind="props" v-model="joinDate" label="주문일자" readonly />
-                        </template>
-                        <v-date-picker v-model="joinDate" @change="joinMenu = false" />
-                    </v-menu>
+                    <v-text-field variant="outlined" v-model="joinDate" label="주문일자" readonly />
                 </v-col>
                 <v-col cols="12" sm="3">
-                    <v-menu v-model="leavMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
-                        <template #activator="{ props }">
-                            <v-text-field v-bind="props" v-model="leavDate" label="납기일자" readonly />
-                        </template>
-                        <v-date-picker v-model="leavDate" @change="leavMenu = false" />
-                    </v-menu>
+                    <v-text-field variant="outlined" v-model="leavDate" label="납기일자" readonly />
                 </v-col>
             </v-row>
         </v-col>
@@ -64,12 +54,49 @@
             <v-col cols="12">
                 <div class="card">
                     <h3>상세주문관리</h3>
-                    <DataTable :value="products" tableStyle="min-width: 50rem">
-                        <Column field="productId" header="제품번호"></Column>
-                        <Column field="itemName" header="제품명"></Column>
-                        <Column field="qty" header="수량"></Column>
-                        <Column field="amt" header="금액"></Column>
-                        <Column field="allamt" header="총금액"></Column>
+                    <DataTable
+                        v-model:editingRows="editingRows"
+                        :value="orderDetails"
+                        editMode="cell"
+                        dataKey="item_id"
+                        @cell-edit-complete="onCellEditComplete"
+                        tableStyle="min-width: 50rem"
+                        paginator
+                        :rows="5"
+                    >
+                        <Column field="item_id" header="제품코드"></Column>
+                        <Column field="qty" header="수량"
+                            ><template #editor="{ data, field }">
+                                <input
+                                    type="number"
+                                    v-model.number="data.qty"
+                                    @input="data.tamt = data.qty * data.amt"
+                                    class="p-inputtext p-component"
+                                    style="width: 100px; padding: 4px 8px; box-sizing: border-box"
+                                /> </template
+                        ></Column>
+                        <Column field="amt" header="금액"
+                            ><template #editor="{ data, field }">
+                                <input
+                                    type="number"
+                                    v-model.number="data[field]"
+                                    @input="data.tamt = data.qty * data.amt"
+                                    class="p-inputtext p-component"
+                                    style="width: 100px; padding: 4px 8px; box-sizing: border-box"
+                                /> </template
+                        ></Column>
+                        <Column field="tamt" header="총금액"></Column>
+                        <Column :rowEditor="true" style="width: 100px" />
+                        <Column header="삭제" style="width: 80px; text-align: center">
+                            <template #body="{ data }">
+                                <button
+                                    style="color: red; border: none; background: none; cursor: pointer"
+                                    @click="deleteOrderDetail(data.detail_id)"
+                                >
+                                    삭제
+                                </button>
+                            </template>
+                        </Column>
                     </DataTable>
                 </div>
             </v-col>
@@ -108,6 +135,7 @@ onMounted(() => {
 });
 
 const products = ref([]);
+const orderDetails = ref([]);
 const joinMenu = ref(false);
 const joinDate = ref(null);
 const leavMenu = ref(false);
@@ -120,17 +148,23 @@ const remk = ref(null);
 const showModal = ref(false); // 주문모달
 const selectOrder = ref(null); // 주문선택
 
+const editingRows = ref([]);
+
 watch(selectOrder, async (newOrderId) => {
     if (newOrderId) {
         try {
-            const response = await axios.get(`/api/orderDetails/${newOrderId}`);
-            products.value = response.data;
+            const params = {
+                order_id: newOrderId
+            };
+            const response = await axios.get(`/api/detailOrder`, { params });
+            orderDetails.value = response.data;
+            console.log(orderDetails.value);
         } catch (error) {
-            console.error('주문상세 불러오기 실 패', error);
-            products.value = [];
+            console.error('주문상세 불러오기 실패', error);
+            orderDetails.value = [];
         }
     } else {
-        products.value = [];
+        orderDetails.value = [];
     }
 });
 
@@ -149,8 +183,8 @@ const onSelectItem = (item) => {
     orderName.value = item.ordr;
     empName.value = item.emp_name;
     vendName.value = item.vend_id;
-    joinDate.value = item.ordr_date;
-    leavDate.value = item.paprd_date;
+    joinDate.value = dayjs(item.ordr_date).format('YYYY-MM-DD');
+    leavDate.value = dayjs(item.paprd_date).format('YYYY-MM-DD');
     remk.value = item.remk;
 };
 
@@ -161,6 +195,25 @@ const formattedJoinDate = computed(() => {
 const formattedLeavDate = computed(() => {
     return leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : '';
 });
+
+const onCellEditComplete = (e) => {
+    const { data, newValue, field } = e;
+
+    if (field === 'qty' || field === 'amt') {
+        data.tamt = data.qty * data.amt;
+    }
+};
+
+const deleteOrderDetail = async (itemId) => {
+    console.log(itemId);
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try {
+        await axios.delete('/api/deleteOrder', { data: { detail_id: itemId } });
+        orderDetails.value = orderDetails.value.filter((item) => item.detail_id !== itemId);
+    } catch (error) {
+        console.error('삭제 실패', error);
+    }
+};
 </script>
 
 <style scoped>

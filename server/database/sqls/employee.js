@@ -29,7 +29,7 @@ const insertEmp = `
   INSERT INTO EMPLOYEE
   (EMP_ID,EMP_NAME, DEPT_ID, PHONE, JOIN_CO, LEAVDORM, STATUS, PERM, REMK)
 VALUES
-  (next_code('E'), ?, (SELECT DEPT_ID FROM DEPARTMENT WHERE DEPT_NAME = ? LIMIT 1), ?, ?, ?, ?, ?,?);
+  (next_code('EMP'), ?, (SELECT DEPT_ID FROM DEPARTMENT WHERE DEPT_NAME = ? LIMIT 1), ?, ?, ?, ?, ?,?);
 `;
 
 //수정 UPDATE (id 기준 수정)
@@ -52,7 +52,7 @@ const selectStatus = `
          C.CMMN_NAME AS status
   FROM CMMN_CODE C
   WHERE C.GROUP_ID = 'EMP_STATUS'
-    AND \`UON\` = 'Y'
+    AND UON = 'Y'
   ORDER BY C.CMMN_ID
   LIMIT ? OFFSET ?;
 `;
@@ -63,7 +63,7 @@ const selectPerm = `
          C.CMMN_NAME AS perm_name
   FROM CMMN_CODE C
   WHERE C.GROUP_ID = 'EMP_PERM'
-    AND \`USE\` = 'Y'
+    AND UON = 'Y'
   ORDER BY C.CMMN_ID
   LIMIT ? OFFSET ?;
 `;

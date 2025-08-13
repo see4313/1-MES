@@ -17,10 +17,9 @@ module.exports = {
   ...employee,
   ...inspitemSqls,
   ...item,
+  ...production,
   ...vendor,
   ...badncode,
-  ...item,
-  ...production,
   ...bom,
   ...facility,
 };
