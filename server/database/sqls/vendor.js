@@ -8,7 +8,7 @@ SELECT
   V.BIZ_NUMBER AS bizNumber,
   V.CNTINFO    AS cntinfo,
   COALESCE(C.CMMN_NAME, V.VEND_TYPE) AS vendType,  -- 코드명 없으면 코드값
-  V.\`USE\`      AS useYn,
+  V.UON      AS useYn,
   V.ADDRESS    AS address,
   V.PSCH       AS psch,
   V.REMK       AS remark
@@ -45,7 +45,7 @@ WHERE 1=1
 // ===== 등록 =====
 const VENDOR_INSERT = `
 INSERT INTO VENDOR
-  (VEND_ID, VEND_NAME, BIZ_NUMBER, CNTINFO, VEND_TYPE, \`USE\`, ADDRESS, PSCH, REMK)
+  (VEND_ID, VEND_NAME, BIZ_NUMBER, CNTINFO, VEND_TYPE, UON, ADDRESS, PSCH, REMK)
 VALUES
   (next_code('VD'), ?, ?, ?, ?, ?, ?, ?, ?)
 `;
@@ -57,7 +57,7 @@ UPDATE VENDOR
        BIZ_NUMBER = ?,    
        CNTINFO    = ?,    
        VEND_TYPE  = ?,   
-       \`USE\`      = ?,  
+       UON      = ?,  
        ADDRESS    = ?,   
        PSCH       = ?,    
        REMK       = ?    
@@ -71,7 +71,7 @@ SELECT
   C.CMMN_NAME AS vend_type
 FROM CMMN_CODE C
 WHERE C.GROUP_ID = 'VENDOR_TYPE'
-  AND \`USE\` = 'Y'
+  AND UON = 'Y'
   AND (COALESCE(?, '') = '' 
        OR C.CMMN_ID   LIKE CONCAT('%', ?, '%') 
        OR C.CMMN_NAME LIKE CONCAT('%', ?, '%'))
@@ -85,7 +85,7 @@ SELECT
   V.VEND_ID   AS vend_id,
   V.VEND_NAME AS vend_name
 FROM VENDOR V
-WHERE \`USE\` = 'Y'
+WHERE UON = 'Y'
   AND (COALESCE(?, '') = '' 
        OR V.VEND_ID   LIKE CONCAT('%', ?, '%') 
        OR V.VEND_NAME LIKE CONCAT('%', ?, '%'))

@@ -35,20 +35,34 @@ const orderList = (filters) => {
 
 // 주문상세
 const detailOrder = `
-SELECT detail_id,
-       order_id,
-       item_id,
-       qty,
-       amt,
+SELECT ordt.detail_id,
+       ordt.order_id,
+       tem.item_id,
+       tem.spec,
+       tem.unit, 
+       ordt.qty,
+       ordt.amt,
        (qty * amt) as tamt
-FROM ORDER_DETAIL
-WHERE order_id = ?
+FROM ORDER_DETAIL ordt JOIN ITEM tem
+						ON ordt.item_id = tem.item_id
+JOIN ORDER_INFO ord
+                ON ord.order_id = ordt.order_id
+WHERE ordt.order_id = ?
 `;
 
-//주문등록
-const orderInsert = `
-INSERT INTO ORDER_INFO(order_id, ordr, emp_id, vend_id, ordr_date, paprd_date, remk)
-VALUES (next_code('OD'), ?,?,?,?,?,?)
+// 주문, 주문상세수정
+const setOrder = `
+UPDATE  ORDER_DETAIL 
+SET qty = ?,
+    amt = ?
+WHERE order_id = ?
+AND DETAIL_ID = ?
+`;
+
+// 주문상세 단건 삭제
+const deleteOrder = `
+DELETE FROM ORDER_DETAIL
+WHERE detail_id = ?
 `;
 
 // 모달(담당자)
@@ -91,9 +105,10 @@ WHERE item_type = '완제품'
 
 module.exports = {
   orderList,
-  orderInsert,
   empModal,
   orderModal,
   detailOrder,
   itemModal,
+  setOrder,
+  deleteOrder,
 };

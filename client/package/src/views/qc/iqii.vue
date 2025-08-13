@@ -18,20 +18,15 @@
                                 @click="openLotModal"
                             />
                         </v-col>
-
-                        <!-- 품목명 (비활성) -->
                         <v-col cols="12" md="3">
                             <h3>품목명</h3>
                             <v-text-field v-model="itemName" variant="outlined" disabled />
                         </v-col>
-
-                        <!-- 품목번호 (비활성) -->
                         <v-col cols="12" md="3">
                             <h3>품목번호</h3>
                             <v-text-field v-model="itemId" variant="outlined" disabled />
                         </v-col>
                     </v-row>
-
                     <v-row>
                         <v-col cols="12" class="d-flex" style="gap: 8px">
                             <v-btn color="primary" variant="flat" @click="onSearch">조회</v-btn>
@@ -42,8 +37,6 @@
             </v-form>
         </v-card-item>
     </v-card>
-
-    <!-- LOT번호 모달 -->
     <ModalSearch
         :visible="lotIdModal"
         title="LOT 검색"

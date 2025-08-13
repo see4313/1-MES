@@ -4,7 +4,7 @@
         <v-card elevation="10" class="pa-6">
             <v-card-item class="py-6 px-6">
                 <CardHeader
-                    title="사원 관리"
+                    title="거래처 관리"
                     btn-text2="조회"
                     btn-color2="primary"
                     btn-variant2="flat"
@@ -19,13 +19,7 @@
             <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="거래처번호"
-                            v-model="searchForm.vendId"
-                            append-inner-icon="mdi-magnify"
-                            @click:append-inner.stop="openModal('vendId', 'search')"
-                        />
+                        <v-text-field variant="outlined" label="거래처번호" v-model="searchForm.vendId" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -179,7 +173,7 @@
         @select="onSelectVendType"
     />
 
-    <ModalSearch
+    <!-- <ModalSearch
         v-model:visible="showVendIdModal"
         title="거래처번호 검색"
         idField="vend_id"
@@ -190,7 +184,7 @@
         :fetchData="(q, p, s) => fetchModal('/api/vendorId', q, p, s)"
         :pageSize="10"
         @select="onSelectVendId"
-    />
+    /> -->
 
     <ModalSearch
         v-model:visible="showVendPschModal"
@@ -408,7 +402,6 @@ const onClickUpdate = async () => {
         await axios.put(`/api/vendor/${createForm.value.id}`, { ...buildPayload() });
         notify('수정이 완료되었습니다.', 'success');
         await onClickSearch();
-        await onClickReset();
     } catch (e) {
         notify(e?.response?.data?.message || '수정 중 오류가 발생했습니다.', 'error');
     }

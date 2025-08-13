@@ -75,7 +75,7 @@ const sidebarItem = [
             },
             {
                 title: '자재 발주등록',
-                to: ''
+                to: '/mt-003'
             },
             {
                 title: '자재 입고등록',
@@ -87,7 +87,7 @@ const sidebarItem = [
             },
             {
                 title: '재고조회',
-                to: '/mt-003'
+                to: '/mt-002'
             },
             {
                 title: '반품관리',
@@ -111,11 +111,11 @@ const sidebarItem = [
         children: [
             {
                 title: '생산 지시',
-                to: '/instructions'
+                to: '/instruction'
             },
             {
-                title: 'About Us',
-                to: ''
+                title: '생산 지시 조회',
+                to: '/instructionlist'
             },
             {
                 title: 'Blog',
@@ -155,6 +155,10 @@ const sidebarItem = [
             },
             {
                 title: '입고 품질 검사 등록',
+                to: '/iqc'
+            },
+            {
+                title: '입고 품질 검사 조회',
                 to: '/iqii'
             },
             {
