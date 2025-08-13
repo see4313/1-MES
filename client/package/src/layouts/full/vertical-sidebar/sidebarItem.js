@@ -155,7 +155,7 @@ const sidebarItem = [
             },
             {
                 title: '입고 품질 검사 등록',
-                to: ''
+                to: '/iqc'
             },
             {
                 title: '입고 품질 검사 조회',
