@@ -123,8 +123,7 @@
         :columns="[
             { key: 'emp_id', label: '사원번호' },
             { key: 'dept_id', label: '부서' },
-            { key: 'emp_name', label: '사원명' },
-            { key: 'status', label: '상태' }
+            { key: 'emp_name', label: '사원명' }
         ]"
         :fetchData="fetchItems"
         :pageSize="5"
@@ -211,7 +210,7 @@ const vendId = ref(null);
 // DB에서 리스트 가져오기
 const fetchItems = async () => {
     try {
-        const response = await axios.get('/api/boards');
+        const response = await axios.get('/api/empModal');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);

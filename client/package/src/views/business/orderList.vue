@@ -18,15 +18,6 @@
                 </v-col>
                 <v-col cols="12" sm="4">
                     <v-sheet class="pa-2 ma-2">
-                        <v-text-field variant="outlined" label="주문 검색" v-model="selectorder" readonly>
-                            <template #append-inner>
-                                <v-icon @click="showModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
-                            </template>
-                        </v-text-field>
-                    </v-sheet>
-                </v-col>
-                <v-col cols="12" sm="4">
-                    <v-sheet class="pa-2 ma-2">
                         <v-menu v-model="leavMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
                             <template #activator="{ props }">
                                 <v-text-field
@@ -58,7 +49,11 @@
             >
                 <Column field="order_id" header="주문코드"></Column>
                 <Column field="ordr" header="주문명"></Column>
-                <Column field="ordr_date" header="주문일자"></Column>
+                <Column field="ordr_date" header="주문일자">
+                    <template #body="{ data }">
+                        {{ dayjs(data.ordr_date).format('YYYY-MM-DD') }}
+                    </template></Column
+                >
                 <Column field="emp_name" header="담당자"></Column>
                 <Column field="vend_name" header="업체명"></Column>
                 <Column field="st" header="상태"></Column>
@@ -76,6 +71,8 @@
                 <Column field="order_id" header="주문코드"></Column>
                 <Column field="item_id" header="제품코드"></Column>
                 <Column field="qty" header="수량"></Column>
+                <Column field="spec" header="규격"></Column>
+                <Column field="unit" header="단위"></Column>
                 <Column field="amt" header="금액"></Column>
                 <Column field="tamt" header="총금액"></Column>
             </DataTable>
@@ -97,22 +94,6 @@
         @select="onSelectItem"
         @close="showModal1 = false"
     />
-    <!-- 주문 모달 -->
-    <ModalSearch
-        :visible="showModal2"
-        title="주문 검색"
-        idField="order_id"
-        :columns="[
-            { key: 'order_id', label: '주문번호' },
-            { key: 'vend_name', label: '업체명' },
-            { key: 'emp_name', label: '담당자' },
-            { key: 'ordr_date', label: '주문일자' }
-        ]"
-        :fetchData="fetchItems2"
-        :pageSize="5"
-        @select="onSelectItem2"
-        @close="showModal2 = false"
-    />
 </template>
 <script setup>
 import DataTable from 'primevue/datatable';
@@ -129,10 +110,9 @@ const selectOrder = ref(null); // 선택된 행
 const orderList = ref(); // 조회목록
 const detailOrder = ref(); // 조회목록
 const showModal1 = ref(false); // 담당자모달
-const showModal2 = ref(false); // 주문모달
 const selectemp = ref(null); // 담당자 선택
+const selectempId = ref(null);
 const selectorder = ref(null); // 주문선택
-const joinDate = ref(null);
 const leavMenu = ref(false);
 const leavDate = ref(null);
 
@@ -144,7 +124,7 @@ const formattedLeavDate = computed(() => {
 const Select = async () => {
     try {
         const params = {
-            emp_id: selectemp.value,
+            emp_id: selectempId.value,
             order_id: selectorder.value,
             ordr_date: formattedLeavDate.value
         };
@@ -179,23 +159,10 @@ const fetchItems = async () => {
     }
 };
 
-const fetchItems2 = async () => {
-    try {
-        const response = await axios.get('/api/orderModal');
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        console.error('조회 실패', error);
-        return [];
-    }
-};
-
 // 모달에서 선택한 값 처리 onSelectItem
 const onSelectItem = (item) => {
-    selectemp.value = item.emp_id;
-};
-
-const onSelectItem2 = (item) => {
-    selectorder.value = item.order_id;
+    selectemp.value = item.emp_name;
+    selectempId.value = item.emp_id;
 };
 </script>
 

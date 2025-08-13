@@ -17,6 +17,19 @@ router.get("/detailOrder", async (req, res) => {
   res.send(list);
 });
 
+//주문상세수정
+router.put("/setOrder", async (req, res) => {
+  let list = await orderService.setOrder();
+  res.send(list); // 응답
+});
+
+// 상세 단건삭제
+router.delete("/deleteOrder", async (req, res) => {
+  const { detail_id } = req.body;
+  let list = await orderService.deleteOrder(detail_id);
+  res.send(list); // 응답
+});
+
 // 모달(담당자)
 router.get("/empModal", async (req, res) => {
   let list = await orderService.empModal();
