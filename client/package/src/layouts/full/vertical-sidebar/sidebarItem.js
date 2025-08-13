@@ -111,11 +111,11 @@ const sidebarItem = [
         children: [
             {
                 title: '생산 지시',
-                to: '/instructions'
+                to: '/instruction'
             },
             {
-                title: 'About Us',
-                to: ''
+                title: '생산 지시 조회',
+                to: '/instructionlist'
             },
             {
                 title: 'Blog',
