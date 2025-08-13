@@ -4,7 +4,7 @@ import CardHeader from '@/components/production/card-header.vue'
 </script>
 
 <template>
-  <v-card elevation="10">
+  <v-card elevation="10" >
     <v-card-item class="py-6 px-6">
       <v-container fluid>
         <h1>test</h1>
