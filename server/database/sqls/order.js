@@ -103,6 +103,11 @@ FROM ITEM
 WHERE item_type = '완제품'
 `;
 
+// 등록
+const orderInsert = `
+CALL order_procedure(?,?,?,?,?,?,?)
+`;
+
 module.exports = {
   orderList,
   empModal,
@@ -111,4 +116,5 @@ module.exports = {
   itemModal,
   setOrder,
   deleteOrder,
+  orderInsert,
 };
