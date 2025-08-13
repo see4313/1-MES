@@ -27,5 +27,15 @@ export function useFormatDate() {
         return `${y}-${mm}-${dd}`;
     };
 
-    return { formatDate, toISO };
+    const minDate = () => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate());
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    };
+
+    return { formatDate, toISO, minDate };
 }
