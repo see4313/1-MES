@@ -209,7 +209,7 @@ VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?)
 
 // 발주 등록
 const procInsert = `
-CALL proc_insert(?, ?, ?, ?, ?, ?);
+CALL proc_insert(?, ?, ?, ?, ?, ?)
 `;
 
 module.exports = {
