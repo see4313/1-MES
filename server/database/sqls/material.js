@@ -157,6 +157,37 @@ FROM   WAREHOUSE
 WHERE  uon = 'Y'
 `;
 
+// 거래처 모달용
+const selectVend = `
+SELECT vend_id
+     , biz_number
+     , vend_name
+     , vend_type
+     , address
+     , cntinfo
+     , psch
+     , uon
+     , remk
+FROM   VENDOR
+WHERE  uon = 'Y'
+`;
+
+// 사원 모달용
+const selectEmp = `
+SELECT emp_id
+     , emp_name
+     , status
+     , join_co
+     , leavdorm
+     , perm
+     , dept_id
+     , phone
+     , remk
+FROM   EMPLOYEE
+WHERE  status = '재직'
+AND    dept_id = 'D002'
+`;
+
 // 품목 삭제
 const itemDelete = `
 DELETE FROM ITEM
@@ -176,6 +207,11 @@ INSERT INTO ITEM (item_id, item_name, item_type, unit, spec, cutd_cond, uon, rem
 VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?)
 `;
 
+// 발주 등록
+const procInsert = `
+CALL proc_insert(?, ?, ?, ?, ?, ?);
+`;
+
 module.exports = {
   inventoryList,
   itemList,
@@ -188,4 +224,7 @@ module.exports = {
   itemUpdate,
   itemDelete,
   itemUnit,
+  selectVend,
+  selectEmp,
+  procInsert,
 };
