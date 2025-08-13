@@ -1,6 +1,6 @@
 <!-- instruction.vue -->
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onBeforeMount } from 'vue';
 import axios from 'axios';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import CardHeader from '@/components/production/card-header-btn.vue';
@@ -9,12 +9,30 @@ import { useFormatDate } from '@/composables/useFormatDate';
 // Date Format
 const { formatDate, minDate } = useFormatDate();
 
-const productType = ref('semi'); // 상품 유형
+const selectProductType = ref("semi"); // 선택된 상품 유형
 const visibleProductModal = ref(false); // 상품 선택 모달창 표시 여부
 const selectProductList = ref([]); // 선택된 상품
-const goalDatePicker = ref(false); // Date Picker 표시 여부
+const goalDatePicker = ref(false); // 목표 생산 일자 Date Picker 표시 여부
 const goalDate = ref(null); // 목표 생산 일자
+const startDatePicker = ref(false); // 생산 시작 일자 Date Picker 표시 여부
+const startDate = ref(null); // 생산 시작 일자
 const remk = ref(''); // 비고
+const snackOpen = ref(false); // 스낵바 표시 여부
+const snackMessage = ref(''); // 스낵바 메시지
+const snackColor = ref(''); // 스낵바 색상
+
+// 스낵바
+const snackBar = (message, color) => {
+    snackMessage.value = message;
+    snackColor.value = color;
+    snackOpen.value = true;
+};
+
+// 상품 유형 
+const productType = ref([
+  { key: "반제품", value : "semi" },
+  { key: "완제품", value : "finish" }
+]);
 
 // 품목 계획 Load
 const planLoad = () => {
@@ -22,7 +40,7 @@ const planLoad = () => {
 };
 
 // 품목 유형 변경시 선택된 상품 init
-watch(productType, () => {
+watch(selectProductType, () => {
   selectProductList.value = [];
 });
 
@@ -42,7 +60,7 @@ watch(
 // DB에서 선택된 품목 유형에 맞게 리스트를 불러옴
 const getProductList = async () => {
   try {
-    const { data } = await axios.get(`/api/itemlist/${productType.value}`);
+    const { data } = await axios.get(`/api/itemlist/${selectProductType.value}`);
     const set = excludeSet.value;
     return (data ?? []).filter(it => !set.has(it.itemId));
   } catch (e) {
@@ -74,16 +92,20 @@ const onSelectProduct = (item) => {
 // 생산 지시 버튼을 누를 경우
 const instructionsBtn = async () => {
     if(selectProductList.value.length == 0) {
-        alert("생산 지시할 품목을 선택해주세요.");
-        return;
+      snackBar("생산 지시할 품목을 선택해주세요.", 'warning');
+      return;
     }
     if(selectProductList.value.some(product => product.quantity < 1)) {
-        alert("지시 수량을 다시 한번 확인하여 주세요.");
-        return;
+      snackBar("지시 수량을 다시 한번 확인하여 주세요.", 'warning');
+      return;
+    }
+    if(!startDate.value) {
+      snackBar("생산 시작 일자를 선택하여주세요.", 'warning');
+      return;
     }
     if(!goalDate.value) {
-        alert("목표 생산 일자를 입력하여주세요.");
-        return;
+      snackBar("목표 생산 일자를 선택하여주세요.", 'warning');
+      return;
     }
 
     const detail = [];
@@ -99,16 +121,18 @@ const instructionsBtn = async () => {
       const result 
               = await axios
                 .post('api/instructions', {
-                  itemType: productType.value,
+                  itemType: selectProductType.value,
                   goalDate: formatDate(goalDate.value, '-'),
+                  startDate: formatDate(startDate.value, '-'),
                   remark: remk.value,
                   details: detail
                 });
       if (result.data.affectedRows > 0) {
         selectProductList.value = [];
+        startDate.value = null;        
         goalDate.value = null;
         remk.value = null;
-        alert("등록 성공");
+        snackBar("성공적으로 생산 지시하였습니다.", 'success');
       }
     } catch (e) {
         console.error(e);
@@ -130,10 +154,10 @@ const instructionsBtn = async () => {
           @btn-click="planLoad"
         />
 
-        <v-chip-group v-model="productType" mandatory selected-class="active">
-          <v-chip value="semi" label pill variant="tonal" size="small">반제품</v-chip>
-          <v-chip value="finish" label pill variant="tonal" size="small">완제품</v-chip>
+        <v-chip-group v-model="selectProductType" mandatory selected-class="active">
+          <v-chip v-for="type in productType" :key=type.value :value=type.value label pill variant="tonal" size="small">{{ type.key }}</v-chip>
         </v-chip-group>
+        
 
         <v-table>
           <thead>
@@ -141,6 +165,8 @@ const instructionsBtn = async () => {
               <th class="text-center font-weight-bold">품목 번호</th>
               <th class="text-center font-weight-bold">품목 유형</th>
               <th class="text-center font-weight-bold">품목명</th>
+              <th class="text-center font-weight-bold">단위</th>
+              <th class="text-center font-weight-bold">규격</th>
               <th class="text-center font-weight-bold">지시 수량</th>
               <th class="text-center font-weight-bold">삭제</th>
             </tr>
@@ -150,7 +176,9 @@ const instructionsBtn = async () => {
               <td class="text-center">{{ product.itemId }}</td>
               <td class="text-center">{{ product.itemType }}</td>
               <td class="text-center">{{ product.itemName }}</td>
-              <td class="text-center" style="width: 120px;">
+              <td class="text-center">{{ product.unit }}</td>
+              <td class="text-center">{{ product.spec }}</td>
+              <td class="text-center">
                 <v-text-field
                   v-model.number="product.quantity"
                   type="number"
@@ -178,6 +206,36 @@ const instructionsBtn = async () => {
           </v-btn>
         </v-row>
 
+          <v-menu
+            v-model="startDatePicker"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            location="bottom"
+            :offset="8"
+            min-width="auto"
+          >
+          <template #activator="{ props }">
+            <v-text-field
+              v-bind="props"
+              :model-value="formatDate(startDate, '-')"
+              label="생산 시작 일자"
+              append-inner-icon="mdi-calendar"
+              readonly
+              variant="outlined"
+              density="compact"
+              clearable
+              @click:clear="startDate = null"
+            />
+          </template>
+
+          <v-date-picker
+            v-model="startDate"
+            :min="minDate()"
+            :max="goalDate"
+            @update:model-value="startDatePicker = false"
+          />
+        </v-menu>
+
         <v-menu
           v-model="goalDatePicker"
           :close-on-content-click="false"
@@ -202,7 +260,7 @@ const instructionsBtn = async () => {
 
           <v-date-picker
             v-model="goalDate"
-            :min="minDate()"
+            :min="startDate || minDate()"
             @update:model-value="goalDatePicker = false"
           />
         </v-menu>
@@ -237,6 +295,11 @@ const instructionsBtn = async () => {
     @select="onSelectProduct"
     @close="visibleProductModal = false"
   />
+
+  <v-snackbar v-model="snackOpen" :timeout="2000" :color="snackColor" location="top right" rounded="pill">
+    {{ snackMessage }}
+    <template #actions><v-btn variant="text" @click="snackOpen = false">닫기</v-btn></template>
+  </v-snackbar>
 </template>
 
 <style scoped>
