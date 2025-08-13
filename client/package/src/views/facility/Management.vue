@@ -11,7 +11,7 @@
                 btn-text2="조회"
                 btn-variant2="flat"
                 btn-color2="primary"
-                @btn-click2="select"
+                @btn-click2="select()"
             />
             <v-row>
                 <v-col cols="12" md="12">
@@ -51,8 +51,8 @@
         <v-card-item class="py-6 px-6">
             <CardHeader title="설비목록" />
             <DataTable
-                v-model:selection="selectItemList"
-                :value="itemList"
+                v-model:selection="selectfacilityList"
+                :value="facilityList"
                 selectionMode="single"
                 :metaKeySelection="false"
                 dataKey="item_id"
@@ -61,17 +61,16 @@
                 tableStyle="min-width: 50rem"
                 class="cursor-pointer"
             >
-                <Column field="item_id" sortable header="설비ID" />
-                <Column field="item_name" header="설비명" />
-                <Column field="item_type" header="설비유형" />
-                <Column field="cutd_cond" header="보유 수" />
-                <Column field="unit" header="담당자" />
-                <Column field="buy_date" header="구매일자" />
-                <Column field="opt_temp" header="적정 온도(C)" />
-                <Column field="opt_humidity" header="적정 습도(%)" />
-                <Column field="opt_rpm" header="적정 RPM" />
-                <Column field="opt_power" header="적정 전력량(KW)" />
-                <Column field="opt_power" header="비고" />
+                <Column field="facility_id" sortable header="설비ID" />
+                <Column field="facility_nm" header="설비명" />
+                <Column field="facility_type" header="설비유형" />
+                <Column field="emp_id" header="담당자" />
+                <Column field="purchase_dt" header="구매일자" />
+                <Column field="temp_val" header="적정 온도(C)" />
+                <Column field="humidity_val" header="적정 습도(%)" />
+                <Column field="rpm_val" header="적정 RPM" />
+                <Column field="power_val" header="적정 전력량(KW)" />
+                <Column field="remk" header="비고" />
             </DataTable>
         </v-card-item>
     </v-card>
@@ -194,8 +193,8 @@ const todayStr = new Date().toISOString().split('T')[0];
 const selectItemName = ref('');
 const selectItemType = ref('');
 const selectCutd = ref('');
-const itemList = ref([]);
-const selectItemList = ref(null);
+const facilityList = ref([]);
+const selectfacilityList = ref(null);
 
 /** 등록폼 */
 const itemId = ref('');
@@ -240,29 +239,29 @@ function dataReset() {
 /** 목록 조회 */
 async function select() {
     const params = {
-        item_name: selectItemName.value,
-        item_type: selectItemType.value,
-        cutd: selectCutd.value
+        facility_id: selectItemName.value,
+        facility_type: selectItemType.value,
+        emp_id: selectCutd.value
     };
     const res = await axios.get('/api/facilityList', { params });
-    itemList.value = Array.isArray(res.data) ? res.data : [];
+    facilityList.value = Array.isArray(res.data) ? res.data : [];
 }
 
 /** 목록 클릭 → 폼에 반영 */
-watch(selectItemList, (val) => {
-    if (!val) return;
-    itemId.value = val.item_id || '';
-    itemName.value = val.item_name || '';
-    itemType.value = val.item_type || '';
-    itemSpec.value = val.cutd_cond || '';
-    itemCutd.value = val.unit || '';
-    buyDate.value = val.buy_date || '';
-    optimalTemp.value = val.opt_temp || '';
-    optimalHumidity.value = val.opt_humidity || '';
-    optimalRpm.value = val.opt_rpm || '';
-    optimalPower.value = val.opt_power || '';
-    itemRemk.value = val.remk || '';
-});
+// watch(selectItemList, (val) => {
+//     if (!val) return;
+//     itemId.value = val.item_id || '';
+//     itemName.value = val.item_name || '';
+//     itemType.value = val.item_type || '';
+//     itemSpec.value = val.cutd_cond || '';
+//     itemCutd.value = val.unit || '';
+//     buyDate.value = val.buy_date || '';
+//     optimalTemp.value = val.opt_temp || '';
+//     optimalHumidity.value = val.opt_humidity || '';
+//     optimalRpm.value = val.opt_rpm || '';
+//     optimalPower.value = val.opt_power || '';
+//     itemRemk.value = val.remk || '';
+// });
 
 /** 모달 데이터 가져오기 */
 const fetchItemNames = async () => (await axios.get('/api/itemNames')).data || [];
