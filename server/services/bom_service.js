@@ -1,43 +1,38 @@
-const { query } = require("../database/mapper");
-const { BOM_LIST, BOM_DETAILS } = require("../database/sqls/bom");
+const mapper = require("../database/mapper");
 
-console.log("[BOM SQL LOADED]", {
-  hasList: typeof BOM_LIST === "string",
-  hasDetails: typeof BOM_DETAILS === "string",
-});
-
-function buildListParams(q = {}) {
-  const bom_number = q.bom_number || "";
-  const item_name = q.item_name || "";
-  const item_id = q.item_id || "";
-  const ver = q.ver || "";
-  const use_yn = q.use_yn || "";
-
-  // 10개(각 조건 2개씩) 순서 주의!
-  return [
-    bom_number,
-    bom_number,
-    item_name,
-    item_name,
-    item_id,
-    item_id,
-    ver,
-    ver,
-    use_yn,
-    use_yn,
-  ];
+function normalizeRows(result) {
+  if (Array.isArray(result)) {
+    if (Array.isArray(result[0]) && result.length === 2) return result[0];
+    return result;
+  }
+  if (result && Array.isArray(result.rows)) return result.rows;
+  return [];
 }
 
-async function listBom(filters = {}) {
-  const params = buildListParams(filters);
-  console.log("[SERVICE] listBom params:", params);
-  return query(BOM_LIST, params);
-}
+exports.listBom = async (filters = {}) => {
+  const raw = await mapper.query("selectBomList", filters);
+  const rows = normalizeRows(raw);
+  return rows;
+};
 
-async function getBomDetails(bomNumber) {
-  if (!bomNumber) throw new Error("bomNumber required");
-  console.log("[SERVICE] getBomDetails:", bomNumber);
-  return query(BOM_DETAILS, [bomNumber]);
-}
+exports.getBomDetails = async (bomNumber) => {
+  console.log("[Service] getBomDetails called with bomNumber:", bomNumber);
 
-module.exports = { listBom, getBomDetails };
+  try {
+    // mapper.query에 쿼리 이름과 함께 파라미터를 올바르게 전달합니다.
+    // 대부분의 mapper 구현은 단일 파라미터를 '?'에 바인딩할 때 객체 대신 값을 직접 받습니다.
+    // { bomNumber } 객체 대신 bomNumber 변수를 직접 전달합니다.
+    const queryResult = await mapper.query("selectBomDetails", bomNumber);
+
+    console.log("[Service] Raw query result:", queryResult);
+
+    const rows = normalizeRows(queryResult);
+
+    console.log("[Service] Normalized rows:", rows);
+
+    return rows;
+  } catch (error) {
+    console.error("[Service] Error in getBomDetails:", error);
+    return []; // 오류 발생 시 빈 배열 반환
+  }
+};
