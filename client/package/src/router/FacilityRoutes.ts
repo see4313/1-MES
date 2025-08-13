@@ -17,6 +17,12 @@ const FacilityRoutes: RouteRecordRaw[] = [
                 name: 'FacilityList',
                 component: () => import('@/views/facility/List.vue')
             },
+
+            {
+                path: 'management',
+                name: 'FacilityManagement',
+                component: () => import('@/views/facility/Management.vue')
+            },
             {
                 path: 'status',
                 name: 'FacilityStatus',

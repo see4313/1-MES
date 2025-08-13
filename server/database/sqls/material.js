@@ -124,34 +124,23 @@ WHERE  1=1
 
 // 품목구분 모달용
 const itemType = `
-SELECT lot_id
-     , item_id
-     , wh_id
-     , crea_date
-     , vald_date
-     , entebord_qty
-     , dlivy_qty
-     , bnt
-     , status
-     , remk
-FROM   INVENTORY
-WHERE  1=1
+SELECT cmmn_id, group_id, cmmn_name, uon
+FROM   CMMN_CODE
+WHERE  group_id = 'ITEM_TYPE'
 `;
 
 // 보관조건 모달용
 const cutdCond = `
-SELECT lot_id
-     , item_id
-     , wh_id
-     , crea_date
-     , vald_date
-     , entebord_qty
-     , dlivy_qty
-     , bnt
-     , status
-     , remk
-FROM   INVENTORY
-WHERE  1=1
+SELECT cmmn_id, group_id, cmmn_name, uon
+FROM   CMMN_CODE
+WHERE  group_id = 'CUTD_COND'
+`;
+
+// 단위 모달용
+const itemUnit = `
+SELECT cmmn_id, group_id, cmmn_name, uon
+FROM   CMMN_CODE
+WHERE  group_id = 'ITEM_UNIT'
 `;
 
 // 창고번호 모달용
@@ -168,6 +157,25 @@ FROM   WAREHOUSE
 WHERE  uon = 'Y'
 `;
 
+// 품목 삭제
+const itemDelete = `
+DELETE FROM ITEM
+WHERE item_id = ?
+`;
+
+// 품목 수정
+const itemUpdate = `
+UPDATE ITEM
+SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?
+WHERE  item_id = ?
+`;
+
+// 품목 등록
+const itemInsert = `
+INSERT INTO ITEM (item_id, item_name, item_type, unit, spec, cutd_cond, uon, remk)
+VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?)
+`;
+
 module.exports = {
   inventoryList,
   itemList,
@@ -176,4 +184,8 @@ module.exports = {
   itemType,
   cutdCond,
   whId,
+  itemInsert,
+  itemUpdate,
+  itemDelete,
+  itemUnit,
 };

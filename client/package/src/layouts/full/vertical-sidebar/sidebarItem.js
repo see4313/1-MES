@@ -15,15 +15,15 @@ const sidebarItem = [
 
             {
                 title: 'BOM관리',
-                to: ''
+                to: '/bom'
             },
             {
                 title: '창고관리',
-                to: ''
+                to: '/warehouse'
             },
             {
                 title: '공정정보',
-                to: ''
+                to: '/process'
             }
         ]
     },
@@ -114,8 +114,8 @@ const sidebarItem = [
                 to: '/instructions'
             },
             {
-                title: '생산 지시 조회',
-                to: '/instructionslist'
+                title: 'About Us',
+                to: ''
             },
             {
                 title: 'Blog',
@@ -189,14 +189,12 @@ const sidebarItem = [
                 title: '대시보드',
                 to: '/facility/dashboard'
             },
+
             {
-                title: '설비목록',
-                to: '/facility/list'
+                title: '설비 관리',
+                to: '/facility/management'
             },
-            {
-                title: '설비 상태 조회',
-                to: '/facility/status'
-            },
+
             {
                 title: '점검 이력 등록',
                 to: '/facility/inspect/add'
