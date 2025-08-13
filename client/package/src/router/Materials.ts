@@ -20,6 +20,11 @@ const MainRoutes = {
             name: 'mt-003',
             path: '/mt-003',
             component: () => import('@/views/materials/MT-003.vue')
+        },
+        {
+            name: 'mt-004',
+            path: '/mt-004',
+            component: () => import('@/views/materials/MT-004.vue')
         }
     ]
 };
