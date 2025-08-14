@@ -13,24 +13,29 @@ const selectItemList = (type) => {
       item_id     AS itemId,
       item_name   AS itemName,
       item_type   AS itemType,
-      unit        AS unit,
-      spec        AS spec,
+      unit,
+      spec,
       cutd_cond   AS cutdCond,
       safe_qty    AS safeQty,
       exp_date    AS expDate,
-      uon         AS uon,
-      remk        AS remk
+      uon,
+      remk
     from ITEM
-    where 1=1
+    where uon = 'Y'
   `;
 
   const params = [];
 
+  if (type === 'notmaterial') {
+    sql += ` and item_type <> ?`;
+    params.push("원재료");
+  }
   if (typeMap[type]) {
     sql += ` and item_type = ?`;
     params.push(typeMap[type]);
-  }
+  } 
   
+  console.log(sql, params);
   return { sql, params };
 };
 

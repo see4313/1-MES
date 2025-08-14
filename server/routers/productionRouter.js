@@ -6,9 +6,10 @@ const itemService = require("../services/itemService");
 const productionService = require("../services/productionService.js");
 
 // getItemList -- 품목 리스트
-router.get("/itemlist/:type", async (req, res) =>{
 
-  // type = 'null' : all, semi : 반제품, finish : 완재품
+router.get("/prod/itemlist/:type", async (req, res) =>{
+
+  // type = 'notmaterial' : 원재료 빼고 , semi : 반제품, finish : 완재품, 
   const { type } = req.params;
   try {
     const result = await itemService.getItemList(type);
@@ -18,8 +19,17 @@ router.get("/itemlist/:type", async (req, res) =>{
   }
 });
 
+router.get("/prod/instructionlist", async (req, res) => {
+  try {
+    const result = await productionService.getInstructionList();
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+})
+
 // addProdInstructions -- 생산 지시
-router.post("/instructions", async (req, res) => {
+router.post("/prod/instructions", async (req, res) => {
   try {
     const { body } = req;
     const result = await productionService.addProdInstructions(body);

@@ -22,9 +22,6 @@ const goalDate = ref(null); // 목표 생산 일자
 const startDatePicker = ref(false); // 생산 시작 일자 Date Picker 표시 여부
 const startDate = ref(null); // 생산 시작 일자
 const remk = ref(''); // 비고
-const snackOpen = ref(false); // 스낵바 표시 여부
-const snackMessage = ref(''); // 스낵바 메시지
-const snackColor = ref(''); // 스낵바 색상
 
 // 상품 유형 
 const productType = ref([
@@ -58,8 +55,9 @@ watch(
 // DB에서 선택된 품목 유형에 맞게 리스트를 불러옴
 const getProductList = async () => {
   try {
-    const { data } = await axios.get(`/api/itemlist/${selectProductType.value}`);
+    const { data } = await axios.get(`/api/prod/itemlist/${selectProductType.value}`);
     const set = excludeSet.value;
+    // console.log(data);
     return (data ?? []).filter(it => !set.has(it.itemId));
   } catch (e) {
     console.error(e);
@@ -68,13 +66,12 @@ const getProductList = async () => {
 };
 
 // 선택된 품목 삭제
-const deleteProduct = (id) => {
+const removeProduct = (id) => {
   const i = selectProductList.value.findIndex(product => product.itemId === id);
   if (i !== -1) selectProductList.value.splice(i, 1);
 };
 
 // 품목 선택시 중복 체크
-
 const excludeIds = computed(() => selectProductList.value.map(p => p.itemId));
 const excludeSet = computed(() => new Set(excludeIds.value));
 
@@ -105,6 +102,9 @@ const instructionsBtn = async () => {
     snackBar("목표 생산 일자를 선택하여주세요.", 'warning');
     return;
   }
+  if(!confirm("등록하시겠습니까?")) {
+    return;
+  }
 
   const detail = [];
 
@@ -118,7 +118,7 @@ const instructionsBtn = async () => {
   try {
     const result 
       = await axios
-        .post('api/instructions', {
+        .post('api/prod/instructions', {
           itemType: selectProductType.value,
           goalDate: formatDate(goalDate.value, '-'),
           startDate: formatDate(startDate.value, '-'),
@@ -146,34 +146,45 @@ const instructionsBtn = async () => {
           title="생산 지시"
           btn-icon="mdi-plus-circle"
           btn-text="생산 계획 불러오기"
-          btn-variant="flat"
+          btn-variant="outlined"
           btn-color="primary"
           @btn-click="planLoad"
         />
 
         <v-chip-group v-model="selectProductType" mandatory selected-class="active">
-          <v-chip v-for="type in productType" :key="type.value" :value="type.value" label pill variant="tonal" size="small">{{ type.key }}</v-chip>
+          <v-chip v-for="type in productType" :key="type.value" :value="type.value" label pill variant="outlined" size="small">{{ type.key }}</v-chip>
         </v-chip-group>
         
-        <v-table>
+        <v-table class="fixed-table">
+            <colgroup>
+              <col style="width: 14%" />  <!-- 품목 번호 -->
+              <col style="width: 10%" />  <!-- 품목 유형 -->
+              <col style="width: 22%" />  <!-- 품목명 -->
+              <col style="width: 14%" />  <!-- 규격 -->
+              <col style="width: 10%" />  <!-- 단위 -->
+              <col style="width: 20%" />  <!-- 지시 수량 (입력) -->
+              <col style="width: 10%" />  <!-- 삭제 -->
+            </colgroup>
           <thead>
             <tr>
               <th class="text-center font-weight-bold">품목 번호</th>
               <th class="text-center font-weight-bold">품목 유형</th>
               <th class="text-center font-weight-bold">품목명</th>
-              <th class="text-center font-weight-bold">단위</th>
               <th class="text-center font-weight-bold">규격</th>
+              <th class="text-center font-weight-bold">단위</th>
               <th class="text-center font-weight-bold">지시 수량</th>
               <th class="text-center font-weight-bold">삭제</th>
             </tr>
           </thead>
+
           <tbody>
             <tr v-for="product in selectProductList" :key="product.itemId">
-              <td class="text-center">{{ product.itemId }}</td>
-              <td class="text-center">{{ product.itemType }}</td>
-              <td class="text-center">{{ product.itemName }}</td>
-              <td class="text-center">{{ product.unit }}</td>
-              <td class="text-center">{{ product.spec }}</td>
+              <td class="text-center"><div class="cell">{{ product.itemId }}</div></td>
+              <td class="text-center"><div class="cell">{{ product.itemType }}</div></td>
+              <td class="text-center"><div class="cell">{{ product.itemName }}</div></td>
+              <td class="text-center"><div class="cell">{{ product.spec }}</div></td>
+              <td class="text-center"><div class="cell">{{ product.unit }}</div></td>
+
               <td class="text-center">
                 <v-text-field
                   v-model.number="product.quantity"
@@ -185,10 +196,13 @@ const instructionsBtn = async () => {
                   density="compact"
                   :disabled="!product.itemId"
                   placeholder="0"
+                  class="qty-input"
+                  style="min-width: 0;"
                 />
               </td>
+
               <td class="text-center">
-                <v-btn color="error" @click="deleteProduct(product.itemId)">
+                <v-btn color="error" class="del-btn" @click="removeProduct(product.itemId)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </td>
@@ -197,7 +211,7 @@ const instructionsBtn = async () => {
         </v-table>
 
         <v-row justify="center" class="my-4">
-          <v-btn append-icon="mdi-plus-circle" color="primary" @click="visibleProductModal = true">
+          <v-btn append-icon="mdi-plus-circle" variant="outlined" color="primary" @click="visibleProductModal = true">
             품목 추가
           </v-btn>
         </v-row>
@@ -300,4 +314,43 @@ const instructionsBtn = async () => {
   background-color: #000;
   color: #fff;
 }
+
+.fixed-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.fixed-table .cell {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-center {
+  max-width: 160px;
+}
+
+.fixed-table .td {
+  max-width: 160px;
+}
+
+.qty-input {
+  min-width: 0 !important;
+  max-width: 160px;
+}
+
+.qty-input .v-field {
+  width: 100%;
+}
+
+.qty-input .v-field__input {
+  min-width: 0;
+}
+
+.del-btn {
+  min-width: 0;    
+  padding: 6px 10px; 
+}
+
 </style>
