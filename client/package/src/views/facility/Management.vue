@@ -187,6 +187,9 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import { useSnackBar } from '@/composables/useSnackBar.js';
+import { useFormatDate } from '@/composables/useFormatDate';
+
+const { formatDate } = useFormatDate();
 
 // Snack Bar
 const { snackOpen, snackMessage, snackColor } = useSnackBar();
@@ -325,7 +328,7 @@ const itemSave = async () => {
         facility_nm: itemName.value,
         facility_type: selectItemTypeId.value,
         emp_id: selectCutdId.value,
-        purchase_dt: buyDate.value,
+        purchase_dt: formatDate(buyDate.value, '-'),
         temp_val: optimalTemp.value,
         humidity_val: optimalHumidity.value,
         rpm_val: optimalRpm.value,
