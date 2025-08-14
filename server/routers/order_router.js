@@ -10,6 +10,13 @@ router.get("/orderList", async (req, res) => {
   res.send(list); // 응답
 });
 
+// 등록
+router.post("/orderInsert", async (req, res) => {
+  let board = req.body;
+  let result = await orderService.orderInsert(board);
+  res.send(result);
+});
+
 // 주문상세
 router.get("/detailOrder", async (req, res) => {
   const order_id = req.query.order_id;
@@ -17,9 +24,10 @@ router.get("/detailOrder", async (req, res) => {
   res.send(list);
 });
 
-//주문상세수정
+//주문수정
 router.put("/setOrder", async (req, res) => {
-  let list = await orderService.setOrder();
+  let board = req.body;
+  let list = await orderService.setOrder(board);
   res.send(list); // 응답
 });
 
@@ -46,13 +54,6 @@ router.get("/orderModal", async (req, res) => {
 router.get("/itemModal", async (req, res) => {
   let list = await orderService.itemModal();
   res.send(list); // 응답
-});
-
-// 등록
-router.post("/orderInsert", async (req, res) => {
-  let board = req.body;
-  let result = await orderService.orderInsert(board);
-  res.send(result);
 });
 
 // 가장 마지막에 존재해야 함
