@@ -5,6 +5,11 @@ import axios from 'axios';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import CardHeader from '@/components/production/card-header-btn.vue';
 import { useFormatDate } from '@/composables/useFormatDate';
+import SnackBar from '@/components/shared/SnackBar.vue'; 
+import { useSnackBar } from '@/composables/useSnackBar.js';
+
+// Snack Bar
+const { snackBar } = useSnackBar();
 
 // Date Format
 const { formatDate, minDate } = useFormatDate();
@@ -20,13 +25,6 @@ const remk = ref(''); // 비고
 const snackOpen = ref(false); // 스낵바 표시 여부
 const snackMessage = ref(''); // 스낵바 메시지
 const snackColor = ref(''); // 스낵바 색상
-
-// 스낵바
-const snackBar = (message, color) => {
-    snackMessage.value = message;
-    snackColor.value = color;
-    snackOpen.value = true;
-};
 
 // 상품 유형 
 const productType = ref([
@@ -46,15 +44,15 @@ watch(selectProductType, () => {
 
 // 품목 수량 값이 없거나 0보다 작을 경우 자동으로 0으로 init
 watch(
-    () => selectProductList.value.map(product => product.quantity),
-    () => {
-        for (const product of selectProductList.value) {
-            const qty = product.quantity;
-            if (qty < 0 || qty == '') {
-                product.quantity = 0;
-            }
-        }    
-    }
+  () => selectProductList.value.map(product => product.quantity),
+  () => {
+    for (const product of selectProductList.value) {
+      const qty = product.quantity;
+      if (qty < 0 || qty == '') {
+        product.quantity = 0;
+      }
+    }    
+  }
 );
 
 // DB에서 선택된 품목 유형에 맞게 리스트를 불러옴
@@ -91,53 +89,52 @@ const onSelectProduct = (item) => {
 
 // 생산 지시 버튼을 누를 경우
 const instructionsBtn = async () => {
-    if(selectProductList.value.length == 0) {
-      snackBar("생산 지시할 품목을 선택해주세요.", 'warning');
-      return;
-    }
-    if(selectProductList.value.some(product => product.quantity < 1)) {
-      snackBar("지시 수량을 다시 한번 확인하여 주세요.", 'warning');
-      return;
-    }
-    if(!startDate.value) {
-      snackBar("생산 시작 일자를 선택하여주세요.", 'warning');
-      return;
-    }
-    if(!goalDate.value) {
-      snackBar("목표 생산 일자를 선택하여주세요.", 'warning');
-      return;
-    }
+  if (selectProductList.value.length == 0) {
+    snackBar("생산 지시할 품목을 선택해주세요.", 'warning');
+    return;
+  }
+  if (selectProductList.value.some(product => product.quantity < 1)) {
+    snackBar("지시 수량을 다시 한번 확인하여 주세요.", 'warning');
+    return;
+  }
+  if (!startDate.value) {
+    snackBar("생산 시작 일자를 선택하여주세요.", 'warning');
+    return;
+  }
+  if (!goalDate.value) {
+    snackBar("목표 생산 일자를 선택하여주세요.", 'warning');
+    return;
+  }
 
-    const detail = [];
+  const detail = [];
 
-    for (const product of selectProductList.value) {
-      detail.push({
-        item_id: String(product.itemId),
-        goal_qty: Number(product.quantity)
-      });
+  for (const product of selectProductList.value) {
+    detail.push({
+      item_id: String(product.itemId),
+      goal_qty: Number(product.quantity)
+    });
+  }
+
+  try {
+    const result 
+      = await axios
+        .post('api/instructions', {
+          itemType: selectProductType.value,
+          goalDate: formatDate(goalDate.value, '-'),
+          startDate: formatDate(startDate.value, '-'),
+          remark: remk.value,
+          details: detail
+        });
+    if (result.data.affectedRows > 0) {
+      selectProductList.value = [];
+      startDate.value = null;        
+      goalDate.value = null;
+      remk.value = null;
+      snackBar("성공적으로 생산 지시하였습니다.", 'success');
     }
-
-    try {
-      const result 
-              = await axios
-                .post('api/instructions', {
-                  itemType: selectProductType.value,
-                  goalDate: formatDate(goalDate.value, '-'),
-                  startDate: formatDate(startDate.value, '-'),
-                  remark: remk.value,
-                  details: detail
-                });
-      if (result.data.affectedRows > 0) {
-        selectProductList.value = [];
-        startDate.value = null;        
-        goalDate.value = null;
-        remk.value = null;
-        snackBar("성공적으로 생산 지시하였습니다.", 'success');
-      }
-    } catch (e) {
-        console.error(e);
-    }
-
+  } catch (e) {
+    console.error(e);
+  }
 };
 </script>
 
@@ -155,10 +152,9 @@ const instructionsBtn = async () => {
         />
 
         <v-chip-group v-model="selectProductType" mandatory selected-class="active">
-          <v-chip v-for="type in productType" :key=type.value :value=type.value label pill variant="tonal" size="small">{{ type.key }}</v-chip>
+          <v-chip v-for="type in productType" :key="type.value" :value="type.value" label pill variant="tonal" size="small">{{ type.key }}</v-chip>
         </v-chip-group>
         
-
         <v-table>
           <thead>
             <tr>
@@ -206,14 +202,14 @@ const instructionsBtn = async () => {
           </v-btn>
         </v-row>
 
-          <v-menu
-            v-model="startDatePicker"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            location="bottom"
-            :offset="8"
-            min-width="auto"
-          >
+        <v-menu
+          v-model="startDatePicker"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          location="bottom"
+          :offset="8"
+          min-width="auto"
+        >
           <template #activator="{ props }">
             <v-text-field
               v-bind="props"
@@ -296,10 +292,7 @@ const instructionsBtn = async () => {
     @close="visibleProductModal = false"
   />
 
-  <v-snackbar v-model="snackOpen" :timeout="2000" :color="snackColor" location="top right" rounded="pill">
-    {{ snackMessage }}
-    <template #actions><v-btn variant="text" @click="snackOpen = false">닫기</v-btn></template>
-  </v-snackbar>
+  <SnackBar />
 </template>
 
 <style scoped>

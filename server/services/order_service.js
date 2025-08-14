@@ -44,16 +44,16 @@ const itemModal = async () => {
 };
 
 //등록
-const orderInsert = async (obj) => {
-  let insertData = orderToArray(obj, [
-    "ordr",
-    "emp_id",
-    "vend_id",
-    "ordr_date",
-    "paprd_date",
-    "remk",
+const orderInsert = async (data) => {
+  let resInfo = await mariadb.query("orderInsert", [
+    data.ordr,
+    data.emp_id,
+    data.vend_id,
+    data.ordr_date,
+    data.paprd_date,
+    data.remk,
+    JSON.stringify(data.details), // 프로시저에서 JSON 파싱
   ]);
-  let resInfo = await mariadb.query("orderInsert", insertData);
 
   if (resInfo.affectedRows > 0) {
     return {
@@ -82,5 +82,5 @@ module.exports = {
   detailOrder,
   itemModal,
   setOrder,
-  deleteOrder,
+  orderToArray,
 };

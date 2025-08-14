@@ -123,6 +123,7 @@
                     <DataTable
                         v-model:selection="selectedRow"
                         :value="detailRows"
+                        :loading="detailsLoading"
                         dataKey="bom_detail_no"
                         tableStyle="min-width: 50rem"
                         selectionMode="single"
@@ -134,7 +135,7 @@
                     >
                         <Column field="item_id" header="품목번호" sortable />
                         <Column field="item_name" header="품목명" />
-                        <Column field="usage" header="사용량" />
+                        <Column field="usage_qty" header="규격" />
                         <Column field="unit" header="단위" />
                         <Column field="loss" header="손실률" />
                     </DataTable>
@@ -268,7 +269,9 @@
     <!-- ===== 스낵바 ===== -->
     <v-snackbar v-model="snackOpen" :timeout="2000" :color="snackColor" location="top right" rounded="pill">
         {{ snackMessage }}
-        <template #actions><v-btn variant="text" @click="snackOpen = false">닫기</v-btn></template>
+        <template #actions>
+            <v-btn variant="text" @click="snackOpen = false">닫기</v-btn>
+        </template>
     </v-snackbar>
 
     <!-- ===== 공통 모달 ===== -->
@@ -286,25 +289,14 @@
             { key: 'start_date', label: '시작일' },
             { key: 'end_date', label: '종료일' },
             { key: 'use_yn', label: '사용여부' },
-            { key: 'remark', label: '비고' }
+            { key: 'remk', label: '비고' }
         ]"
         :fetchData="fetchBomList"
         :pageSize="10"
         @select="onSelectBom"
+        search-placeholder="BOM번호/품목명으로 검색"
     />
-    <!--bom 번호-->
-    <!-- <ModalSearch
-        v-model:visible="showBomModal1"
-        title="BOM번호 검색"
-        idField="bom_number1"
-        :columns="[
-            { key: 'bom_number', label: 'BOM번호' },
-            { key: 'item_name', label: '품목명' }
-        ]"
-        :fetchData="fetchBomList1"
-        :pageSize="10"
-        @select="onSelectBom1"
-    /> -->
+
     <!-- 품목 검색(단일) -->
     <ModalSearch
         v-model:visible="showItemModal"
@@ -361,25 +353,13 @@ const createForm = ref({
 /* ===== 날짜 표시/프록시 ===== */
 const formattedStartDate = computed(() => (searchForm.value.startDate ? dayjs(searchForm.value.startDate).format('YYYY-MM-DD') : ''));
 const formattedEndDate = computed(() => (searchForm.value.endDate ? dayjs(searchForm.value.endDate).format('YYYY-MM-DD') : ''));
-const searchStartProxy = computed({
-    get: () => searchForm.value.startDate,
-    set: (v) => (searchForm.value.startDate = asDate(v))
-});
-const searchEndProxy = computed({
-    get: () => searchForm.value.endDate,
-    set: (v) => (searchForm.value.endDate = asDate(v))
-});
+const searchStartProxy = computed({ get: () => searchForm.value.startDate, set: (v) => (searchForm.value.startDate = asDate(v)) });
+const searchEndProxy = computed({ get: () => searchForm.value.endDate, set: (v) => (searchForm.value.endDate = asDate(v)) });
 
 const formattedStartDate1 = computed(() => (createForm.value.startDate ? dayjs(createForm.value.startDate).format('YYYY-MM-DD') : ''));
 const formattedEndDate1 = computed(() => (createForm.value.endDate ? dayjs(createForm.value.endDate).format('YYYY-MM-DD') : ''));
-const createStartProxy = computed({
-    get: () => createForm.value.startDate,
-    set: (v) => (createForm.value.startDate = asDate(v))
-});
-const createEndProxy = computed({
-    get: () => createForm.value.endDate,
-    set: (v) => (createForm.value.endDate = asDate(v))
-});
+const createStartProxy = computed({ get: () => createForm.value.startDate, set: (v) => (createForm.value.startDate = asDate(v)) });
+const createEndProxy = computed({ get: () => createForm.value.endDate, set: (v) => (createForm.value.endDate = asDate(v)) });
 
 /* ===== 오버레이/모달 ===== */
 const startMenu = ref(false);
@@ -387,7 +367,6 @@ const endMenu = ref(false);
 const startMenu1 = ref(false);
 const endMenu1 = ref(false);
 
-const showBomModal1 = ref(false);
 const showBomModal = ref(false);
 const showItemModal = ref(false);
 const itemModalTarget = ref('search'); // 'search' | 'create'
@@ -404,6 +383,7 @@ const openBomSearchModal = async () => {
     await closeAllOverlays();
     showBomModal.value = true;
 };
+
 const openItemModal = async (t = 'search') => {
     await closeAllOverlays();
     itemModalTarget.value = t;
@@ -411,56 +391,86 @@ const openItemModal = async (t = 'search') => {
 };
 
 /* ===== 목록/모달 데이터 ===== */
-
-// BOM 검색 모달 데이터 로딩
-
-const cacheBomAll = ref(null);
-
-// keyword(q)로 BOM번호/품목명 동시에 LIKE 검색, 나머지 필터도 옵션
-const fetchBomList = async (q = '') => {
-    const { data } = await axios.get('/api/bom', {
-        params: {
-            bom_number: q || undefined,
-            item_name: q || undefined
-            // 필요 시 추가 필터
-            // item_id: 'ITM001',
-            // ver: 'A1',
-            // use_yn: 'Y',
-        }
-    });
-    return Array.isArray(data) ? data : (data?.rows ?? data?.items ?? []);
-};
-
-// 상세
-
-/* ===== 디테일 테이블 ===== */
 const detailRows = ref([]);
 const detailsLoading = ref(false);
 
-const fetchBomDetails = async (bomNumber) => {
-    const { data } = await axios.get(`/api/bom/${encodeURIComponent(bomNumber)}/details`);
-    return Array.isArray(data) ? data : (data?.rows ?? data?.items ?? []);
+// BOM 목록 (모달에서 사용)
+const fetchBomList = async (q = '') => {
+    try {
+        const { data } = await axios.get('/api/bom', {
+            params: {
+                bom_number: q || searchForm.value.bomNumber || undefined,
+                item_name: q || searchForm.value.itemName || undefined,
+                item_id: searchForm.value.itemId || undefined,
+                ver: searchForm.value.ver || undefined,
+                use_yn: searchForm.value.useYn || undefined,
+                start_date_from: toDateStr(searchForm.value.startDate) || undefined,
+                end_date_to: toDateStr(searchForm.value.endDate) || undefined
+            }
+        });
+        return unwrap(data);
+    } catch (e) {
+        console.error('API 호출 중 오류가 발생했습니다:', e);
+        // 오류 발생 시, 사용자에게 알림을 표시하고 빈 배열 반환
+        notify(e?.response?.data?.message || 'BOM 목록을 불러오는 중 오류가 발생했습니다.', 'error');
+        return [];
+    }
 };
 
-/* ===== 모달 선택 ===== */
-async function onSelectBom(row) {
+// 모달 선택 → 검색폼 채우고 상세 조회
+const onSelectBom = async (row) => {
     if (!row) {
         showBomModal.value = false;
         return;
     }
 
     const bomNumber = row.bom_number ?? row.bomNumber ?? '';
-    searchForm.value.bomNumber = bomNumber;
-    searchForm.value.itemId = row.item_id ?? row.itemId ?? '';
-    searchForm.value.itemName = row.item_name ?? row.itemName ?? '';
-    searchForm.value.ver = row.ver ?? '';
-    searchForm.value.useYn = row.use_yn ?? row.useYn ?? '';
-    searchForm.value.startDate = row.start_date ? asDate(row.start_date) : null;
-    searchForm.value.endDate = row.end_date ? asDate(row.end_date) : null;
+
+    // 검색 폼에 정보 채우기
+    searchForm.value = {
+        bomNumber,
+        itemId: row.item_id ?? row.itemId ?? '',
+        itemName: row.item_name ?? row.itemName ?? '',
+        ver: row.ver ?? '',
+        startDate: row.start_date ? asDate(row.start_date) : null,
+        endDate: row.end_date ? asDate(row.end_date) : null,
+        useYn: row.use_yn ?? row.useYn ?? ''
+    };
 
     showBomModal.value = false;
-    await fetchBomDetails(bomNumber);
-}
+
+    // BOM 상세 정보 조회
+    detailsLoading.value = true;
+    try {
+        // bom_service.js의 getBomDetails 함수를 호출
+        const rows = await fetchBomDetails(bomNumber);
+        console.log('[UI] details rows =', rows.length);
+        // 조회된 상세 정보를 테이블에 할당
+        detailRows.value = rows;
+    } catch (e) {
+        notify(e?.response?.data?.message || '상세 조회 중 오류가 발생했습니다.', 'error');
+    } finally {
+        detailsLoading.value = false;
+    }
+};
+
+// bom.vue 내부에 추가된 함수
+const fetchBomDetails = async (bomNumber) => {
+    // API 호출로 BOM 상세 정보를 가져옵니다.
+    // bomNumber를 API 경로에 포함하여 호출합니다.
+    const { data } = await axios.get(`/api/bom/${encodeURIComponent(bomNumber)}/details`);
+    return unwrap(data);
+};
+
+const fetchItemList = async (q = '') => {
+    try {
+        const { data } = await axios.get('/api/item', { params: { item_name: q || undefined } });
+        return unwrap(data);
+    } catch (e) {
+        console.warn('[fetchItemList] API 조정 필요?', e?.message || e);
+        return [];
+    }
+};
 
 const onSelectItem = (row) => {
     const id = row?.item_id ?? '';
@@ -514,32 +524,13 @@ const onClickUpdate = async () => {
     }
 };
 
-/* ===== 행 선택 → 폼 채우기 ===== */
-const selectedRow = ref(null);
-watch(selectedRow, (row) => {
-    if (!row) return resetCreateForm();
-    createForm.value = {
-        id: row?.bom_detail_no ?? null,
-        itemId: row?.item_id ?? '',
-        itemName: row?.item_name ?? '',
-        usage: row?.usage ?? '',
-        unit: row?.unit ?? '',
-        loss: row?.loss ?? '',
-        ver: row?.ver ?? '',
-        startDate: row?.start_date ? asDate(row.start_date) : null,
-        endDate: row?.end_date ? asDate(row.end_date) : null,
-        useYn: row?.use_yn ?? '',
-        remark: row?.remark ?? row?.remk ?? ''
-    };
-});
-
 /* ===== 초기화 ===== */
 function resetCreateForm() {
     createForm.value = {
         id: null,
         itemId: '',
         itemName: '',
-        usage: '',
+        usage_qty: '',
         unit: '',
         loss: '',
         ver: '',

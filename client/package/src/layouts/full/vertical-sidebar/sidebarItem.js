@@ -79,7 +79,7 @@ const sidebarItem = [
             },
             {
                 title: '자재 입고등록',
-                to: ''
+                to: '/mt-004'
             },
             {
                 title: '자재 출고관리',
