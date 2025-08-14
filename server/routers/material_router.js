@@ -93,5 +93,26 @@ router.post("/procInsert", async (req, res) => {
   res.send(result);
 });
 
+// 발주 조회
+router.get("/selectProc", async (req, res) => {
+  let params = req.query.regist_date;
+  let list = await materialService.selectProc(params);
+  res.send(list); // 응답
+});
+
+// 발주 상세
+router.get("/selectProcDetail", async (req, res) => {
+  let params = req.query.procId;
+  let list = await materialService.selectProcDetail(params);
+  res.send(list); // 응답
+});
+
+// 입고 처리
+router.post("/receive", async (req, res) => {
+  let item = req.body;
+  let result = await materialService.receive(item);
+  res.send(result);
+});
+
 // 가장 마지막에 존재해야 함
 module.exports = router;
