@@ -1,105 +1,68 @@
 // server/services/facility_service.js
-// 가정: ../database/mapper 의 query 함수가
-//   rows = await mapper.query(sqlKey, params)
-// 형태로 rows(Array)를 반환한다고 가정.
-// COUNT 쿼리는 rows[0].total 로 접근.
-// 필요 시 mapper 경로/시그니처는 실제 프로젝트에 맞게 조정.
+const mariadb = require("../database/mapper.js");
 
-const mapper = require("../database/mapper");
-
+// 설비목록 조회
 const facilityList = async (filters) => {
-  let list = await mariadb.query("facilityList", filters);
-  return list;
+  return await mariadb.query("facilityList", filters);
 };
 
-function toPaging({ page = 1, size = 10 }) {
-  const p = Math.max(1, Number(page) || 1);
-  const s = Math.max(1, Number(size) || 10);
-  const offset = (p - 1) * s;
-  return { page: p, size: s, limit: s, offset };
-}
+// 설비명 목록 (모달)
+const facilityNames = async () => {
+  return await mariadb.query("facilityNames");
+};
 
-async function list({ page = 1, size = 10 } = {}) {
-  const { limit, offset, page: p, size: s } = toPaging({ page, size });
+// 설비유형 목록 (모달)
+const facilityTypes = async () => {
+  return await mariadb.query("facilityTypes");
+};
 
-  const rows = await mapper.query("SELECT_FACILITY_LIST", [limit, offset]);
-  const countRows = await mapper.query("COUNT_FACILITY");
-  const total = countRows?.[0]?.total ?? 0;
+// 담당자 목록 (모달)
+const facilityUsers = async () => {
+  return await mariadb.query("facilityUsers");
+};
 
-  return {
-    items: rows,
-    page: p,
-    size: s,
-    total,
-    totalPages: Math.ceil(total / s),
-  };
-}
-
-async function getById(id) {
-  const rows = await mapper.query("SELECT_FACILITY_ONE", [id]);
-  return rows?.[0] || null;
-}
-
-async function create({
-  facility_code,
-  facility_name,
-  facility_type,
-  use_yn = "Y",
-}) {
-  // 필수값 검증(필요 시 강화)
-  if (!facility_code || !facility_name) {
-    const err = new Error("facility_code, facility_name는 필수입니다.");
-    err.status = 400;
-    throw err;
-  }
-  const result = await mapper.query("INSERT_FACILITY", [
-    facility_code,
-    facility_name,
-    facility_type || null,
-    use_yn,
+// 설비 등록
+const facilityInsert = async (data) => {
+  return await mariadb.query("facilityInsert", [
+    data.facility_nm,
+    data.facility_type,
+    data.emp_id,
+    data.purchase_dt,
+    data.temp_val,
+    data.humidity_val,
+    data.rpm_val,
+    data.power_val,
+    data.remk,
   ]);
-  // 가정: INSERT 결과로 insertId를 받을 수 있음(프로젝트 환경에 따라 다를 수 있음)
-  const insertId = result?.insertId ?? null;
-  return insertId ? await getById(insertId) : { ok: true };
-}
+};
 
-async function update(
-  id,
-  { facility_code, facility_name, facility_type, use_yn = "Y" }
-) {
-  const existing = await getById(id);
-  if (!existing) {
-    const err = new Error("대상 설비가 존재하지 않습니다.");
-    err.status = 404;
-    throw err;
-  }
-  await mapper.query("UPDATE_FACILITY", [
-    facility_code ?? existing.facility_code,
-    facility_name ?? existing.facility_name,
-    facility_type ?? existing.facility_type,
-    use_yn ?? existing.use_yn,
-    id,
+// 설비 수정
+const facilityUpdate = async (data) => {
+  return await mariadb.query("facilityUpdate", [
+    data.facility_nm,
+    data.facility_type,
+    data.emp_id,
+    data.purchase_dt,
+    data.temp_val,
+    data.humidity_val,
+    data.rpm_val,
+    data.power_val,
+    data.remk,
+    data.facility_id,
   ]);
-  return await getById(id);
-}
+};
 
-async function remove(id) {
-  // 소프트 삭제를 원한다면 UPDATE_FACILITY로 use_yn='N' 세팅하도록 변경
-  const existing = await getById(id);
-  if (!existing) {
-    const err = new Error("대상 설비가 존재하지 않습니다.");
-    err.status = 404;
-    throw err;
-  }
-  await mapper.query("DELETE_FACILITY", [id]);
-  return { ok: true };
-}
+// 설비 삭제
+const facilityDelete = async (facility_id) => {
+  return await mariadb.query("facilityDelete", [facility_id]);
+};
 
 module.exports = {
-  list,
-  getById,
-  create,
-  update,
-  remove,
   facilityList,
+  facilityNames,
+  facilityTypes,
+  facilityUsers,
+  facilityInsert,
+  facilityUpdate,
+  facilityDelete,
 };
