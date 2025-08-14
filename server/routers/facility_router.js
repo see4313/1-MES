@@ -63,6 +63,7 @@ router.post("/facilityInsert", async (req, res) => {
 // 설비 수정
 router.put("/facilityUpdate", async (req, res) => {
   try {
+    console.log(req.body);
     const result = await service.facilityUpdate(req.body);
     res.send({ success: true, result });
   } catch (err) {
