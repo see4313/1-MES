@@ -11,6 +11,19 @@ const addProdInstructions = async (data) => {
   }
 };
 
+
+// 생산 지시건 조회
+const getInstructionList = async () => {
+  try {
+    const result = await db.query('selectInstructionList');
+    return result;
+  } catch (e) {
+    console.error(e);
+    return { err : e };
+  }
+};
+
 module.exports = {
-  addProdInstructions
+  addProdInstructions,
+  getInstructionList
 };

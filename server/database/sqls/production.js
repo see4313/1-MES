@@ -22,10 +22,30 @@ const insertProdInstruct = (data) => {
     remark,
     JSON.stringify(details)
   ];
-  console.log(params);
+  // console.log(params);
   return { sql, params };
 };
 
+const selectInstructionList = () => {
+
+  sql =
+  `
+    select
+      instruct_no as instructNo,
+      deta_plan_no as detaPlanNo,
+      item_type as itemType,
+      instruct_datetime as instructDatetime,
+      status,
+      goal_datetime as goalDatetime,
+      remk,
+      start_datetime as startDatetime
+    from PROD_INSTRUCT
+  `;
+
+  return { sql }
+};
+
 module.exports = {
-  insertProdInstruct
+  insertProdInstruct,
+  selectInstructionList
 }
