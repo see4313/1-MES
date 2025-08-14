@@ -49,4 +49,37 @@ router.get("/users", async (req, res) => {
   }
 });
 
+// 설비 등록
+router.post("/facilityInsert", async (req, res) => {
+  try {
+    const result = await service.facilityInsert(req.body);
+    res.send({ success: true, result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ success: false, message: "등록 실패" });
+  }
+});
+
+// 설비 수정
+router.put("/facilityUpdate", async (req, res) => {
+  try {
+    const result = await service.facilityUpdate(req.body);
+    res.send({ success: true, result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ success: false, message: "수정 실패" });
+  }
+});
+
+// 설비 삭제
+router.delete("/facilityDelete", async (req, res) => {
+  try {
+    const result = await service.facilityDelete(req.body.facility_id);
+    res.send({ success: true, result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ success: false, message: "삭제 실패" });
+  }
+});
+
 module.exports = router;

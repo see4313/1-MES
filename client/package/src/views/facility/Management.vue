@@ -11,7 +11,7 @@
                 btn-text2="조회"
                 btn-variant2="flat"
                 btn-color2="primary"
-                @btn-click2="select()"
+                @btn-click2="select"
             />
             <v-row>
                 <v-col cols="12" md="12">
@@ -55,7 +55,7 @@
                 :value="facilityList"
                 selectionMode="single"
                 :metaKeySelection="false"
-                dataKey="item_id"
+                dataKey="facility_id"
                 paginator
                 :rows="5"
                 tableStyle="min-width: 50rem"
@@ -171,26 +171,35 @@
         @select="onSelectCutd"
         @close="cutdModal = false"
     />
+
+    <!-- Snackbar -->
+    <v-snackbar v-model="snackOpen" :color="snackColor" timeout="2000" location="top right">
+        {{ snackMessage }}
+    </v-snackbar>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue';
+import { ref, watch } from 'vue';
 import axios from 'axios';
 import CardHeader2 from '@/components/production/card-header-btn2.vue';
 import CardHeader3 from '@/components/production/card-header-btn3k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import ModalSearch from '@/views/commons/CommonModal.vue';
-import SnackBar from '@/components/shared/SnackBar.vue';
 import { useSnackBar } from '@/composables/useSnackBar.js';
 
-//Snack Bar
-const { snackBar } = useSnackBar();
+// Snack Bar
+const { snackOpen, snackMessage, snackColor } = useSnackBar();
+function showSnack(msg, color = 'success') {
+    snackMessage.value = msg;
+    snackColor.value = color;
+    snackOpen.value = true;
+}
 
-/** 날짜 */
+// 날짜
 const todayStr = new Date().toISOString().split('T')[0];
 
-/** 조회조건 */
+// 조회조건
 const selectItemName = ref('');
 const selectItemId = ref('');
 const selectItemType = ref('');
@@ -198,11 +207,11 @@ const selectItemTypeId = ref('');
 const selectCutd = ref('');
 const selectCutdId = ref('');
 
-/** 목록 */
+// 목록
 const facilityList = ref([]);
 const selectfacilityList = ref(null);
 
-/** 등록폼 */
+// 등록폼
 const itemId = ref('');
 const itemName = ref('');
 const itemType = ref('');
@@ -215,19 +224,22 @@ const optimalRpm = ref('');
 const optimalPower = ref('');
 const itemRemk = ref('');
 
-/** 모달 상태 */
+// 모달 상태
 const itemNameModal = ref(false);
 const itemTypeModal = ref(false);
 const cutdModal = ref(false);
 
-/** 조회 초기화 */
+// 조회 초기화
 function selectReset() {
     selectItemName.value = '';
+    selectItemId.value = '';
     selectItemType.value = '';
+    selectItemTypeId.value = '';
     selectCutd.value = '';
+    selectCutdId.value = '';
 }
 
-/** 등록폼 초기화 */
+// 등록폼 초기화
 function dataReset() {
     itemId.value = '';
     itemName.value = '';
@@ -240,26 +252,26 @@ function dataReset() {
     optimalRpm.value = '';
     optimalPower.value = '';
     itemRemk.value = '';
+    selectItemTypeId.value = '';
+    selectCutdId.value = '';
 }
 
-/** 목록 조회 */
+// 목록 조회
 async function select() {
     try {
         const params = {
-            facility_id: selectItemId.value, // 설비 ID
-            facility_type: selectItemTypeId.value, //설비유형 ID
-            emp_id: selectCutdId.value // 담당자 ID
+            facility_id: selectItemId.value,
+            facility_type: selectItemTypeId.value,
+            emp_id: selectCutdId.value
         };
         const response = await axios.get('/api/facilityList', { params });
         facilityList.value = response.data;
-        return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);
-        return [];
     }
 }
 
-/** 목록 클릭 → 폼에 반영 */
+// 목록 클릭 → 폼에 반영 + ID 세팅
 watch(selectfacilityList, (val) => {
     if (!val) return;
     itemId.value = val.facility_id || '';
@@ -273,42 +285,18 @@ watch(selectfacilityList, (val) => {
     optimalRpm.value = val.rpm_val || '';
     optimalPower.value = val.power_val || '';
     itemRemk.value = val.remk || '';
+
+    // 값이 없으면 기존 값 유지
+    if (val.facility_type) selectItemTypeId.value = val.facility_type;
+    if (val.emp_id) selectCutdId.value = val.emp_id;
 });
 
-/** 모달 데이터 가져오기 */
-const fetchItemNames = async () => {
-    try {
-        const response = await axios.get('/api/itemNames');
-        console.log(response.data);
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        console.error('조회 실패', error);
-        return [];
-    }
-};
+// 모달 데이터
+const fetchItemNames = async () => (await axios.get('/api/itemNames')).data;
+const fetchItemTypes = async () => (await axios.get('/api/itemTypes')).data;
+const fetchUsers = async () => (await axios.get('/api/users')).data;
 
-const fetchItemTypes = async () => {
-    try {
-        const response = await axios.get('/api/itemTypes');
-        console.log(response.data);
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        console.error('조회 실패', error);
-        return [];
-    }
-};
-const fetchUsers = async () => {
-    try {
-        const response = await axios.get('/api/users');
-        console.log(response.data);
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        console.error('조회 실패', error);
-        return [];
-    }
-};
-
-/** 모달 선택 → 조회조건 + 등록폼 반영 */
+// 모달 선택
 function onSelectItemName(row) {
     selectItemName.value = row.item_name;
     selectItemId.value = row.item_id;
@@ -325,56 +313,59 @@ function onSelectCutd(row) {
     itemCutd.value = row.user_name;
 }
 
-function showSnack(msg, color = 'success') {
-    snackbar.open({
-        message: msg,
-        color: color,
-        timeout: 2000
-    });
-}
-
-/** 저장 */
-async function itemSave() {
-    if (!itemName.value || !itemTypeId.value || !itemCutdId.value) {
+// 설비 저장
+const itemSave = async () => {
+    if (!itemName.value || !selectItemTypeId.value || !selectCutdId.value) {
         showSnack('필수 값을 입력하세요', 'error');
         return;
     }
 
+    let obj = {
+        facility_id: itemId.value || null,
+        facility_nm: itemName.value,
+        facility_type: selectItemTypeId.value,
+        emp_id: selectCutdId.value,
+        purchase_dt: buyDate.value,
+        temp_val: optimalTemp.value,
+        humidity_val: optimalHumidity.value,
+        rpm_val: optimalRpm.value,
+        power_val: optimalPower.value,
+        remk: itemRemk.value
+    };
+
     try {
-        const payload = {
-            facility_id: itemId.value || null,
-            facility_nm: itemName.value,
-            facility_type: itemTypeId.value,
-            emp_id: itemCutdId.value,
-            purchase_dt: buyDate.value || null,
-            temp_val: optimalTemp.value || null,
-            humidity_val: optimalHumidity.value || null,
-            rpm_val: optimalRpm.value || null,
-            power_val: optimalPower.value || null,
-            remk: itemRemk.value || null
-        };
-        await axios.post('/api/facilitySave', payload);
-        showSnack('저장 완료');
-        await select(); // 목록 갱신
+        let response;
+        if (!itemId.value) {
+            response = await axios.post('/api/facilityInsert', obj);
+            if (response.data.success) showSnack('저장되었습니다', 'success');
+        } else {
+            response = await axios.put('/api/facilityUpdate', obj);
+            if (response.data.success) showSnack('수정되었습니다', 'success');
+        }
+        await select();
+        dataReset();
     } catch (err) {
         console.error(err);
         showSnack('저장 실패', 'error');
     }
-}
+};
 
-/** 삭제 */
-async function itemDelete() {
+// 설비 삭제
+const itemDelete = async () => {
     if (!itemId.value) {
-        showSnack('삭제할 설비를 선택하세요', 'error');
+        showSnack('삭제할 데이터를 선택하세요', 'warning');
         return;
     }
     try {
-        await axios.delete(`/api/facilityDelete/${itemId.value}`);
-        showSnack('삭제 완료');
-        await select(); // 목록 갱신
+        const response = await axios.delete('/api/facilityDelete', { data: { facility_id: itemId.value } });
+        if (response.data.success) {
+            showSnack('삭제되었습니다.', 'success');
+            await select();
+            dataReset();
+        }
     } catch (err) {
         console.error(err);
         showSnack('삭제 실패', 'error');
     }
-}
+};
 </script>

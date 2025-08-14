@@ -3,6 +3,7 @@ const facilityList = (filters) => {
   let sql = `
    SELECT f.FACILITY_ID      AS facility_id
      , f.FACILITY_NM      AS facility_nm
+     ,f.FACILITY_TYPE     AS facility_type
      , ft.TYPE_NAME       AS facility_type_name
      , f.USE_YN           AS use_yn
      , f.PURCHASE_DT      AS purchase_dt
@@ -65,9 +66,41 @@ const facilityUsers = `
     ORDER BY EMP_NAME ASC
 `;
 
+// 설비 등록
+const facilityInsert = `
+    INSERT INTO FACILITY (
+       FACILITY_ID,FACILITY_NM, FACILITY_TYPE, EMP_ID, PURCHASE_DT,
+        TEMP_VAL, HUMIDITY_VAL, RPM_VAL, POWER_VAL, REMK
+    ) VALUES (next_code('FAC'),?, ?,?, ?, ?, ?, ?, ?, ?)
+`;
+
+// 설비 수정
+const facilityUpdate = `
+    UPDATE FACILITY
+    SET FACILITY_NM = ?,
+        FACILITY_TYPE = ?,
+        EMP_ID = ?,
+        PURCHASE_DT = ?,
+        TEMP_VAL = ?,
+        HUMIDITY_VAL = ?,
+        RPM_VAL = ?,
+        POWER_VAL = ?,
+        REMK = ?
+    WHERE FACILITY_ID = ?
+`;
+
+// 설비 삭제
+const facilityDelete = `
+    DELETE FROM FACILITY
+    WHERE FACILITY_ID = ?
+`;
+
 module.exports = {
   facilityList,
   facilityNames,
   facilityTypes,
   facilityUsers,
+  facilityInsert,
+  facilityUpdate,
+  facilityDelete,
 };
