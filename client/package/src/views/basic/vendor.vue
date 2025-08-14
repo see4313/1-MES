@@ -173,19 +173,6 @@
         @select="onSelectVendType"
     />
 
-    <!-- <ModalSearch
-        v-model:visible="showVendIdModal"
-        title="거래처번호 검색"
-        idField="vend_id"
-        :columns="[
-            { key: 'vend_id', label: '거래처번호' },
-            { key: 'vend_name', label: '거래처명' }
-        ]"
-        :fetchData="(q, p, s) => fetchModal('/api/vendorId', q, p, s)"
-        :pageSize="10"
-        @select="onSelectVendId"
-    /> -->
-
     <ModalSearch
         v-model:visible="showVendPschModal"
         title="사원 검색"
@@ -279,12 +266,6 @@ const onSelectVendType = (row) => {
     if (modalTarget.value === 'create') createForm.value.vendType = val;
     else searchForm.value.vendType = val;
     showVendTypeModal.value = false;
-};
-
-const onSelectVendId = (row) => {
-    const val = row?.vend_id || row?.vendId || '';
-    if (modalTarget.value !== 'create') searchForm.value.vendId = val;
-    showVendIdModal.value = false;
 };
 
 const onSelectVendPsch = (row) => {
