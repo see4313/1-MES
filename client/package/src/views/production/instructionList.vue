@@ -13,8 +13,8 @@ const selectedInstructionStatus = ref([]); // 선택된 생산 지시 상태
 
 // 상품 유형
 const productType = ref([
-  { key : "반제품", value : "반제품" },
-  { key : "완제품", value : "완제품" }
+  { key : "반제품", value : "semi" },
+  { key : "완제품", value : "finish" }
 ]);
 
 const instructionStatus = ref([
