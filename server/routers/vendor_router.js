@@ -67,6 +67,7 @@ router.post(
       vendorService.toNull(b.bizNumber),
       vendorService.nz(b.bizNumber),
     ]);
+    //중복검사
     const dup = (Array.isArray(exact) ? exact : exact?.rows ?? []).some(
       (r) => r.vendName === b.vendName && r.bizNumber === b.bizNumber
     );

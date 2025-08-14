@@ -9,30 +9,83 @@ function normalizeRows(result) {
   return [];
 }
 
-exports.listBom = async (filters = {}) => {
+const listBom = async (filters = {}) => {
   const raw = await mapper.query("selectBomList", filters);
   const rows = normalizeRows(raw);
   return rows;
 };
 
-exports.getBomDetails = async (bomNumber) => {
-  console.log("[Service] getBomDetails called with bomNumber:", bomNumber);
-
+const getBomDetails = async (bomNumber) => {
   try {
-    // mapper.query에 쿼리 이름과 함께 파라미터를 올바르게 전달합니다.
-    // 대부분의 mapper 구현은 단일 파라미터를 '?'에 바인딩할 때 객체 대신 값을 직접 받습니다.
-    // { bomNumber } 객체 대신 bomNumber 변수를 직접 전달합니다.
     const queryResult = await mapper.query("selectBomDetails", bomNumber);
-
-    console.log("[Service] Raw query result:", queryResult);
-
     const rows = normalizeRows(queryResult);
-
-    console.log("[Service] Normalized rows:", rows);
-
     return rows;
   } catch (error) {
-    console.error("[Service] Error in getBomDetails:", error);
     return []; // 오류 발생 시 빈 배열 반환
   }
+};
+
+// 모달(상세주문)
+const itemModal = async () => {
+  let list = await mapper.query("itemModal");
+  return list;
+};
+
+// 단위 조회
+const itemUnit = async () => {
+  let list = await mapper.query("itemUnit");
+  return list;
+};
+
+const toNull = (value) => value ?? null;
+
+// toDateStr 함수 정의
+const toDateStr = (date) => {
+  if (!date) return null;
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const bomInsert = async (item) => {
+  // item_id가 없으면 에러를 발생시키는 로직 추가
+  if (!item.item_id) {
+    throw new Error("ITEM_ID는 필수 입력 항목입니다.");
+  }
+
+  const params = [
+    toNull(item.item_id),
+    toNull(item.use ?? item.use_yn),
+    toNull(item.ver),
+    toDateStr(item.start_date),
+    toDateStr(item.end_date),
+    toNull(item.remk),
+  ];
+
+  try {
+    const resInfo = await mapper.query("bomInsert", params);
+    return { result: !!(resInfo && resInfo.affectedRows > 0) };
+  } catch (error) {
+    console.error("BOM 데이터 삽입 오류:", error);
+    throw error;
+  }
+};
+
+function convertToArray(obj, columns) {
+  let result = [];
+  for (let column of columns) {
+    result.push(obj[column] ?? null);
+  }
+  return result;
+}
+
+module.exports = {
+  convertToArray,
+  bomInsert,
+  listBom,
+  getBomDetails,
+  itemModal,
+  itemUnit,
 };
