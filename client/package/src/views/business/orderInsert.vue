@@ -203,6 +203,7 @@ const showModal2 = ref(false); // 업체모달
 const showModal3 = ref(false); // 제품코드모달
 const selectedItem = ref(null);
 const selectedItem2 = ref(null);
+const selectedItem3 = ref(null);
 const empId = ref(null);
 const vendId = ref(null);
 
@@ -217,6 +218,7 @@ const fetchItems = async () => {
     }
 };
 
+//업체명모달
 const fetchItems2 = async () => {
     try {
         const response = await axios.get('/api/vend');
@@ -227,6 +229,7 @@ const fetchItems2 = async () => {
     }
 };
 
+//제품모달
 const fetchItems3 = async () => {
     try {
         const response = await axios.get('/api/itemModal');
