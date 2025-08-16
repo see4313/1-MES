@@ -79,14 +79,18 @@
                 <v-col cols="12">
                     <div class="card">
                         <DataTable :value="inventoryList" paginator :rows="10" tableStyle="min-width: 50rem">
-                            <Column field="lot_id" sortable header="LOT번호"></Column>
-                            <Column field="item_id" sortable header="품목번호"></Column>
-                            <Column field="item_name" header="품목명"></Column>
-                            <Column field="item_type" header="품목구분"></Column>
-                            <Column field="wh_name" header="위치"></Column>
-                            <Column field="cutd_cond" header="보관조건"></Column>
-                            <Column field="qty" header="수량"></Column>
-                            <Column field="vald_date" sortable header="유효기한"></Column>
+                            <Column field="lot_id" sortable header="LOT번호" style="width: 130px"></Column>
+                            <Column field="item_id" sortable header="품목번호" style="width: 130px"></Column>
+                            <Column field="item_name" header="품목명" style="width: 130px"></Column>
+                            <Column field="item_type" header="품목구분" style="width: 80px"></Column>
+                            <Column field="wh_name" header="위치" style="width: 100px"></Column>
+                            <Column field="cutd_cond" header="보관조건" style="width: 80px"></Column>
+                            <Column field="qty" header="수량" style="width: 80px"></Column>
+                            <Column field="vald_date" sortable header="유효기한" style="width: 100px">
+                                <template #body="{ data }">
+                                    {{ formatDate(data.vald_date) }}
+                                </template>
+                            </Column>
                         </DataTable>
                     </div>
                 </v-col>
@@ -206,12 +210,14 @@ onMounted(() => {});
 
 // 조회조건 초기화
 function selectReset() {
-    selectItemId.value = null;
-    selectLotId.value = null;
-    selectItemType.value = null;
-    selectCutd.value = null;
-    selectWhId.value = null;
-    formattedexpDate.value = null;
+    if (confirm('초기화하시겠습니까?')) {
+        selectItemId.value = null;
+        selectLotId.value = null;
+        selectItemType.value = null;
+        selectCutd.value = null;
+        selectWhId.value = null;
+        formattedexpDate.value = null;
+    }
 }
 
 // 조회
@@ -303,5 +309,10 @@ const onSelectCutd = (item) => {
 
 const onSelectWhId = (item) => {
     selectWhId.value = item.wh_id; // 창고코드
+};
+
+// 출력 날짜 포맷
+const formatDate = (date) => {
+    return date ? dayjs(date).format('YYYY-MM-DD') : '';
 };
 </script>

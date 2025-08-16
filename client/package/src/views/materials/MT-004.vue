@@ -62,13 +62,25 @@
                                     @update:selection="(val) => onSelectDetail(data.procument_id, val)"
                                 >
                                     <Column selectionMode="multiple" headerStyle="width: 3em" />
-                                    <Column field="item_id" header="품목번호" sortable></Column>
-                                    <Column field="item_name" header="품목명"></Column>
-                                    <Column field="spec" header="규격"></Column>
-                                    <Column field="unit" header="단위"> </Column>
-                                    <Column field="qty" header="수량"> </Column>
-                                    <Column field="untpc" header="단가"> </Column>
-                                    <Column field="totpc" header="금액"> </Column>
+                                    <Column field="item_id" header="품목번호" sortable style="width: 100px"> </Column>
+                                    <Column field="item_name" header="품목명" style="width: 100px"> </Column>
+                                    <Column field="spec" header="규격" style="width: 100px"> </Column>
+                                    <Column field="unit" header="단위" style="width: 100px"> </Column>
+                                    <Column field="qty" header="수량" style="width: 100px">
+                                        <template #body="data">
+                                            {{ Number(data.data.qty).toLocaleString() }}
+                                        </template></Column
+                                    >
+                                    <Column field="untpc" header="단가" style="width: 100px">
+                                        <template #body="data">
+                                            {{ Number(data.data.untpc).toLocaleString() }}
+                                        </template></Column
+                                    >
+                                    <Column field="totpc" header="금액" style="width: 100px">
+                                        <template #body="data">
+                                            {{ Number(data.data.totpc).toLocaleString() }}
+                                        </template>
+                                    </Column>
                                 </DataTable>
                             </div>
                         </template>
@@ -157,13 +169,15 @@ const handleReceive = async () => {
         return;
     }
 
-    try {
-        await axios.post('/api/receive', payload);
-        alert('입고 처리 완료');
-        // 필요 시 화면 리로드 또는 상세 초기화
-    } catch (error) {
-        console.error(error);
-        alert('입고 처리 실패');
+    if (confirm('등록하시겠습니까?')) {
+        try {
+            await axios.post('/api/receive', payload);
+            alert('입고 처리 완료');
+            // 필요 시 화면 리로드 또는 상세 초기화
+        } catch (error) {
+            console.error(error);
+            alert('입고 처리 실패');
+        }
     }
 };
 </script>

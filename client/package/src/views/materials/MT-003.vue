@@ -324,7 +324,9 @@ const openItemModal = (index) => {
 
 // 행 삭제 함수
 const deleteRow = (index) => {
-    procDetailList.value.splice(index, 1);
+    if (confirm('삭제하시겠습니까?')) {
+        procDetailList.value.splice(index, 1);
+    }
 };
 
 // 입력 값 초기화
@@ -339,31 +341,54 @@ const dataReset = () => {
 
 // 등록 실행
 const addProc = async () => {
-    try {
-        const payload = {
-            vend_id: selectVendId.value,
-            emp_id: selectEmpId.value,
-            reg_date: formattedregDate.value,
-            pap_date: formattedpapDate.value,
-            remark: itemRemk.value,
-            details: procDetailList.value.map((item) => ({
-                item_id: item.item_id,
-                qty: item.qty,
-                untpc: item.untpc
-            }))
-        };
+    // 기본 필수값 체크
+    if (!selectVendId.value || !selectEmpId.value || !formattedregDate.value || !formattedpapDate.value) {
+        alert('모든 항목을 입력해주세요.');
+        return;
+    }
 
-        const response = await axios.post('/api/procInsert', payload);
-        if (response.data.result) {
-            alert('등록 성공');
-            dataReset();
-            procDetailList.value = [];
-        } else {
-            alert('등록 실패');
+    // 상세 항목 존재 여부 체크
+    if (!procDetailList.value || procDetailList.value.length === 0) {
+        alert('상세 항목을 하나 이상 선택해주세요.');
+        return;
+    }
+
+    // 상세 항목의 값 체크
+    const invalidDetail = procDetailList.value.find(
+        (item) => !item.item_id || !item.qty || item.qty <= 0 || !item.untpc || item.untpc <= 0
+    );
+    if (invalidDetail) {
+        alert(`품목의 항목을 올바르게 입력해주세요.`);
+        return;
+    }
+
+    if (confirm('등록하시겠습니까?')) {
+        try {
+            const payload = {
+                vend_id: selectVendId.value,
+                emp_id: selectEmpId.value,
+                reg_date: formattedregDate.value,
+                pap_date: formattedpapDate.value,
+                remark: itemRemk.value,
+                details: procDetailList.value.map((item) => ({
+                    item_id: item.item_id,
+                    qty: item.qty,
+                    untpc: item.untpc
+                }))
+            };
+
+            const response = await axios.post('/api/procInsert', payload);
+            if (response.data.result) {
+                alert('등록 성공');
+                dataReset();
+                procDetailList.value = [];
+            } else {
+                alert('등록 실패');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('에러 발생');
         }
-    } catch (err) {
-        console.error(err);
-        alert('에러 발생');
     }
 };
 </script>
