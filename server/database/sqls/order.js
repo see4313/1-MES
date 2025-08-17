@@ -98,9 +98,35 @@ JOIN EMPLOYEE emp
 // 모달 (상세주문)
 const itemModal = `
 SELECT item_id,
-       item_name
+       item_name,
+       item_type
 FROM ITEM 
 WHERE item_type = '완제품'
+`;
+
+// 모달(생산지시)
+const prodModal = `
+SELECT prd.instruct_no,
+       prdp.deta_plan_no,
+       prd.deta_plan_no,
+        prdp.item_id,
+		item.item_id,
+        item.item_name,
+        prd.instruct_datetime
+FROM PROD_PLAN_DETA prdp JOIN PROD_INSTRUCT prd
+							ON prdp.deta_plan_no = prd.deta_plan_no
+JOIN ITEM item 
+				ON prdp.item_id = item.item_id
+`;
+
+// 창고 모달
+const whModal = `
+SELECT wh_id,
+        wh_name,
+        wh_type,
+        loca,
+        uon
+FROM WAREHOUSE;
 `;
 
 module.exports = {
@@ -112,4 +138,6 @@ module.exports = {
   setOrder,
   deleteOrder,
   orderInsert,
+  whModal,
+  prodModal,
 };
