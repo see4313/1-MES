@@ -1,83 +1,143 @@
-// server/routers/bom_router.js
 const express = require("express");
 const router = express.Router();
 const bomService = require("../services/bom_service");
 
-// 목록
-router.get("/bom", async (req, res) => {
-  console.log("[API] GET /bom", Object.assign({}, req.query));
-  try {
+/* ================ 공통 유틸 ================ */
+// 비동기 에러 핸들링 래퍼
+const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
+
+// GET 요청들은 캐시 방지
+router.use((req, res, next) => {
+  if (req.method === "GET") res.set("Cache-Control", "no-store");
+  next();
+});
+
+// 배열 응답 보정 (GET 목록/상세 공용)
+const asArray = (data) => (Array.isArray(data) ? data : []);
+
+/* ================ BOM 목록 조회 ================ */
+// GET /bom?filters...
+router.get(
+  "/bom",
+  asyncHandler(async (req, res) => {
+    console.log("[API] GET /bom", { ...req.query });
     const rows = await bomService.listBom(req.query || {});
-    res.set("Cache-Control", "no-store");
-    res.status(200).json(Array.isArray(rows) ? rows : []);
-  } catch (err) {
-    console.error("[BOM LIST ERROR]", err);
-    res.status(500).json({ message: String(err?.message || err) });
-  }
-});
+    res.status(200).json(asArray(rows));
+  })
+);
 
-// 상세
-router.get("/bom/:bomNumber/details", async (req, res) => {
-  console.log("[API] GET /bom/:bomNumber/details", req.params.bomNumber);
-  try {
+/* ================ BOM 상세 조회 ================ */
+// GET /bom/:bomNumber/details
+router.get(
+  "/bom/:bomNumber/details",
+  asyncHandler(async (req, res) => {
     const rows = await bomService.getBomDetails(req.params.bomNumber);
-    res.set("Cache-Control", "no-store");
-    res.status(200).json(Array.isArray(rows) ? rows : []);
-  } catch (err) {
-    console.error("[BOM DETAILS ERROR]", err);
-    res.status(500).json({ message: String(err?.message || err) });
-  }
-});
+    res.status(200).json(asArray(rows));
+  })
+);
 
-//품목
-router.get("/item", async (req, res) => {
-  try {
-    const { item_name } = req.query;
-    const items = await bomService.itemModal({ item_name });
-    res.status(200).json(items);
-  } catch (err) {
-    console.error("[ITEM LIST ERROR]", err);
-    res.status(500).json({ message: "품목 목록 조회 오류" });
-  }
-});
+/* ================ 품목 모달 조회 ================ */
+// GET /item
+router.get(
+  "/item",
+  asyncHandler(async (_req, res) => {
+    const items = await bomService.itemModal();
+    res.status(200).json(asArray(items));
+  })
+);
 
-// 단위 조회
-router.get("/unit", async (req, res) => {
-  let list = await bomService.itemUnit();
-  res.send(list); // 응답
-});
-
-//등록
-
-router.post("/bomInsert", async (req, res) => {
-  // 클라이언트에서 보낸 객체를 구조 분해 할당하여 키 이름을 통일
-  const { itemId, use, use_yn, ver, startDate, endDate, remk } = req.body;
-
-  // 'itemId'가 존재하는지 유효성 검사
-  if (!itemId) {
-    return res.status(400).json({
-      error: "itemId는 필수 입력 항목입니다.",
+/* ================ BOM 상세 삭제 ================ */
+// DELETE /bom/:bomNumber/details/:bomDetailNo
+router.delete(
+  "/bom/:bomNumber/details/:bomDetailNo",
+  asyncHandler(async (req, res) => {
+    const { bomNumber, bomDetailNo } = req.params;
+    const result = await bomService.deleteBomDetail(bomNumber, bomDetailNo);
+    res.status(200).json({
+      message: "BOM 상세 내역이 성공적으로 삭제되었습니다.",
+      result,
     });
-  }
+  })
+);
 
-  // 서비스 함수에 전달할 객체를 새로 생성하여 키 이름 통일
-  const item = {
-    item_id: itemId,
-    use: use ?? use_yn,
-    ver: ver,
-    start_date: startDate,
-    end_date: endDate,
-    remk: remk,
-  };
+/* ================ BOM 헤더 등록/수정 ================ */
+// POST /bomInsert  (헤더 등록)
+router.post(
+  "/bomInsert",
+  asyncHandler(async (req, res) => {
+    try {
+      const out = await bomService.insertBomHeader(req.body || {});
+      res.status(200).json(out);
+    } catch (err) {
+      if (err.status)
+        return res
+          .status(err.status)
+          .json(err.body || { message: err.message });
+      res.status(500).json({ message: err.message || "등록 실패" });
+    }
+  })
+);
 
-  try {
-    const result = await bomService.bomInsert(item);
-    res.status(201).send(result);
-  } catch (error) {
-    console.error("BOM 데이터 삽입 중 오류 발생:", error);
-    res.status(500).json({
-      error: "서버에서 BOM 데이터를 처리하는 중 오류가 발생했습니다.",
+// PUT /bom/:bomNumber  (헤더 수정)
+router.put(
+  "/bom/:bomNumber",
+  asyncHandler(async (req, res) => {
+    try {
+      const out = await bomService.updateBomHeader(
+        req.params.bomNumber,
+        req.body || {}
+      );
+      res.status(200).json(out);
+    } catch (err) {
+      if (err.status)
+        return res
+          .status(err.status)
+          .json(err.body || { message: err.message });
+      res.status(500).json({ message: err.message || "수정 실패" });
+    }
+  })
+);
+
+/* ================ 저장(프로시저) ================ */
+// POST /bom  (신규: 헤더 필수, 디테일 옵션)
+router.post(
+  "/bom",
+  asyncHandler(async (req, res) => {
+    const { header, details } = req.body || {};
+    if (!header)
+      return res.status(400).json({ message: "header는 필수입니다." });
+
+    const out = await bomService.saveBomViaProc({
+      bomNumber: null,
+      header,
+      details: details ?? [],
     });
-  }
-});
+    res.status(200).json(out); // { bom_number, detail_rows }
+  })
+);
+
+// POST /bom/:bomNumber/details  (기존 BOM 디테일 추가/수정)
+router.post(
+  "/bom/:bomNumber/details",
+  asyncHandler(async (req, res) => {
+    const { bomNumber } = req.params;
+    const { details } = req.body || {};
+
+    if (!bomNumber)
+      return res.status(400).json({ message: "bomNumber가 필요합니다." });
+    if (!Array.isArray(details))
+      return res
+        .status(400)
+        .json({ message: "details는 배열 형태여야 합니다." });
+
+    const out = await bomService.saveBomViaProc({
+      bomNumber,
+      header: null, // 헤더 변경 없음
+      details, // 빈 배열도 허용(전체 삭제 시나리오)
+    });
+    res.status(200).json(out); // { bom_number, detail_rows }
+  })
+);
+
 module.exports = router;

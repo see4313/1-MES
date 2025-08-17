@@ -1,22 +1,21 @@
-// server/sqls/bom_sql.js
-
+// server/database/sqls/bom.js
+//조회
 const selectBomList = (filters = {}) => {
   let sql = `
-    SELECT B.BOM_NUMBER                          AS bom_number
-         , B.ITEM_ID                             AS item_id
-         , I.ITEM_NAME                           AS item_name
-         , B.VER                                 AS ver
-         , B.\`USE\`                              AS use_yn      
+    SELECT B.BOM_NUMBER            AS bom_number
+         , B.ITEM_ID               AS item_id
+         , I.ITEM_NAME             AS item_name
+         , B.VER                   AS ver
+         , B.\`USE\`               AS use_yn
          , DATE_FORMAT(B.START_DATE, '%Y-%m-%d') AS start_date
-         , DATE_FORMAT(B.END_DATE,   '%Y-%m-%d') AS end_date
-         , B.REMK                                AS remk
+         , DATE_FORMAT(B.END_DATE,  '%Y-%m-%d') AS end_date
+         , B.REMK                  AS remk
     FROM   BOM B
-           LEFT JOIN ITEM I ON I.ITEM_ID = B.ITEM_ID
+    LEFT JOIN ITEM I ON I.ITEM_ID = B.ITEM_ID
     WHERE  1=1
   `;
   const params = [];
 
-  // == 동적 조건 ==
   if (filters.bom_number) {
     sql += " AND B.BOM_NUMBER LIKE ?";
     params.push(`%${String(filters.bom_number)}%`);
@@ -33,13 +32,11 @@ const selectBomList = (filters = {}) => {
     sql += " AND B.VER = ?";
     params.push(String(filters.ver));
   }
-  // use / use_yn 둘 다 대응
   const useFilter = filters.use_yn ?? filters.use;
   if (useFilter !== undefined && String(useFilter) !== "") {
     sql += " AND B.`USE` = ?";
     params.push(String(useFilter));
   }
-  // 기간 필터(선택): 시작일/종료일 경계 포함
   if (filters.start_date_from) {
     sql += " AND B.START_DATE >= ?";
     params.push(String(filters.start_date_from));
@@ -49,17 +46,15 @@ const selectBomList = (filters = {}) => {
     params.push(String(filters.start_date_to));
   }
   if (filters.end_date_from) {
-    sql += " AND B.END_DATE >= ?";
+    sql += " AND B.END_DATE   >= ?";
     params.push(String(filters.end_date_from));
   }
   if (filters.end_date_to) {
-    sql += " AND B.END_DATE <= ?";
+    sql += " AND B.END_DATE   <= ?";
     params.push(String(filters.end_date_to));
   }
 
-  // 정렬
   sql += " ORDER BY B.BOM_NUMBER DESC";
-
   return { sql, params };
 };
 
@@ -72,7 +67,7 @@ const selectBomDetails = (bomNumber, filters = {}) => {
         i.ITEM_NAME     AS item_name,
         i.SPEC       AS spec,
         d.UNIT          AS unit,
-        d.LOSS          AS loss
+        d.USAGE      AS \`usage\`
     FROM
         BOM_DETAIL d
     LEFT JOIN
@@ -102,35 +97,82 @@ const selectBomDetails = (bomNumber, filters = {}) => {
 
   return { sql, params };
 };
+// 품목명 조회
+const BOM_DUP_BY_ID_VER = `
+SELECT 1
+  FROM BOM
+ WHERE ITEM_ID = ?
+   AND VER = ?
+ LIMIT 1;
+`;
 
-//bom등록
-const bomInsert = `
+// BOM INSERT (BOM_NUMBER 는 next_code('BOM') 사용)
+const SQL_BOM_INSERT = `
 INSERT INTO BOM
-(BOM_NUMBER, ITEM_ID, \`USE\`, VER, START_DATE, END_DATE, REMK)
+  (BOM_NUMBER, ITEM_ID, \`USE\`, VER, START_DATE, END_DATE, REMK)
 VALUES
-(next_code('BOM'), ?, ?, ?, ?, ?, ?)
+  (next_code('BOM'), ?, ?, ?, ?, ?, ?);`;
+
+// BOM UPDATE
+const SQL_BOM_UPDATE = `
+UPDATE BOM
+   SET ITEM_ID    = ?,
+       \`USE\`      = ?,
+       VER        = ?,
+       START_DATE = ?,
+       END_DATE   = ?,
+       REMK       = ?
+ WHERE BOM_NUMBER = ?;
 `;
 
-// 모달 (품목)
+// 품목명 + 버전 정확 일치(중복 체크)
+const BOM_DUP_BY_ID_VER_EXCEPT = `
+SELECT 1
+  FROM BOM
+ WHERE ITEM_ID = ?
+   AND VER     = ?
+   AND BOM_NUMBER <> ?
+ LIMIT 1;
+`;
+
+// 모달(품목)
 const itemModal = `
-SELECT item_id,
-       item_name,
-       spec,
-       unit
-FROM ITEM 
+SELECT item_id, item_name, spec, unit
+FROM ITEM
 `;
 
-// 단위 모달용
-const itemUnit = `
-SELECT cmmn_id, group_id, cmmn_name, uon
-FROM   CMMN_CODE
-WHERE  group_id = 'ITEM_UNIT'
+// 단건 삭제
+const deleteBomDetail = `
+  DELETE FROM BOM_DETAIL
+  WHERE BOM_NUMBER = ?
+    AND BOM_DETAIL_NO = ?
+`;
+
+//상세내역 프로시저
+const callSaveBomProc = `
+  CALL save_bom_with_details_compat(?, ?, ?, ?, ?, ?, ?, ?);
+`;
+
+const saveBomWithDetails = `
+  CALL save_bom_with_details_compat(NULL, ?, ?, ?, ?, ?, ?, ?);
+`;
+
+// null 대신 빈 문자열 ''를 명시적으로 전달
+const saveBomDetailsOnly = `
+  CALL save_bom_with_details_compat(?, '', '', NULL, NULL, '', ?);
 `;
 
 module.exports = {
-  itemUnit,
-  bomInsert,
-  itemModal,
   selectBomList,
   selectBomDetails,
+  deleteBomDetail,
+  itemModal,
+  callSaveBomProc,
+  saveBomWithDetails,
+  saveBomDetailsOnly,
+  BOM_DUP_BY_ID_VER,
+  SQL_BOM_INSERT,
+  SQL_BOM_UPDATE,
+
+  BOM_DUP_BY_ID_VER_EXCEPT,
 };
