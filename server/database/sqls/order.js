@@ -12,7 +12,7 @@ const orderList = (filters) => {
       , ord.st
       FROM ORDER_INFO ord JOIN VENDOR vend
                     ON ord.vend_id = vend.vend_id
-      JOIN EMPLOYEE emp
+       JOIN EMPLOYEE emp
                    ON ord.emp_id = emp.emp_id
     WHERE 1=1
 `;
@@ -49,14 +49,14 @@ JOIN ORDER_INFO ord
                 ON ord.order_id = ordt.order_id
 WHERE ordt.order_id = ?
 `;
+// 등록
+const orderInsert = `
+CALL order_procedure(?,?,?,?,?,?,?)
+`;
 
 // 주문, 주문상세수정
 const setOrder = `
-UPDATE  ORDER_DETAIL 
-SET qty = ?,
-    amt = ?
-WHERE order_id = ?
-AND DETAIL_ID = ?
+CALL ordUpdate_procedure(?,?,?,?,?,?,?,?)
 `;
 
 // 주문상세 단건 삭제
@@ -101,11 +101,6 @@ SELECT item_id,
        item_name
 FROM ITEM 
 WHERE item_type = '완제품'
-`;
-
-// 등록
-const orderInsert = `
-CALL order_procedure(?,?,?,?,?,?,?)
 `;
 
 module.exports = {

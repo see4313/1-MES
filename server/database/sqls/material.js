@@ -209,7 +209,49 @@ VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?)
 
 // 발주 등록
 const procInsert = `
-CALL proc_insert(?, ?, ?, ?, ?, ?);
+CALL proc_insert(?, ?, ?, ?, ?, ?)
+`;
+
+// 입고 등록
+const receive = `
+CALL proc_receive(?)
+`;
+
+// 발주 조회
+const selectProc = `
+SELECT p.procument_id
+     , p.vend_id
+     , p.emp_id
+     , v.vend_name
+     , e.emp_name
+     , p.regist_date
+     , p.paprd_date
+     , p.status
+     , p.remk
+FROM   PROCUMENT p JOIN VENDOR v
+                   ON   p.vend_id = v.vend_id
+                   JOIN EMPLOYEE e
+                   ON   p.emp_id = e.emp_id
+WHERE  p.status = '미완료'
+AND    p.regist_date < ?
+`;
+
+// 발주상세 조회
+const selectProcDetail = `
+SELECT pd.pcmt_detail_id
+     , pd.procument_id
+     , pd.item_id
+     , pd.qty
+     , pd.untpc
+     , pd.status
+     , i.item_name
+     , i.unit
+     , i.spec
+     , (pd.qty * pd.untpc) as totpc
+FROM   PROCUMENT_DETAIL pd JOIN ITEM i
+                           ON   pd.item_id = i.item_id
+WHERE  pd.status = '미완료'
+AND    pd.procument_id = ?
 `;
 
 module.exports = {
@@ -227,4 +269,7 @@ module.exports = {
   selectVend,
   selectEmp,
   procInsert,
+  selectProc,
+  selectProcDetail,
+  receive,
 };
