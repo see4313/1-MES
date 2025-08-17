@@ -268,7 +268,7 @@ const toggleRow = (row) => {
                     <template #expansion="{ data }">
                         <div class="px-4 py-3">
                             <div v-if="detailLoading.has(data.instructNo)" class="text-caption" style="color: #888">
-                                상세 지시 불러오는 중…
+                                세부 지시 불러오는 중…
                             </div>
 
                             <div v-else>
