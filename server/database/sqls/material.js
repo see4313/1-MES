@@ -5,6 +5,7 @@ const inventoryList = (filters) => {
          , iv.item_id
          , it.item_name
          , it.item_type
+         , it.spec
          , iv.wh_id
          , wh.wh_name
          , iv.crea_date
@@ -46,6 +47,10 @@ const inventoryList = (filters) => {
   if (filters.vald_date) {
     sql += " AND iv.vald_date < ?";
     params.push(filters.vald_date);
+  }
+  if (filters.status) {
+    sql += " AND iv.status = ?";
+    params.push(filters.status);
   }
 
   return { sql, params };
