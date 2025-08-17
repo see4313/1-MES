@@ -37,5 +37,20 @@ export function useFormatDate() {
         return `${y}-${m}-${day}`;
     };
 
-    return { formatDate, toISO, minDate };
+    const kstFormatDate = (date, sep = '-') => {
+        if (!date) return '';
+        const d = date instanceof Date ? date : new Date(date);
+        if (isNaN(d.getTime())) return '';
+
+        // UTC timestamp 기준으로 KST 변환
+        const utc = d.getTime();
+        const kst = new Date(utc + 9 * 60 * 60 * 1000);
+
+        const year = kst.getUTCFullYear();
+        const month = String(kst.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(kst.getUTCDate()).padStart(2, '0');
+        return [year, month, day].join(sep);
+    };
+
+    return { formatDate, toISO, minDate, kstFormatDate };
 }
