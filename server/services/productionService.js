@@ -1,29 +1,39 @@
 // productionService.js
-const db = require('../database/mapper');
+const db = require("../database/mapper");
 
 const addProdInstructions = async (data) => {
   try {
-    const result = await db.query('insertProdInstruct', data);
+    const result = await db.query("insertProdInstruct", data);
     return result;
   } catch (e) {
     console.error(e);
-    return { err : e };
+    return { err: e };
   }
 };
 
-
 // 생산 지시건 조회
-const getInstructionList = async () => {
+const getInstructionList = async (query) => {
   try {
-    const result = await db.query('selectInstructionList');
+    const result = await db.query("selectInstructionList", query);
     return result;
   } catch (e) {
     console.error(e);
-    return { err : e };
+    return { err: e };
+  }
+};
+
+const getDetailInstruction = async (query) => {
+  try {
+    const result = await db.query("selectDetailInstruction", query);
+    return result;
+  } catch (e) {
+    console.error(e);
+    return { err: e };
   }
 };
 
 module.exports = {
   addProdInstructions,
-  getInstructionList
+  getInstructionList,
+  getDetailInstruction,
 };
