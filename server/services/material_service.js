@@ -13,6 +13,12 @@ const historyList = async (filters) => {
   return list;
 };
 
+// 로그인 조회
+const userLogin = async (filters) => {
+  let list = await mariadb.query("userLogin", filters);
+  return list;
+};
+
 // 품목목록 조회
 const itemList = async (filters) => {
   let list = await mariadb.query("itemList", filters);
@@ -245,4 +251,5 @@ module.exports = {
   itemReturn,
   itemdispose,
   historyList,
+  userLogin,
 };

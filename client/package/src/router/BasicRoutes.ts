@@ -32,6 +32,11 @@ const MainRoutes = {
             component: () => import('@/views/basic/process.vue')
         },
         {
+            name: 'mt-001',
+            path: '/mt-001',
+            component: () => import('@/views/materials/MT-001.vue')
+        },
+        {
             name: 'Cards',
             path: '/ui/cards',
             component: () => import('@/views/ui-components/Cards.vue')

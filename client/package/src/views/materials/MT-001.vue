@@ -259,6 +259,8 @@
         @select="onSelectUnit"
         @close="itemUnitModal = false"
     />
+
+    <SnackBar />
 </template>
 
 <script setup>
@@ -270,7 +272,11 @@ import Column from 'primevue/column';
 import { ref, onMounted, computed, watch } from 'vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
+// Snack Bar
+const { snackBar } = useSnackBar();
 const selectItemList = ref(null);
 const itemId = ref(null);
 const itemName = ref(null);
@@ -295,9 +301,6 @@ const selectCutd = ref(null); // 보관조건 선택
 const selectUnit = ref(null); // 단위 선택
 
 onMounted(() => {});
-
-// 필수체크
-const requiredRule = [(v) => !!v || '필수 입력 항목입니다.'];
 
 // 조회조건 초기화
 function selectReset() {
@@ -347,7 +350,7 @@ const itemDelete = async () => {
         let response = await axios.delete('/api/itemDelete', { data: { item_id: itemId.value } }).catch((err) => console.log(err));
 
         if (response.data.result) {
-            alert('삭제되었습니다.');
+            snackBar('삭제되었습니다.', 'success');
             select();
             dataReset();
         }
@@ -366,7 +369,7 @@ const itemSave = async () => {
         !itemCutd.value ||
         !itemUseYn.value
     ) {
-        alert('모든 필수 항목을 입력해주세요.');
+        snackBar('모든 필수 항목을 입력해주세요.', 'warning');
         return;
     }
 
@@ -387,7 +390,7 @@ const itemSave = async () => {
             let response = await axios.post('/api/itemInsert', obj).catch((err) => console.log(err));
 
             if (response.data.result) {
-                alert('등록되었습니다.');
+                snackBar('등록되었습니다', 'sueccss');
                 select();
                 dataReset();
             }
@@ -408,7 +411,7 @@ const itemSave = async () => {
             let response = await axios.put('/api/itemUpdate', obj).catch((err) => console.log(err));
 
             if (response.data.result) {
-                alert('수정되었습니다.');
+                snackBar('수정되었습니다', 'sueccss');
                 select();
                 dataReset();
             }
@@ -429,7 +432,7 @@ const select = async () => {
         const response = await axios.get('/api/itemList', { params });
         itemList.value = response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패', 'error');
     }
 };
 
@@ -442,7 +445,7 @@ const fetchItemName = async () => {
         const response = await axios.get('/api/itemList', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패', 'error');
         return [];
     }
 };
@@ -452,7 +455,7 @@ const fetchItemType = async () => {
         const response = await axios.get('/api/itemType');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패', 'error');
         return [];
     }
 };
@@ -462,7 +465,7 @@ const fetchCutd = async () => {
         const response = await axios.get('/api/cutdCond');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패', 'error');
         return [];
     }
 };
@@ -472,7 +475,7 @@ const fetchUnit = async () => {
         const response = await axios.get('/api/itemUnit');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패', 'error');
         return [];
     }
 };

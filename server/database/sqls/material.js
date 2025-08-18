@@ -88,6 +88,37 @@ const historyList = (filters) => {
   return { sql, params };
 };
 
+// 로그인 조회
+const userLogin = (filters) => {
+  let sql = `
+    SELECT e.emp_id,
+           e.emp_name,
+           e.status,
+           e.leavdorm,
+           e.perm,
+           e.dept_id,
+           d.dept_name,
+           e.phone,
+           e.remk
+    FROM   EMPLOYEE e JOIN DEPARTMENT d
+                      ON   e.dept_id = d.dept_id
+    WHERE  1 = 1
+  `;
+
+  const params = [];
+
+  if (filters.emp_id) {
+    sql += " AND e.emp_id = ?";
+    params.push(filters.emp_id);
+  }
+  if (filters.emp_pw) {
+    sql += " AND e.emp_id = ?";
+    params.push(filters.emp_pw);
+  }
+
+  return { sql, params };
+};
+
 // 품목조회
 const itemList = (filters) => {
   let sql = `
@@ -309,4 +340,5 @@ module.exports = {
   itemReturn,
   itemdispose,
   historyList,
+  userLogin,
 };
