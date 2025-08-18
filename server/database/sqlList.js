@@ -13,6 +13,7 @@ const cleanHist = require("./sqls/cleanHist.js");
 const product = require("./sqls/product.js");
 const warehouse = require("./sqls/warehouse.js");
 const process = require("./sqls/process.js");
+const prcsRouter = require("./sqls/prcsRouter.js");
 
 
 module.exports = {
@@ -31,4 +32,5 @@ module.exports = {
   ...product,
   ...warehouse,
   ...process,
+  ...prcsRouter
 };
