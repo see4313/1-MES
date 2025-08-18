@@ -23,6 +23,12 @@ router.post("/productInsert", async (req, res) => {
   res.send(result);
 });
 
+// 출고관리 목록
+router.get("/setDelivery", async (req, res) => {
+  let list = await productService.setDelivery();
+  res.send(list);
+});
+
 // 모달(생산지시)
 router.get("/prodModal", async (req, res) => {
   let list = await productService.prodModal();
