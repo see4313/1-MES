@@ -273,7 +273,7 @@ const toggleRow = (row) => {
 
                             <div v-else>
                                 <DataTable :value="detailCache[data.instructNo] || []" size="small" responsiveLayout="scroll">
-                                    <Column field="detaInstructNo" header="상세 지시 번호" />
+                                    <Column field="detaInstructNo" header="세부 지시 번호" />
                                     <Column field="itemId" header="품목번호" />
                                     <Column field="itemName" header="품목명" />
                                     <Column field="goalQty" header="지시 수량" />

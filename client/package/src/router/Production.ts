@@ -15,12 +15,21 @@ const MainRoutes = {
             name: 'instruction',
             path: '/instruction',
             component: () => import('@/views/production/instruction.vue')
-        }
-        ,
+        },
         {
             name: 'instructionList',
             path: '/instructionlist',
             component: () => import('@/views/production/instructionList.vue')
+        },
+        {
+            name: 'productionㄲesults',
+            path: '/productionresults',
+            component: () => import('@/views/production/productionResults.vue')
+        },
+        {
+            name: 'prcsRouter',
+            path: '/prcsrouter',
+            component: () => import('@/views/basic/prcsRouter.vue')
         }
     ]
 };
