@@ -32,20 +32,14 @@ const orderModal = async () => {
 };
 
 // 모달(상세주문)
-const itemModal = async () => {
-  let list = await mariadb.query("itemModal");
+const itemModal1 = async () => {
+  let list = await mariadb.query("itemModal1");
   return list;
 };
 
 // 모달(창고주문)
 const whModal = async () => {
   let list = await mariadb.query("whModal");
-  return list;
-};
-
-// 모달(생산지시)
-const prodModal = async () => {
-  let list = await mariadb.query("prodModal");
   return list;
 };
 
@@ -109,10 +103,9 @@ module.exports = {
   empModal,
   orderModal,
   detailOrder,
-  itemModal,
+  itemModal1,
   setOrder,
   orderToArray,
   deleteOrder,
   whModal,
-  prodModal,
 };

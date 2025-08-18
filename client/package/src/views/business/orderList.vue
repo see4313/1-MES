@@ -125,7 +125,6 @@ const Select = async () => {
     try {
         const params = {
             emp_id: selectempId.value,
-            order_id: selectorder.value,
             ordr_date: formattedLeavDate.value
         };
         const response = await axios.get('/api/orderList', { params });
