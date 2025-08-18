@@ -39,14 +39,9 @@ const FacilityRoutes: RouteRecordRaw[] = [
                 component: () => import('@/views/facility/inspect/Manage.vue')
             },
             {
-                path: 'cleaning/add',
-                name: 'FacilityCleaningAdd',
-                component: () => import('@/views/facility/cleaning/Add.vue')
-            },
-            {
-                path: 'cleaning/manage',
-                name: 'FacilityCleaningManage',
-                component: () => import('@/views/facility/cleaning/Manage.vue')
+                path: 'cleaning/histmanage',
+                name: 'FacilityHistMange',
+                component: () => import('@/views/facility/cleaning/CleaningHistMange.vue')
             },
             {
                 path: 'failure/add',

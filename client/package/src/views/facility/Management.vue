@@ -323,6 +323,10 @@ const itemSave = async () => {
         return;
     }
 
+    if (!confirm(itemId.value ? '정말 수정하시겠습니까?' : '정말 저장하시겠습니까?')) {
+        return;
+    }
+
     let obj = {
         facility_id: itemId.value || null,
         facility_nm: itemName.value,
@@ -343,7 +347,7 @@ const itemSave = async () => {
             if (response.data.success) showSnack('저장되었습니다', 'success');
         } else {
             response = await axios.put('/api/facilityUpdate', obj);
-            if (response.data.success) showSnack('수정되었습니다', 'success');
+            if (response.data.success) showSnack('수정되었습니다', 'warning');
         }
         await select();
         dataReset();
@@ -359,10 +363,14 @@ const itemDelete = async () => {
         showSnack('삭제할 데이터를 선택하세요', 'warning');
         return;
     }
+
+    if (!confirm('정말 삭제하시겠습니까?')) {
+        return;
+    }
     try {
         const response = await axios.delete('/api/facilityDelete', { data: { facility_id: itemId.value } });
         if (response.data.success) {
-            showSnack('삭제되었습니다.', 'success');
+            showSnack('삭제되었습니다.', 'error');
             await select();
             dataReset();
         }

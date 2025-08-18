@@ -194,29 +194,20 @@ const sidebarItem = [
                 title: '설비 관리',
                 to: '/facility/management'
             },
-
-            {
-                title: '점검 이력 등록',
-                to: '/facility/inspect/add'
-            },
             {
                 title: '점검 이력 관리',
                 to: '/facility/inspect/manage'
             },
             {
-                title: '세척이력 등록',
-                to: '/facility/cleaning/add'
-            },
-            {
-                title: '세척이력 관리',
-                to: '/facility/cleaning/manage'
+                title: '세척 이력 관리',
+                to: '/facility/cleaning/histmanage'
             },
             {
                 title: '고장 등록',
                 to: '/facility/failure/add'
             },
             {
-                title: '수리이력 등록',
+                title: '수리 이력',
                 to: '/facility/repair/add'
             },
             {
