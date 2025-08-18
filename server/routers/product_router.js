@@ -16,6 +16,12 @@ router.get("/insertList", async (req, res) => {
   res.send(list);
 });
 
+// 출고관리 목록
+router.get("/deliveryList", async (req, res) => {
+  let list = await productService.deliveryList();
+  res.send(list);
+});
+
 // 완제품 입고
 router.post("/productInsert", async (req, res) => {
   let board = req.body;

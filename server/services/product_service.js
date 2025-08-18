@@ -13,6 +13,12 @@ const insertList = async () => {
   return list;
 };
 
+// 출고관리 목록
+const deliveryList = async () => {
+  let list = await mariadb.query("deliveryList");
+  return list;
+};
+
 // 완제품 입고
 const productInsert = async (data) => {
   let list = convertToArray(item, [
@@ -55,4 +61,5 @@ module.exports = {
   insertList,
   productInsert,
   setDelivery,
+  deliveryList,
 };
