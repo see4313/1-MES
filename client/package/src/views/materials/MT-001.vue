@@ -436,7 +436,10 @@ const select = async () => {
 // 모달조회
 const fetchItemName = async () => {
     try {
-        const response = await axios.get('/api/itemId');
+        const params = {
+            uon: 'Y' // 사용여부
+        };
+        const response = await axios.get('/api/itemList', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);

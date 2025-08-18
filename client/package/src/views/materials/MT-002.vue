@@ -23,13 +23,6 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="LOT 번호" v-model="selectLotId" variant="outlined" readonly>
-                                <template #append-inner>
-                                    <v-icon @click="lotIdModal = true" class="cursor-pointer">mdi-magnify</v-icon>
-                                </template>
-                            </v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="4">
                             <v-text-field label="품목 구분" v-model="selectItemType" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemTypeModal = true" class="cursor-pointer">mdi-magnify</v-icon>
@@ -43,6 +36,9 @@
                                 </template>
                             </v-text-field>
                         </v-col>
+                    </v-row>
+
+                    <v-row dense>
                         <v-col cols="12" sm="4">
                             <v-text-field label="창고 코드" v-model="selectWhId" variant="outlined" readonly>
                                 <template #append-inner>
@@ -242,7 +238,10 @@ const select = async () => {
 // 모달조회 fetchItems
 const fetchItemId = async () => {
     try {
-        const response = await axios.get('/api/itemId');
+        const params = {
+            uon: 'Y' // 사용여부
+        };
+        const response = await axios.get('/api/itemList', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);

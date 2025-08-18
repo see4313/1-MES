@@ -10,16 +10,17 @@ router.get("/inventoryList", async (req, res) => {
   res.send(list); // 응답
 });
 
+// 출고이력 조회
+router.get("/historyList", async (req, res) => {
+  const filters = req.query;
+  let list = await materialService.historyList(filters);
+  res.send(list); // 응답
+});
+
 // 품목목록 조회
 router.get("/itemList", async (req, res) => {
   const filters = req.query;
   let list = await materialService.itemList(filters);
-  res.send(list); // 응답
-});
-
-// 품목번호 조회
-router.get("/itemId", async (req, res) => {
-  let list = await materialService.itemId();
   res.send(list); // 응답
 });
 
@@ -111,6 +112,20 @@ router.get("/selectProcDetail", async (req, res) => {
 router.post("/receive", async (req, res) => {
   let item = req.body;
   let result = await materialService.receive(item);
+  res.send(result);
+});
+
+// 반품 처리
+router.post("/itemReturn", async (req, res) => {
+  let item = req.body;
+  let result = await materialService.itemReturn(item);
+  res.send(result);
+});
+
+// 폐기 처리
+router.post("/itemdispose", async (req, res) => {
+  let item = req.body;
+  let result = await materialService.itemdispose(item);
   res.send(result);
 });
 
