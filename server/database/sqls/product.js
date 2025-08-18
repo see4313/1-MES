@@ -32,6 +32,16 @@ SELECT item.item_id,
        ins.remk
 FROM INSP_ACMSLT ins
 JOIN ITEM item ON  ins.item_id = item.item_id
+WHERE item.item_type = '완제품'
+`;
+
+// 출고관리 목록
+const deliveryList = `
+SELECT inv.item_id,
+       item.item_name,
+       inv.dlivy_qty
+FROM INVENTORY inv JOIN ITEM item
+                      ON inv.item_id = item.item_id; 
 `;
 
 // 완제품 입고
@@ -73,4 +83,5 @@ module.exports = {
   insertList,
   productInsert,
   setDelivery,
+  deliveryList,
 };
