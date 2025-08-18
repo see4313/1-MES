@@ -40,6 +40,18 @@ INSERT INTO INVENTORY (lot_id, item_id, wh_id, crea_date, vald_date, entebord_qt
 VALUES (next_code('LOT'), ?, ?, ?, ?, ?, ?, ?)
 `;
 
+// 출고관리 목록
+const setDelivery = `
+SELECT ordt.detail_id,
+       ordt.item_id,
+       item.item_name,
+       ord.vend_id,
+       vend.vend_name
+FROM ORDER_DETAIL ordt
+JOIN ITEM item ON ordt.item_id = item.item_id
+JOIN ORDER_INFO ord ON ordt.order_id = ord.order_id
+JOIN VENDOR vend ON ord.vend_id = vend.vend_id;
+`;
 // 모달(생산지시번호)
 const prodModal = `
  SELECT inv.lot_id, 
@@ -60,4 +72,5 @@ module.exports = {
   productList,
   insertList,
   productInsert,
+  setDelivery,
 };

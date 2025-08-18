@@ -36,7 +36,7 @@
                 </v-col>
             </v-row>
 
-            <DataTable :value="orderList" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
+            <DataTable :value="setDelivery" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
                 <Column field="detail_id" header="주문상세코드"></Column>
                 <Column field="item_id" header="제품 코드"></Column>
                 <Column field="item_name" header="제품명"></Column>
@@ -115,6 +115,7 @@ const selectedItem = ref(null);
 const selectedItem3 = ref(null);
 const orderId = ref(null);
 const vendId = ref(null);
+const setDelivery = ref(null);
 
 onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
@@ -127,8 +128,8 @@ const Select = async () => {
             item_id: selectedItem.value,
             vend_id: selectedItem3.value
         };
-        const response = await axios.get('/api/productList', { params });
-        productList.value = response.data;
+        const response = await axios.get('/api/setDelivery', { params });
+        setDelivery.value = response.data;
     } catch (error) {
         console.log('조회실패', error);
     }

@@ -232,7 +232,7 @@ const fetchItems2 = async () => {
 //제품모달
 const fetchItems3 = async () => {
     try {
-        const response = await axios.get('/api/itemModal');
+        const response = await axios.get('/api/itemModal1');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         console.error('조회 실패', error);
