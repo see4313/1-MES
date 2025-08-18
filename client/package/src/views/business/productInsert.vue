@@ -2,91 +2,75 @@
 <template>
     <v-row>
         <v-card elevation="10">
-            <v-col cols="12" md="12">
-                <v-card-item class="py-6 px-6">
-                    <CardHeader2
-                        title="제품입고처리"
-                        btn-text1="등록"
-                        btn-variant1="flat"
-                        btn-color1="primary"
-                        @btn-click1=""
-                        btn-text2="초기화"
-                        btn-variant2="flat"
-                        btn-color2="error"
-                        @btn-click2=""
-                    />
-                </v-card-item>
-            </v-col>
-            <v-row dense>
-                <v-col cols="12" sm="11">
-                    <v-text-field
-                        variant="outlined"
-                        label="생산지시번호"
-                        append-inner-icon="mdi-magnify"
-                        @click:append-inner="show01Modal = true"
-                        v-model="selectedItem"
-                    />
-                </v-col>
-                <v-col cols="12" sm="11">
-                    <v-text-field variant="outlined" label="제품코드" v-model="orderName" readonly />
-                </v-col>
-                <v-col cols="12" sm="11">
-                    <v-text-field variant="outlined" label="입고일자" v-model="empName" readonly />
-                </v-col>
-                <v-col cols="12" sm="11">
-                    <v-text-field variant="outlined" label="유통기한" v-model="vendName" readonly />
-                </v-col>
-
-                <v-col cols="12" sm="11">
-                    <v-text-field variant="outlined" v-model="joinDate" label="입고수량" readonly />
-                </v-col>
-                <v-col cols="12" sm="11">
-                    <v-text-field label="창고코드" v-model="selectCutd" variant="outlined" readonly>
-                        <template #append-inner>
-                            <v-icon @click="showModal2 = true" class="cursor-pointer" v-model="selectedItem2">mdi-magnify</v-icon>
-                        </template>
-                    </v-text-field>
+            <v-card-item class="py-6 px-6">
+                <CardHeader
+                    title="입고 관리"
+                    btn-text1="조회"
+                    btn-variant1="flat"
+                    btn-color1="primary"
+                    @btn-click1="Select()"
+                    btn-text2="입고"
+                    btn-variant2="flat"
+                    btn-color2="error"
+                    @btn-click2=""
+                />
+            </v-card-item>
+            <v-row no-gutters>
+                <v-col cols="12" sm="4">
+                    <v-sheet class="pa-2 ma-2">
+                        <v-text-field variant="outlined" label="제품코드 검색" v-model="selectedItem">
+                            <template #append-inner>
+                                <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
+                            </template>
+                        </v-text-field>
+                    </v-sheet>
                 </v-col>
             </v-row>
+
+            <DataTable
+                :value="insertList"
+                tableStyle="min-width: 50rem"
+                v-model:selection="selectedProducts"
+                @row-click="onRowClick"
+                class="cursor-pointer"
+            >
+                <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+                <Column field="item_id" header="제품코드"></Column>
+                <Column field="item_name" header="제품명"></Column>
+                <Column field="item_type" header="제품유형"></Column>
+                <Column field="pass_qty" header="수량"></Column>
+                <Column header="입고수량" style="width: 120px">
+                    <template #body="slotProps">
+                        <v-text-field type="number" dense hide-details style="width: 100px" variant="outlined" min="0" />
+                    </template>
+                </Column>
+                <Column header="비고" style="width: 110px">
+                    <template #body="slotProps">
+                        <v-text-field type="text" dense hide-details style="width: 120px" variant="outlined" min="0" />
+                    </template>
+                </Column>
+            </DataTable>
         </v-card>
     </v-row>
 
+    <!-- 제품 코드모달 -->
     <ModalSearch
         :visible="showModal"
-        title="생산지시검색"
-        idField="instruct_no"
+        title="제품코드"
+        idField="item_id"
         :columns="[
-            { key: 'instruct_no', label: '생산지시번호' },
-            { key: 'item_name', label: '제품명' },
             { key: 'item_id', label: '제품코드' },
-            { key: 'instruct_datetime', label: '지시일자' }
+            { key: 'item_type', label: '제품유형' },
+            { key: 'item_name', label: '제품명' }
         ]"
         :fetchData="fetchItems"
         :pageSize="5"
         @select="onSelectItem"
         @close="showModal = false"
     />
-
-    <!-- 창고 모달 -->
-    <ModalSearch
-        :visible="showModal2"
-        title="창고코드"
-        idField="wh_id"
-        :columns="[
-            { key: 'wh_id', label: '창고코드' },
-            { key: 'wh_name', label: '창고명' },
-            { key: 'wh_type', label: '창고유형' },
-            { key: 'loca', label: '창고위치' },
-            { key: 'uon', label: '사용여부' }
-        ]"
-        :fetchData="fetchItems2"
-        :pageSize="5"
-        @select="onSelectItem2"
-        @close="showModal2 = false"
-    />
 </template>
 <script setup>
-import CardHeader2 from '@/components/production/card-header-btn2.vue';
+import CardHeader from '@/components/production/card-header-btn2.vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -99,43 +83,37 @@ onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
 });
 
-const showModal = ref(false); // 생산지시모달
-const selectedItem = ref(null); // 생산지시선택
-const showModal2 = ref(false); // 창고모달
-const selectedItem2 = ref(null); // 창고선택
-const selectWhId = ref(null);
-const selectInstuctId = ref(null);
+const showModal = ref(false); // 제품코드모달
+const selectedItem = ref(null); // 제품코드선택
+const selectedProducts = ref([]);
+const insertList = ref();
 
-//생산지시
+// 완제품 입고 목록
+const Select = async () => {
+    try {
+        const params = {
+            item_id: selectedItem.value
+        };
+        const response = await axios.get('/api/insertList', { params });
+        insertList.value = response.data;
+    } catch (error) {
+        console.log('조회실패', error);
+    }
+};
+
+// 제품모달조회
 const fetchItems = async () => {
     try {
-        const response = await axios.get('/api/prodModal');
-        return response.data; // 반드시 배열 형태여야 함
+        const response = await axios.get('/api/itemModal1');
+        return response.data;
     } catch (error) {
         console.error('조회 실패', error);
         return [];
     }
 };
 
-const fetchItems2 = async () => {
-    try {
-        const response = await axios.get('/api/whModal');
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        console.error('조회 실패', error);
-        return [];
-    }
-};
-
-// 생산지시 선택값
+// 모달에서 선택한 값 처리 onSelectItem
 const onSelectItem = (item) => {
-    selectedItem.value = item.instruct_id;
-    selectInstuctId.value = item.instruct_id;
-};
-
-// 창고 선택값
-const onSelectItem2 = (item) => {
-    selectedItem2.value = item.wh_id;
-    selectWhId.value = item.wh_id;
+    selectedItem.value = item.item_id;
 };
 </script>
