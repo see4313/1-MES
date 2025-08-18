@@ -1,532 +1,465 @@
 <template>
-    <v-card elevation="10" class="pa-4">
-        <!-- Header -->
-        <div class="d-flex align-center">
-            <div class="text-h6 font-weight-bold">비가동 관리</div>
-            <v-spacer />
-            <v-btn variant="flat" color="grey" class="mr-2" @click="onReset">초기화</v-btn>
-            <v-btn color="primary" @click="onSearch">조회</v-btn>
-        </div>
-
-        <v-divider class="my-4" />
-
-        <!-- ① 검색 영역 -->
-        <v-form ref="searchRef" @submit.prevent="onSearch">
-            <v-row dense>
-                <!-- 설비명 -->
-                <v-col cols="12" sm="3">
-                    <v-text-field
-                        label="설비명"
-                        v-model="search.facilityName"
-                        variant="outlined"
-                        clearable
-                        readonly
-                        append-inner-icon="mdi-magnify"
-                        @click:append-inner="openFacilityModal"
-                    />
-                </v-col>
-
-                <!-- 비가동 사유 -->
-                <v-col cols="12" sm="3">
-                    <v-text-field
-                        label="비가동 사유"
-                        v-model="search.reasonName"
-                        variant="outlined"
-                        clearable
-                        readonly
-                        append-inner-icon="mdi-magnify"
-                        @click:append-inner="openReasonModal"
-                    />
-                </v-col>
-
-                <!-- 시작일자 -->
-                <v-col cols="12" sm="3">
-                    <v-menu v-model="menu.start" :close-on-content-click="false" location="bottom start">
-                        <template #activator="{ props }">
-                            <v-text-field
-                                v-bind="props"
-                                label="시작 일자"
-                                :model-value="formatDate(search.startDate)"
-                                variant="outlined"
-                                readonly
-                                clearable
-                                min
-                                append-inner-icon="mdi-calendar"
-                                @click:clear="search.startDate = null"
-                            />
-                        </template>
-                        <v-date-picker v-model="search.startDate" :max="today" show-adjacent-months />
-                    </v-menu>
-                </v-col>
-
-                <!-- 종료일자 -->
-                <v-col cols="12" sm="3">
-                    <v-menu v-model="menu.end" :close-on-content-click="false" location="bottom start">
-                        <template #activator="{ props }">
-                            <v-text-field
-                                v-bind="props"
-                                label="종료 일자"
-                                :model-value="formatDate(search.endDate)"
-                                variant="outlined"
-                                readonly
-                                clearable
-                                append-inner-icon="mdi-calendar"
-                                @click:clear="search.endDate = null"
-                            />
-                        </template>
-                        <v-date-picker v-model="search.endDate" :min="search.startDate || undefined" :max="today" show-adjacent-months />
-                    </v-menu>
-                </v-col>
-
-                <!-- 상태 -->
-                <v-col cols="12" sm="3">
-                    <v-select
-                        label="상태"
-                        :items="statusItems"
-                        v-model="search.status"
-                        item-title="label"
-                        item-value="value"
-                        variant="outlined"
-                        clearable
-                    />
+    <!-- 조회 영역 -->
+    <v-card elevation="10">
+        <v-card-item class="py-6 px-6">
+            <CardHeader2
+                title="비가동 조회"
+                btn-text1="초기화"
+                btn-variant1="flat"
+                btn-color1="secondary"
+                @btn-click1="selectReset"
+                btn-text2="조회"
+                btn-variant2="flat"
+                btn-color2="primary"
+                @btn-click2="select"
+            />
+            <v-row>
+                <v-col cols="12" md="12">
+                    <v-row justify="space-between" dense>
+                        <v-col cols="12" sm="3">
+                            <v-text-field label="설비명" v-model="filterFacilityName" variant="outlined" readonly>
+                                <template #append-inner>
+                                    <v-icon class="cursor-pointer" @click="facilityModal = true">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-text-field label="담당자" v-model="filterEmpName" variant="outlined" readonly>
+                                <template #append-inner>
+                                    <v-icon class="cursor-pointer" @click="empModal = true">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-text-field label="비가동 유형" v-model="filterDownTypeName" variant="outlined" readonly>
+                                <template #append-inner>
+                                    <v-icon class="cursor-pointer" @click="downTypeModal = true">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-text-field type="date" label="시작일" v-model="filterFromDate" :max="todayStr" variant="outlined" />
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-text-field type="date" label="종료일" v-model="filterToDate" :max="todayStr" variant="outlined" />
+                        </v-col>
+                    </v-row>
                 </v-col>
             </v-row>
-        </v-form>
+        </v-card-item>
     </v-card>
 
-    <v-divider class="my-4" />
-
-    <!-- ④ 결과 테이블 -->
-    <v-card class="mt-6">
-        <v-table density="comfortable">
-            <thead>
-                <tr>
-                    <th style="width: 110px">설비 ID</th>
-                    <th>설비명</th>
-                    <th>비가동 사유</th>
-                    <th style="width: 120px">상태</th>
-                    <th style="width: 180px">비가동 시작시간</th>
-                    <th style="width: 180px">비가동 종료시간</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr
-                    v-for="row in rows"
-                    :key="row.dt_id"
-                    :class="['table-row', selected?.dt_id === row.dt_id ? 'active' : '']"
-                    @click="onSelectRow(row)"
-                >
-                    <td>{{ row.facility_id }}</td>
-                    <td>{{ row.facility_nm }}</td>
-                    <td>{{ row.reason_name }}</td>
-                    <td>
-                        <v-chip size="small" :color="row.status === 'DOWN' ? 'error' : 'success'" variant="tonal">
-                            {{ row.status === 'DOWN' ? '비가동' : '가동' }}
+    <!-- 목록 영역 -->
+    <v-card elevation="10" class="mt-3">
+        <v-card-item class="py-6 px-6">
+            <CardHeader title="비가동 목록" />
+            <DataTable
+                v-model:selection="selectedRow"
+                :value="rows"
+                selectionMode="single"
+                :metaKeySelection="false"
+                dataKey="down_id"
+                paginator
+                :rows="10"
+                :loading="listLoading"
+                tableStyle="min-width: 64rem"
+                class="cursor-pointer"
+                @row-dblclick="
+                    ({ data }) => {
+                        selectedRow = data;
+                    }
+                "
+            >
+                <Column field="down_id" header="ID" />
+                <Column field="facility_name" header="설비명" />
+                <Column field="emp_name" header="담당자" />
+                <Column field="down_type_name" header="비가동 유형" />
+                <Column field="down_start_dt" header="시작일시" />
+                <Column field="down_end_dt" header="종료일시" />
+                <Column field="duration_min" header="소요(분)" />
+                <Column header="상태">
+                    <template #body="{ data }">
+                        <v-chip size="small" :color="data.oper_yn === 'Y' ? 'primary' : 'grey'" variant="flat">
+                            {{ data.oper_yn === 'Y' ? '가동' : '비가동' }}
                         </v-chip>
-                    </td>
-                    <td>{{ fmt(row.start_time) }}</td>
-                    <td>{{ row.end_time ? fmt(row.end_time) : '-' }}</td>
-                </tr>
-
-                <tr v-if="!rows.length">
-                    <td colspan="6" class="text-center py-6">조회 결과가 없습니다</td>
-                </tr>
-            </tbody>
-        </v-table>
-
-        <div class="d-flex align-center justify-end pa-3">
-            <v-pagination v-model="page" :length="totalPages" :total-visible="7" size="small" @update:modelValue="onChangePage" />
-        </div>
+                    </template>
+                </Column>
+                <Column field="remk" header="비고" />
+            </DataTable>
+            <p v-if="!rows.length && !listLoading" class="text-grey mt-3">조회 결과가 없습니다.</p>
+        </v-card-item>
     </v-card>
 
-    <!-- ========== 설비 모달 ========== -->
-    <v-dialog v-model="dlg.facility" max-width="900">
-        <v-card class="rounded-lg">
-            <v-card-title class="text-h6 font-weight-bold">
-                설비 검색
-                <v-spacer /><v-btn icon @click="dlg.facility = false"><v-icon>mdi-close</v-icon></v-btn>
-            </v-card-title>
-            <v-card-text>
-                <v-text-field v-model="q.fac" label="검색" append-inner-icon="mdi-magnify" variant="outlined" clearable class="mb-3" />
-                <v-table density="comfortable">
-                    <thead>
-                        <tr>
-                            <th style="width: 110px">설비ID</th>
-                            <th>설비명</th>
-                            <th>유형</th>
-                            <th>담당자</th>
-                            <th class="text-center" style="width: 100px">선택</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="row in facRows" :key="row.facility_id">
-                            <td>{{ row.facility_id }}</td>
-                            <td>{{ row.facility_nm }}</td>
-                            <td>{{ row.facility_type }}</td>
-                            <td>{{ row.manager_name }}</td>
-                            <td class="text-center">
-                                <v-btn size="small" color="primary" variant="tonal" @click="pickFacility(row)">선택</v-btn>
-                            </td>
-                        </tr>
-                        <tr v-if="!facRows.length">
-                            <td colspan="5" class="text-center py-6">자료가 없습니다</td>
-                        </tr>
-                    </tbody>
-                </v-table>
-            </v-card-text>
-        </v-card>
-    </v-dialog>
+    <!-- 등록/정정 영역 -->
+    <v-card elevation="10" class="mt-3">
+        <v-card-item class="py-6 px-6">
+            <CardHeader3
+                :title="downId ? '비가동 정정' : '비가동 등록'"
+                btn-text1="초기화"
+                btn-variant1="flat"
+                btn-color1="secondary"
+                @btn-click1="formReset"
+                btn-text2="무효"
+                btn-variant2="flat"
+                btn-color2="error"
+                :btn-disabled2="!downId || voiding"
+                @btn-click2="voidRow"
+                btn-text3="저장"
+                btn-variant3="flat"
+                btn-color3="primary"
+                :btn-disabled3="saving"
+                @btn-click3="saveRow"
+            />
+            <v-row dense>
+                <v-col cols="12" sm="4">
+                    <v-text-field label="설비명" v-model="facilityName" variant="outlined" readonly>
+                        <template #append-inner>
+                            <v-icon class="cursor-pointer" @click="facilityModal = true">mdi-magnify</v-icon>
+                        </template>
+                    </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-text-field label="담당자" v-model="empName" variant="outlined" readonly>
+                        <template #append-inner>
+                            <v-icon class="cursor-pointer" @click="empModal = true">mdi-magnify</v-icon>
+                        </template>
+                    </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-text-field label="비가동 유형" v-model="downTypeName" variant="outlined" readonly>
+                        <template #append-inner>
+                            <v-icon class="cursor-pointer" @click="downTypeModal = true">mdi-magnify</v-icon>
+                        </template>
+                    </v-text-field>
+                </v-col>
+            </v-row>
 
-    <!-- ========== 사유 모달 ========== -->
-    <v-dialog v-model="dlg.reason" max-width="700">
-        <v-card class="rounded-lg">
-            <v-card-title class="text-h6 font-weight-bold">
-                비가동 사유
-                <v-spacer /><v-btn icon @click="dlg.reason = false"><v-icon>mdi-close</v-icon></v-btn>
-            </v-card-title>
-            <v-card-text>
-                <v-text-field v-model="q.reason" label="검색" append-inner-icon="mdi-magnify" variant="outlined" clearable class="mb-3" />
-                <v-table density="comfortable">
-                    <thead>
-                        <tr>
-                            <th style="width: 120px">코드</th>
-                            <th>사유명</th>
-                            <th>설명</th>
-                            <th class="text-center" style="width: 100px">선택</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="row in reasonRows" :key="row.code">
-                            <td>{{ row.code }}</td>
-                            <td>{{ row.name }}</td>
-                            <td>{{ row.descr }}</td>
-                            <td class="text-center">
-                                <v-btn size="small" color="primary" variant="tonal" @click="pickReason(row)">선택</v-btn>
-                            </td>
-                        </tr>
-                        <tr v-if="!reasonRows.length">
-                            <td colspan="4" class="text-center py-6">자료가 없습니다</td>
-                        </tr>
-                    </tbody>
-                </v-table>
-            </v-card-text>
-        </v-card>
-    </v-dialog>
+            <v-row dense>
+                <v-col cols="12" sm="4">
+                    <v-text-field label="이력ID" v-model="downId" variant="outlined" readonly />
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-text-field type="datetime-local" label="비가동 시작" v-model="startLocal" :max="nowLocal" variant="outlined" />
+                </v-col>
+                <v-col cols="12" sm="4">
+                    <v-text-field type="datetime-local" label="비가동 종료" v-model="endLocal" :max="nowLocal" variant="outlined" />
+                </v-col>
+            </v-row>
 
-    <!-- 미저장 경고 다이얼로그 -->
-    <v-dialog v-model="dlg.leaveConfirm" width="420">
-        <v-card>
-            <v-card-title class="text-subtitle-1">수정사항이 저장되지 않았습니다.</v-card-title>
-            <v-card-text>선택을 변경하시겠습니까?</v-card-text>
-            <v-card-actions>
-                <v-spacer />
-                <v-btn variant="text" @click="dlg.leaveConfirm = false">취소</v-btn>
-                <v-btn color="primary" @click="confirmLeave">변경</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+            <v-row dense>
+                <v-col cols="12" sm="6">
+                    <v-radio-group v-model="operYn" inline>
+                        <v-radio label="비가동" value="N" />
+                        <v-radio label="가동" value="Y" />
+                    </v-radio-group>
+                </v-col>
+                <v-col cols="12" sm="6">
+                    <v-textarea label="비고" v-model="remk" rows="2" variant="outlined" />
+                </v-col>
+            </v-row>
+
+            <v-row dense v-if="downId">
+                <v-col cols="12">
+                    <v-textarea label="정정 사유" v-model="editReason" rows="3" variant="outlined" />
+                </v-col>
+            </v-row>
+        </v-card-item>
+    </v-card>
+
+    <!-- 모달: 설비/담당자/비가동유형 -->
+    <ModalSearch
+        :visible="facilityModal"
+        title="설비명"
+        idField="facility_id"
+        :columns="[
+            { key: 'facility_id', label: 'ID' },
+            { key: 'facility_name', label: '설비명' }
+        ]"
+        :fetchData="fetchFacilities"
+        @select="onSelectFacility"
+        @close="facilityModal = false"
+    />
+    <ModalSearch
+        :visible="empModal"
+        title="담당자"
+        idField="user_id"
+        :columns="[
+            { key: 'user_id', label: 'ID' },
+            { key: 'user_name', label: '이름' }
+        ]"
+        :fetchData="fetchUsers"
+        @select="onSelectEmp"
+        @close="empModal = false"
+    />
+    <ModalSearch
+        :visible="downTypeModal"
+        title="비가동 유형"
+        idField="down_type_id"
+        :columns="[
+            { key: 'down_type_id', label: 'ID' },
+            { key: 'down_type_name', label: '유형명' }
+        ]"
+        :fetchData="fetchDownTypes"
+        @select="onSelectDownType"
+        @close="downTypeModal = false"
+    />
+
+    <!-- Snackbar -->
+    <v-snackbar v-model="snackOpen" :color="snackColor" timeout="2000" location="top right">
+        {{ snackMessage }}
+    </v-snackbar>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+<script setup>
+import { ref, watch, computed } from 'vue';
 import axios from 'axios';
-import dayjs from 'dayjs';
+import CardHeader2 from '@/components/production/card-header-btn2.vue';
+import CardHeader3 from '@/components/production/card-header-btn3k.vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import ModalSearch from '@/views/commons/CommonModal.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
+import { useFormatDate } from '@/composables/useFormatDate';
 
-type Row = {
-    dt_id: number;
-    facility_id: number;
-    facility_nm: string;
-    reason_code: string;
-    reason_name: string;
-    status: 'RUNNING' | 'DOWN';
-    start_time: string; // 'YYYY-MM-DD HH:mm:ss'
-    end_time: string | null;
+const { formatDate } = useFormatDate();
+const { snackOpen, snackMessage, snackColor } = useSnackBar();
+const showSnack = (m, c = 'success') => {
+    snackMessage.value = m;
+    snackColor.value = c;
+    snackOpen.value = true;
 };
 
-type FacilityRow = { facility_id: number; facility_nm: string; facility_type?: string; manager_name?: string };
-type ReasonRow = { code: string; name: string; descr?: string };
-
-const today = new Date();
-
-/* --------------------------- 검색/페이징 --------------------------- */
-const searchRef = ref();
-const search = ref({
-    facilityId: null as number | null,
-    facilityName: '',
-    reasonCode: '',
-    reasonName: '',
-    startDate: null as Date | null,
-    endDate: null as Date | null,
-    status: 'ALL' as 'ALL' | 'RUNNING' | 'DOWN'
-});
-const statusItems = [
-    { label: '전체', value: 'ALL' },
-    { label: '가동', value: 'RUNNING' },
-    { label: '비가동', value: 'DOWN' }
-];
-
-const page = ref(1);
-const size = ref(10);
-const total = ref(0);
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)));
-
-const rows = ref<Row[]>([]);
-
-/* --------------------------- 테이블 조회 --------------------------- */
-async function fetchList() {
-    const params: any = {
-        page: page.value,
-        size: size.value,
-        status: search.value.status === 'ALL' ? undefined : search.value.status,
-        facilityName: search.value.facilityName || undefined,
-        reasonCode: search.value.reasonCode || undefined,
-        startDate: search.value.startDate ? dayjs(search.value.startDate).format('YYYY-MM-DD') : undefined,
-        endDate: search.value.endDate ? dayjs(search.value.endDate).format('YYYY-MM-DD') : undefined
-    };
-    const { data } = await axios.get('/api/downtimes', { params });
-    rows.value = data?.rows ?? [];
-    total.value = data?.total ?? rows.value.length;
-}
-
-function onSearch() {
-    page.value = 1;
-    fetchList();
-}
-
-function onReset() {
-    search.value = {
-        facilityId: null,
-        facilityName: '',
-        reasonCode: '',
-        reasonName: '',
-        startDate: null,
-        endDate: null,
-        status: 'ALL'
-    };
-    page.value = 1;
-    rows.value = [];
-    selected.value = null;
-    resetEdit();
-}
-
-function onChangePage() {
-    if (guardDirty(() => fetchList())) return;
-    fetchList();
-}
-
-/* --------------------------- 선택/수정 --------------------------- */
-const selected = ref<Row | null>(null);
-
-function onSelectRow(row: Row) {
-    const proceed = !isDirty.value ? true : guardDirty(() => {});
-    if (!proceed) return;
-    selected.value = { ...row };
-    // 바인딩
-    setEditFromRow(row);
-}
-
-const edit = ref({
-    startDate: null as Date | null,
-    startTime: '09:00:00',
-    endDate: null as Date | null,
-    endTime: '09:00:00',
-    status: 'DOWN' as 'RUNNING' | 'DOWN',
-    displayStart: '',
-    displayEnd: ''
-});
-function resetEdit() {
-    edit.value = {
-        startDate: null,
-        startTime: '09:00:00',
-        endDate: null,
-        endTime: '09:00:00',
-        status: 'DOWN',
-        displayStart: '',
-        displayEnd: ''
-    };
-}
-function setEditFromRow(row: Row) {
-    // start
-    const s = dayjs(row.start_time);
-    edit.value.startDate = s.toDate();
-    edit.value.startTime = s.format('HH:mm:ss');
-    edit.value.displayStart = s.format('YYYY-MM-DD HH:mm:ss');
-    // end
-    if (row.end_time) {
-        const e = dayjs(row.end_time);
-        edit.value.endDate = e.toDate();
-        edit.value.endTime = e.format('HH:mm:ss');
-        edit.value.displayEnd = e.format('YYYY-MM-DD HH:mm:ss');
-    } else {
-        edit.value.endDate = null;
-        edit.value.endTime = '09:00:00';
-        edit.value.displayEnd = '';
-    }
-    // status
-    edit.value.status = row.status;
-}
-
-function assembleDateTime(d: Date | null, t: string | null) {
-    if (!d || !t) return '';
-    const [hh = '00', mm = '00', ss = '00'] = (t || '').split(':');
-    const dt = dayjs(d)
-        .hour(+hh || 0)
-        .minute(+mm || 0)
-        .second(+ss || 0)
-        .millisecond(0);
-    return dt.format('YYYY-MM-DD HH:mm:ss');
-}
-
-const valMsg = ref('');
-const canSave = computed(() => {
-    valMsg.value = '';
-    if (!selected.value) return false;
-    const start = assembleDateTime(edit.value.startDate, edit.value.startTime);
-    if (!start) {
-        valMsg.value = '시작시간은 필수입니다.';
-        return false;
-    }
-    const end = assembleDateTime(edit.value.endDate, edit.value.endTime) || null;
-    if (end && dayjs(end).isBefore(dayjs(start))) {
-        valMsg.value = '종료시간은 시작시간보다 빠를 수 없습니다.';
-        return false;
-    }
-    return true;
+// 오늘/현재
+const todayStr = new Date().toISOString().split('T')[0];
+const nowLocal = computed(() => {
+    const n = new Date(),
+        p = (x) => String(x).padStart(2, '0');
+    return `${n.getFullYear()}-${p(n.getMonth() + 1)}-${p(n.getDate())}T${p(n.getHours())}:${p(n.getMinutes())}`;
 });
 
-// dirty 체크
-const isDirty = computed(() => {
-    if (!selected.value) return false;
-    const s0 = selected.value.start_time;
-    const e0 = selected.value.end_time || '';
-    const st0 = selected.value.status;
-    const s1 = assembleDateTime(edit.value.startDate, edit.value.startTime);
-    const e1 = assembleDateTime(edit.value.endDate, edit.value.endTime);
-    const st1 = edit.value.status;
-    return s0 !== s1 || (e0 || '') !== (e1 || '') || st0 !== st1;
-});
+// ===== 상태 플래그 =====
+const listLoading = ref(false);
+const saving = ref(false);
+const voiding = ref(false);
 
-const dlg = ref({ facility: false, reason: false, leaveConfirm: false });
-let leaveNext: null | (() => void) = null;
-function guardDirty(next: () => void) {
-    if (isDirty.value) {
-        leaveNext = next;
-        dlg.value.leaveConfirm = true;
-        return true;
-    }
-    return false;
+// ===== 조회 필터 =====
+const filterFacilityId = ref('');
+const filterFacilityName = ref('');
+const filterEmpId = ref('');
+const filterEmpName = ref('');
+const filterDownTypeId = ref('');
+const filterDownTypeName = ref('');
+const filterFromDate = ref(todayStr);
+const filterToDate = ref(todayStr);
+
+// ===== 목록/선택 =====
+const rows = ref([]);
+const selectedRow = ref(null);
+
+// ===== 폼 =====
+const downId = ref('');
+const facilityId = ref('');
+const facilityName = ref('');
+const empId = ref('');
+const empName = ref('');
+const downTypeId = ref('');
+const downTypeName = ref('');
+const startLocal = ref(''); // datetime-local
+const endLocal = ref('');
+const operYn = ref('N'); // N=비가동, Y=가동
+const remk = ref('');
+const editReason = ref('');
+
+// ===== 모달 =====
+const facilityModal = ref(false);
+const empModal = ref(false);
+const downTypeModal = ref(false);
+
+// ===== 선택 데이터 로드 =====
+const fetchFacilities = async () => (await axios.get('/api/facilities')).data;
+const fetchUsers = async () => (await axios.get('/api/users')).data;
+const fetchDownTypes = async () => (await axios.get('/api/downTypes')).data;
+
+// ===== 모달 선택 =====
+function onSelectFacility(row) {
+    facilityId.value = row.facility_id;
+    facilityName.value = row.facility_name;
+    filterFacilityId.value = row.facility_id;
+    filterFacilityName.value = row.facility_name;
+    facilityModal.value = false;
 }
-function confirmLeave() {
-    dlg.value.leaveConfirm = false;
-    leaveNext && leaveNext();
-    leaveNext = null;
+function onSelectEmp(row) {
+    empId.value = row.user_id;
+    empName.value = row.user_name;
+    filterEmpId.value = row.user_id;
+    filterEmpName.value = row.user_name;
+    empModal.value = false;
+}
+function onSelectDownType(row) {
+    downTypeId.value = row.down_type_id;
+    downTypeName.value = row.down_type_name;
+    filterDownTypeId.value = row.down_type_id;
+    filterDownTypeName.value = row.down_type_name;
+    downTypeModal.value = false;
 }
 
-// 저장
-async function onSave() {
-    if (!selected.value || !canSave.value) return;
-    const body = {
-        start_time: assembleDateTime(edit.value.startDate, edit.value.startTime),
-        end_time: assembleDateTime(edit.value.endDate, edit.value.endTime) || null,
-        status: edit.value.status
-    };
+// ===== 유틸 =====
+function toDateTimeSeconds(local) {
+    if (!local) return '';
+    const d = new Date(local),
+        p = (x) => String(x).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+function minsBetween(a, b) {
+    const st = new Date(a),
+        ed = new Date(b);
+    return Math.max(0, Math.round((ed - st) / 60000));
+}
+
+// ===== 조회 =====
+async function select() {
     try {
-        await axios.put(`/api/downtimes/${selected.value.dt_id}`, body);
-        // 리스트 갱신 + 선택행 갱신
-        await fetchList();
-        const fresh = rows.value.find((r) => r.dt_id === selected.value!.dt_id);
-        if (fresh) {
-            selected.value = { ...fresh };
-            setEditFromRow(fresh);
+        if (filterFromDate.value && filterToDate.value && filterFromDate.value > filterToDate.value) {
+            showSnack('시작일이 종료일보다 클 수 없습니다', 'error');
+            return;
         }
-        toast('저장되었습니다.');
-    } catch (e: any) {
-        alert(e?.response?.data?.message || e?.message || '저장 실패');
+        listLoading.value = true;
+        const params = {
+            facility_id: filterFacilityId.value || null,
+            emp_id: filterEmpId.value || null,
+            down_type_id: filterDownTypeId.value || null,
+            from_dt: filterFromDate.value ? `${formatDate(filterFromDate.value, '-')} 00:00:00` : null,
+            to_dt: filterToDate.value ? `${formatDate(filterToDate.value, '-')} 23:59:59` : null
+        };
+        const { data } = await axios.get('/api/downtimeList', { params });
+        rows.value = (data || []).map((x) => ({
+            ...x,
+            duration_min: x.down_start_dt && x.down_end_dt ? minsBetween(x.down_start_dt, x.down_end_dt) : null,
+            oper_yn: x.oper_yn ?? 'N'
+        }));
+    } catch (e) {
+        console.error(e);
+        showSnack('비가동 조회 실패', 'error');
+    } finally {
+        listLoading.value = false;
     }
 }
 
-/* --------------------------- 모달: 설비 --------------------------- */
-const facRows = ref<FacilityRow[]>([]);
-const q = ref({ fac: '', reason: '' });
-
-function openFacilityModal() {
-    dlg.value.facility = true;
-    loadFacilities();
-}
-async function loadFacilities() {
-    const { data } = await axios.get('/api/facilities', { params: { page: 1, pageSize: 1000, q: q.value.fac } });
-    facRows.value = data?.rows ?? [];
-}
-function pickFacility(row: FacilityRow) {
-    search.value.facilityId = row.facility_id;
-    search.value.facilityName = row.facility_nm;
-    dlg.value.facility = false;
+// ===== 조회 초기화 =====
+function selectReset() {
+    filterFacilityId.value = '';
+    filterFacilityName.value = '';
+    filterEmpId.value = '';
+    filterEmpName.value = '';
+    filterDownTypeId.value = '';
+    filterDownTypeName.value = '';
+    filterFromDate.value = todayStr;
+    filterToDate.value = todayStr;
+    rows.value = [];
+    selectedRow.value = null;
 }
 
-/* --------------------------- 모달: 사유 --------------------------- */
-const reasonRows = ref<ReasonRow[]>([]);
-function openReasonModal() {
-    dlg.value.reason = true;
-    loadReasons();
-}
-async function loadReasons() {
-    const { data } = await axios.get('/api/downtime-reasons', { params: { page: 1, size: 1000, q: q.value.reason } });
-    reasonRows.value = data?.rows ?? [];
-}
-function pickReason(row: ReasonRow) {
-    search.value.reasonCode = row.code;
-    search.value.reasonName = row.name;
-    dlg.value.reason = false;
+// ===== 선택 → 폼 바인딩 =====
+watch(selectedRow, (val) => {
+    if (!val) return;
+    downId.value = val.down_id || '';
+    facilityId.value = val.facility_id || '';
+    facilityName.value = val.facility_name || '';
+    empId.value = val.emp_id || '';
+    empName.value = val.emp_name || '';
+    downTypeId.value = val.down_type_id || '';
+    downTypeName.value = val.down_type_name || '';
+    startLocal.value = val.down_start_dt ? val.down_start_dt.replace(' ', 'T').slice(0, 16) : '';
+    endLocal.value = val.down_end_dt ? val.down_end_dt.replace(' ', 'T').slice(0, 16) : '';
+    operYn.value = val.oper_yn ?? 'N';
+    remk.value = val.remk || '';
+    editReason.value = '';
+});
+
+// ===== 폼 초기화 =====
+function formReset() {
+    downId.value = '';
+    // 필터 프리필
+    facilityId.value = filterFacilityId.value;
+    facilityName.value = filterFacilityName.value;
+    empId.value = filterEmpId.value;
+    empName.value = filterEmpName.value;
+    downTypeId.value = filterDownTypeId.value;
+    downTypeName.value = filterDownTypeName.value;
+    const n = new Date(),
+        p = (x) => String(x).padStart(2, '0');
+    const base = `${n.getFullYear()}-${p(n.getMonth() + 1)}-${p(n.getDate())}T${p(n.getHours())}:${p(n.getMinutes())}`;
+    startLocal.value = base;
+    endLocal.value = base;
+    operYn.value = 'N';
+    remk.value = '';
+    editReason.value = '';
+    selectedRow.value = null;
 }
 
-/* --------------------------- 공통 유틸/바인딩 --------------------------- */
-const menu = ref({ start: false, end: false, editStart: false, editEnd: false });
+// ===== 저장(등록/정정) =====
+async function saveRow() {
+    if (!facilityId.value || !empId.value || !downTypeId.value || !startLocal.value || !endLocal.value) {
+        showSnack('필수값을 입력하세요', 'error');
+        return;
+    }
+    const st = new Date(startLocal.value),
+        ed = new Date(endLocal.value);
+    if (ed < st) return showSnack('종료일시는 시작일시 이후여야 합니다', 'error');
 
-function formatDate(d: Date | null) {
-    return d ? dayjs(d).format('YYYY-MM-DD') : '';
-}
-function fmt(dt: string) {
-    return dayjs(dt).format('YYYY-MM-DD HH:mm:ss');
-}
-function applyEditStart() {
-    const val = assembleDateTime(edit.value.startDate, edit.value.startTime);
-    edit.value.displayStart = val;
-    menu.value.editStart = false;
-}
-function applyEditEnd() {
-    const val = assembleDateTime(edit.value.endDate, edit.value.endTime);
-    edit.value.displayEnd = val;
-    menu.value.editEnd = false;
-}
-function clearEditStart() {
-    edit.value.startDate = new Date();
-    edit.value.startTime = '09:00:00';
-    edit.value.displayStart = '';
-}
-function clearEditEnd() {
-    edit.value.endDate = null;
-    edit.value.endTime = '09:00:00';
-    edit.value.displayEnd = '';
-}
-function toast(msg: string) {
-    // 프로젝트 공통 스낵바가 있다면 그걸 사용. 임시 alert 대체 가능
-    // @ts-ignore
-    if (window?.$toast) window.$toast(msg);
-    else alert(msg);
+    const payload = {
+        down_id: downId.value || null,
+        facility_id: facilityId.value,
+        emp_id: empId.value,
+        down_type_id: downTypeId.value,
+        down_start_dt: toDateTimeSeconds(startLocal.value),
+        down_end_dt: toDateTimeSeconds(endLocal.value),
+        oper_yn: operYn.value,
+        remk: remk.value,
+        edit_reason: downId.value ? editReason.value || null : null
+    };
+
+    if (!confirm(downId.value ? '정말 정정(수정)하시겠습니까?' : '정말 등록하시겠습니까?')) return;
+
+    if (saving.value) return;
+    saving.value = true;
+    try {
+        const res = downId.value ? await axios.put('/api/downtimeUpdate', payload) : await axios.post('/api/downtimeInsert', payload);
+        if (res.data?.success) {
+            showSnack(downId.value ? '정정되었습니다' : '등록되었습니다', downId.value ? 'warning' : 'success');
+            await select();
+            formReset();
+        } else {
+            showSnack(res.data?.error || '저장 실패', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showSnack('저장 실패', 'error');
+    } finally {
+        saving.value = false;
+    }
 }
 
-/* --------------------------- watch/init --------------------------- */
-watch(() => q.value.fac, loadFacilities);
-watch(() => q.value.reason, loadReasons);
-
-onSearch();
+// ===== 무효 처리 =====
+async function voidRow() {
+    if (!downId.value) return showSnack('무효 처리할 건을 선택하세요', 'warning');
+    if (!confirm('정말 무효 처리하시겠습니까?')) return;
+    if (voiding.value) return;
+    voiding.value = true;
+    try {
+        const { data } = await axios.patch('/api/downtimeVoid', { down_id: downId.value, edit_reason: editReason.value || null });
+        if (data?.success) {
+            showSnack('무효 처리되었습니다', 'error');
+            await select();
+            formReset();
+        } else {
+            showSnack(data?.error || '무효 처리 실패', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showSnack('무효 처리 실패', 'error');
+    } finally {
+        voiding.value = false;
+    }
+}
 </script>
-
-<style scoped>
-.table-row {
-    cursor: pointer;
-}
-.table-row.active {
-    background: #eef4ff;
-}
-</style>

@@ -9,6 +9,7 @@ const vendor = require("./sqls/vendor.js");
 const badncode = require("./sqls/badncode.js");
 const bom = require("./sqls/bom.js");
 const facility = require("./sqls/facility.js");
+const cleanHist = require("./sqls/cleanHist.js");
 
 module.exports = {
   ...orders,
@@ -22,4 +23,5 @@ module.exports = {
   ...badncode,
   ...bom,
   ...facility,
+  ...cleanHist,
 };
