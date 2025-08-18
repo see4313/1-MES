@@ -42,6 +42,8 @@
             </v-row>
         </v-card-item>
     </v-card>
+
+    <SnackBar />
 </template>
 
 <script setup>
@@ -53,7 +55,10 @@ import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import InputNumber from 'primevue/inputnumber';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
+const { snackBar } = useSnackBar();
 const selectItemList = ref(null); // 선택한 품목
 const inventoryList = ref(); // 조회 목록
 const lotId = ref(null);
@@ -86,25 +91,25 @@ const select = async () => {
         const response = await axios.get('/api/inventoryList', { params });
         inventoryList.value = response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
     }
 };
 
 // 반품 처리
 const returnItem = async () => {
     if (!selectItemList.value || selectItemList.value.length === 0) {
-        alert('반품할 항목을 선택하세요.');
+        snackBar('반품할 항목을 선택하세요.', 'warning');
         return;
     }
 
     // 수량, 사유 입력 확인
     for (let item of selectItemList.value) {
         if (!item.use_qty || item.use_qty <= 0) {
-            alert(`반품 수량을 입력하세요.`);
+            snackBar('반품 수량을 입력하세요.', 'warning');
             return;
         }
         if (!item.remk || item.remk.trim() === '') {
-            alert(`반품 사유를 입력하세요.`);
+            snackBar('반품 사유를 입력하세요.', 'warning');
             return;
         }
     }
@@ -120,12 +125,12 @@ const returnItem = async () => {
         let response = await axios.post('/api/itemReturn', objList).catch((err) => console.log(err));
 
         if (response.data.result) {
-            alert('처리되었습니다.');
+            snackBar('처리되었습니다', 'success');
             select();
             dataReset();
         }
     } catch (error) {
-        console.error('처리 실패', error);
+        snackBar('처리 실패.', 'error');
     }
 };
 

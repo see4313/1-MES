@@ -174,6 +174,8 @@
         @select="onSelectWhId"
         @close="whIdModal = false"
     />
+
+    <SnackBar />
 </template>
 <script setup>
 import DataTable from 'primevue/datatable';
@@ -183,7 +185,10 @@ import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
 import CardHeader from '@/components/production/card-header-btn2.vue';
 import dayjs from 'dayjs';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
+const { snackBar } = useSnackBar();
 const inventoryList = ref(); // 조회 목록
 const itemIdModal = ref(false); // 품목번호 모달
 const lotIdModal = ref(false); // LOT번호 모달
@@ -225,13 +230,14 @@ const select = async () => {
             item_type: selectItemType.value, // 품목구분
             cutd_cond: selectCutd.value, // 보관조건
             wh_id: selectWhId.value, // 창고번호
-            vald_date: formattedexpDate.value // 유효기간
+            vald_date: formattedexpDate.value, // 유효기간
+            status: '사용가능'
         };
 
         const response = await axios.get('/api/inventoryList', { params });
         inventoryList.value = response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
     }
 };
 
@@ -244,7 +250,7 @@ const fetchItemId = async () => {
         const response = await axios.get('/api/itemList', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -254,7 +260,7 @@ const fetchLotId = async () => {
         const response = await axios.get('/api/lotId');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -264,7 +270,7 @@ const fetchItemType = async () => {
         const response = await axios.get('/api/itemType');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -274,7 +280,7 @@ const fetchCutd = async () => {
         const response = await axios.get('/api/cutdCond');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -284,7 +290,7 @@ const fetchWhId = async () => {
         const response = await axios.get('/api/whId');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };

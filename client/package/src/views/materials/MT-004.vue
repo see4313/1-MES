@@ -97,6 +97,8 @@
             </v-row>
         </v-card-item>
     </v-card>
+
+    <SnackBar />
 </template>
 
 <script setup>
@@ -108,7 +110,10 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import { ref, onMounted, computed } from 'vue';
 import InputNumber from 'primevue/inputnumber';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
+const { snackBar } = useSnackBar();
 const expandedRows = ref({}); // 펼친 행
 const procDetailList = ref({}); // 발주상세 목록
 const procList = ref(); // 발주 목록
@@ -157,7 +162,7 @@ const onSelectDate = async (date) => {
         const response = await axios.get('/api/selectProc', { params });
         procList.value = response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -179,20 +184,21 @@ const handleReceive = async () => {
     });
 
     if (payload.length === 0) {
-        alert('선택된 항목이 없습니다.');
+        snackBar('선택된 항목이 없습니다.', 'warning');
         return;
     }
 
     const invalidItems = payload.filter((item) => !item.remain_qty || Number(item.remain_qty) <= 0);
     if (invalidItems.length > 0) {
-        alert('수량이 입력되지 않았거나 0 이하인 항목이 있습니다.');
+        snackBar('수량이 입력되지 않았거나 0 이하인 항목이 있습니다.', 'warning');
         return;
     }
 
     if (confirm('등록하시겠습니까?')) {
         try {
             await axios.post('/api/receive', payload);
-            alert('입고 처리 완료');
+
+            snackBar('입고 처리 완료', 'success');
 
             // 체크항목 해제
             checkedDetails.value = {};
@@ -207,7 +213,7 @@ const handleReceive = async () => {
             expandedRows.value = {};
         } catch (error) {
             console.error(error);
-            alert('입고 처리 실패');
+            snackBar('입고 처리 실패', 'error');
         }
     }
 };

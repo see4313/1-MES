@@ -211,6 +211,8 @@
         @select="onSelectItem"
         @close="itemModal = false"
     />
+
+    <SnackBar />
 </template>
 
 <script setup>
@@ -222,7 +224,10 @@ import { ref, onMounted, computed, reactive } from 'vue';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
+const { snackBar } = useSnackBar();
 const procDetailList = ref([]);
 const today = dayjs().format('YYYY-MM-DD');
 const regMenu = ref(false);
@@ -255,7 +260,7 @@ const fetchVend = async () => {
         const response = await axios.get('/api/selectVend');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -265,7 +270,7 @@ const fetchEmp = async () => {
         const response = await axios.get('/api/selectEmp');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -279,7 +284,7 @@ const fetchItem = async () => {
         const response = await axios.get('/api/itemList', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -348,13 +353,13 @@ const dataReset = () => {
 const addProc = async () => {
     // 기본 필수값 체크
     if (!selectVendId.value || !selectEmpId.value || !formattedregDate.value || !formattedpapDate.value) {
-        alert('모든 항목을 입력해주세요.');
+        snackBar('모든 항목을 입력해주세요.', 'warning');
         return;
     }
 
     // 상세 항목 존재 여부 체크
     if (!procDetailList.value || procDetailList.value.length === 0) {
-        alert('상세 항목을 하나 이상 선택해주세요.');
+        snackBar('상세 항목을 하나 이상 선택해주세요.', 'warning');
         return;
     }
 
@@ -363,7 +368,7 @@ const addProc = async () => {
         (item) => !item.item_id || !item.qty || item.qty <= 0 || !item.untpc || item.untpc <= 0
     );
     if (invalidDetail) {
-        alert(`품목의 항목을 올바르게 입력해주세요.`);
+        snackBar('품목의 항목을 올바르게 입력해주세요.', 'warning');
         return;
     }
 
@@ -384,15 +389,14 @@ const addProc = async () => {
 
             const response = await axios.post('/api/procInsert', payload);
             if (response.data.result) {
-                alert('등록 성공');
+                snackBar('등록 성공', 'success');
                 dataReset();
                 procDetailList.value = [];
             } else {
-                alert('등록 실패');
+                snackBar('등록 실패.', 'error');
             }
         } catch (err) {
-            console.error(err);
-            alert('에러 발생');
+            snackBar('에러', 'error');
         }
     }
 };

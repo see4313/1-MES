@@ -86,6 +86,8 @@
         @select="onSelectItemName"
         @close="itemModal = false"
     />
+
+    <SnackBar />
 </template>
 
 <script setup>
@@ -96,13 +98,22 @@ import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
 import CardHeader from '@/components/production/card-header-btn2.vue';
 import dayjs from 'dayjs';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
+const { snackBar } = useSnackBar();
 const itemModal = ref(false); // 품목 모달
 const selectItemName = ref(null); // 사원 이름
 const expDate = ref(null);
 const expMenu = ref(false);
 const selectItemId = ref(null); // 품목 번호
 const historyList = ref(null);
+
+const selectReset = () => {
+    selectItemId.value = null;
+    selectItemName.value = null;
+    expDate.value = null;
+};
 
 const fetchItem = async () => {
     try {
@@ -112,7 +123,7 @@ const fetchItem = async () => {
         const response = await axios.get('/api/itemList', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -141,7 +152,7 @@ const select = async () => {
         const response = await axios.get('/api/historyList', { params });
         historyList.value = response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
     }
 };
 </script>

@@ -17,6 +17,13 @@ router.get("/historyList", async (req, res) => {
   res.send(list); // 응답
 });
 
+// 로그인 조회
+router.get("/userLogin", async (req, res) => {
+  const filters = req.query;
+  let list = await materialService.userLogin(filters);
+  res.send(list); // 응답
+});
+
 // 품목목록 조회
 router.get("/itemList", async (req, res) => {
   const filters = req.query;
