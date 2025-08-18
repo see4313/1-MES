@@ -22,14 +22,14 @@ const MainRoutes = {
             component: () => import('@/views/basic/bom.vue')
         },
         {
-            name: 'Alert',
-            path: '/ui/alerts',
-            component: () => import('@/views/ui-components/Alerts.vue')
+            name: '창고관리',
+            path: '/warehouse',
+            component: () => import('@/views/basic/warehouse.vue')
         },
         {
-            name: 'Buttons',
-            path: '/ui/buttons',
-            component: () => import('@/views/ui-components/Buttons.vue')
+            name: '공정정보',
+            path: '/process',
+            component: () => import('@/views/basic/process.vue')
         },
         {
             name: 'Cards',
