@@ -57,10 +57,10 @@
                             <Column field="lot_id" header="LOT번호" style="width: 130px"></Column>
                             <Column field="item_name" header="품목명" style="width: 80px"></Column>
                             <Column field="item_type" header="품목구분" style="width: 100px"></Column>
-                            <Column field="use_qty" header="수량" style="width: 80px"></Column>
-                            <Column field="use_date" header="일자" style="width: 80px">
+                            <Column field="use_qty" header="출고수량" style="width: 80px"></Column>
+                            <Column field="use_date" header="출고일자" style="width: 80px">
                                 <template #body="{ data }">
-                                    {{ formatDate(data.vald_date) }}
+                                    {{ formatDate(data.use_date) }}
                                 </template></Column
                             >
                             <Column field="remk" header="비고" style="width: 100px"> </Column>

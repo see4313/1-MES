@@ -80,7 +80,7 @@ const historyList = (filters) => {
     sql += " AND iv.item_id = ?";
     params.push(filters.item_id);
   }
-  if (filters.item_id) {
+  if (filters.use_date) {
     sql += " AND lh.use_date < ?";
     params.push(filters.use_date);
   }
