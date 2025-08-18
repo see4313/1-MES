@@ -5,6 +5,7 @@ const inventoryList = (filters) => {
          , iv.item_id
          , it.item_name
          , it.item_type
+         , it.spec
          , iv.wh_id
          , wh.wh_name
          , iv.crea_date
@@ -47,6 +48,10 @@ const inventoryList = (filters) => {
     sql += " AND iv.vald_date < ?";
     params.push(filters.vald_date);
   }
+  if (filters.status) {
+    sql += " AND iv.status = ?";
+    params.push(filters.status);
+  }
 
   return { sql, params };
 };
@@ -60,6 +65,7 @@ const itemList = (filters) => {
          , unit
          , spec
          , cutd_cond
+         , conv_qty
          , safe_qty
          , exp_date
          , uon
@@ -87,6 +93,8 @@ const itemList = (filters) => {
     params.push(filters.uon);
   }
 
+  sql += " ORDER BY item_id desc";
+
   return { sql, params };
 };
 
@@ -98,6 +106,7 @@ SELECT item_id
      , unit
      , spec
      , cutd_cond
+     , conv_qty
      , safe_qty
      , exp_date
      , uon
@@ -197,14 +206,14 @@ WHERE item_id = ?
 // 품목 수정
 const itemUpdate = `
 UPDATE ITEM
-SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?
+SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?, conv_qty = ?, exp_date = ?
 WHERE  item_id = ?
 `;
 
 // 품목 등록
 const itemInsert = `
-INSERT INTO ITEM (item_id, item_name, item_type, unit, spec, cutd_cond, uon, remk)
-VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO ITEM (item_id, item_name, item_type, unit, spec, cutd_cond, uon, remk, conv_qty, exp_date)
+VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 // 발주 등록

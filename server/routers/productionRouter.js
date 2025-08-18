@@ -3,13 +3,11 @@
 const express = require("express");
 const router = express.Router();
 const itemService = require("../services/itemService");
-const productionService = require("../services/productionService.js");
+const productionService = require("../services/productionService");
 
-// getItemList -- 품목 리스트
-
-router.get("/prod/itemlist/:type", async (req, res) =>{
-
-  // type = 'notmaterial' : 원재료 빼고 , semi : 반제품, finish : 완재품, 
+// getItemList -- 품목 리스트 조회
+router.get("/prod/itemlist/:type", async (req, res) => {
+  // type = 'notmaterial' : 원재료 빼고 , semi : 반제품, finish : 완제품,
   const { type } = req.params;
   try {
     const result = await itemService.getItemList(type);
@@ -19,14 +17,27 @@ router.get("/prod/itemlist/:type", async (req, res) =>{
   }
 });
 
+// getInstructionList -- 생산 지시 리스트 조회
 router.get("/prod/instructionlist", async (req, res) => {
+  const { query } = req;
   try {
-    const result = await productionService.getInstructionList();
+    const result = await productionService.getInstructionList(query);
     res.send(result);
   } catch (e) {
     console.error(e);
   }
-})
+});
+
+// getDetailInstruction -- 세부 지시 조회
+router.get("/prod/detailinstruction", async (req, res) => {
+  const { query } = req;
+  try {
+    const result = await productionService.getDetailInstruction(query);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
 
 // addProdInstructions -- 생산 지시
 router.post("/prod/instructions", async (req, res) => {
@@ -38,6 +49,5 @@ router.post("/prod/instructions", async (req, res) => {
     console.error(e);
   }
 });
-
 
 module.exports = router;

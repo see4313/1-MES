@@ -91,7 +91,7 @@ const sidebarItem = [
             },
             {
                 title: '반품관리',
-                to: ''
+                to: '/mt-006'
             },
             {
                 title: '폐기관리',

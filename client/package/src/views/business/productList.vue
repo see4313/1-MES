@@ -17,6 +17,12 @@
                 </v-col>
             </v-row>
 
+            <v-chip-group v-model="selectProductType" mandatory selected-class="active">
+                <v-chip v-for="type in productType" :key="type.value" :value="type.value" label pill variant="tonal" size="small">{{
+                    type.key
+                }}</v-chip>
+            </v-chip-group>
+
             <DataTable :value="orderList" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
                 <Column field="order_id" header="LOT"></Column>
                 <Column field="ordr" header="제품 코드"></Column>
@@ -29,6 +35,22 @@
             </DataTable>
         </v-card>
     </v-row>
+
+    <!-- 제품 코드모달 -->
+    <ModalSearch
+        :visible="showModal"
+        title="제품코드"
+        idField="item_id"
+        :columns="[
+            { key: 'item_id', label: '제품코드' },
+            { key: 'item_type', label: '제품유형' },
+            { key: 'item_name', label: '제품명' }
+        ]"
+        :fetchData="fetchItems"
+        :pageSize="5"
+        @select="onSelectItem"
+        @close="showModal = false"
+    />
 </template>
 
 <script setup>
@@ -36,5 +58,37 @@ import CardHeader from '@/components/production/card-header-btn.vue';
 import Column from 'primevue/column';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import DataTable from 'primevue/datatable';
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import axios from 'axios';
+
+onMounted(() => {});
+
+// 상품 유형
+const productType = ref([
+    { key: '반제품', value: 'semi' },
+    { key: '완제품', value: 'finish' }
+]);
+
+const selectProductType = ref('semi'); // 선택된 상품 유형
+const showModal = ref(false); //  주문코드 모달
+const selectedItem = ref(null);
+
+const selectItemId = ref(null);
+const selectItemName = ref(null);
+
+const fetchItems = async () => {
+    try {
+        const response = await axios.get('/api/itemModal');
+        return response.data;
+    } catch (error) {
+        console.error('조회 실패', error);
+        return [];
+    }
+};
+
+// 모달에서 선택한 값 처리 onSelectItem
+const onSelectItem = (item) => {
+    selectedItem.value = item.item_id;
+    selectItemName.value = item.item_name;
+};
 </script>
