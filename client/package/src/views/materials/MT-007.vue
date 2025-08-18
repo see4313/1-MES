@@ -1,7 +1,7 @@
 <template>
     <v-card elevation="10">
         <v-card-item class="py-6 px-6">
-            <CardHeader title="반품 대상" btn-text="확정" btn-variant="flat" btn-color="primary" @btn-click="returnItem()" />
+            <CardHeader title="폐기 대상" btn-text="확정" btn-variant="flat" btn-color="primary" @btn-click="returnItem()" />
             <v-row>
                 <v-col cols="12" md="12">
                     <DataTable
@@ -27,14 +27,14 @@
                         </Column>
                         <Column field="spec" header="규격"></Column>
                         <Column field="bnt" header="수량"></Column>
-                        <Column header="반품수량">
+                        <Column header="폐기수량">
                             <template #body="{ data }">
                                 <InputNumber v-model="data.use_qty" :min="1" />
                             </template>
                         </Column>
-                        <Column header="반품사유">
+                        <Column header="폐기사유">
                             <template #body="{ data }">
-                                <input v-model="data.remk" type="text" placeholder="반품 사유" class="p-inputtext p-component" />
+                                <input v-model="data.remk" type="text" placeholder="폐기 사유" class="p-inputtext p-component" />
                             </template>
                         </Column>
                     </DataTable>
@@ -80,7 +80,7 @@ function dataReset() {
 const select = async () => {
     try {
         const params = {
-            status: '반품대기'
+            status: '폐기대기'
         };
 
         const response = await axios.get('/api/inventoryList', { params });
@@ -90,26 +90,26 @@ const select = async () => {
     }
 };
 
-// 반품 처리
+// 폐기 처리
 const returnItem = async () => {
     if (!selectItemList.value || selectItemList.value.length === 0) {
-        alert('반품할 항목을 선택하세요.');
+        alert('폐기할 항목을 선택하세요.');
         return;
     }
 
     // 수량, 사유 입력 확인
     for (let item of selectItemList.value) {
         if (!item.use_qty || item.use_qty <= 0) {
-            alert(`반품 수량을 입력하세요.`);
+            alert(`폐기 수량을 입력하세요.`);
             return;
         }
         if (!item.remk || item.remk.trim() === '') {
-            alert(`반품 사유를 입력하세요.`);
+            alert(`폐기 사유를 입력하세요.`);
             return;
         }
     }
 
-    // 선택된 항목의 반품수량, 사유까지 모아서 전송
+    // 선택된 항목의 폐기수량, 사유까지 모아서 전송
     let objList = selectItemList.value.map((item) => ({
         lot_id: item.lot_id,
         use_qty: item.use_qty,
@@ -117,7 +117,7 @@ const returnItem = async () => {
     }));
 
     try {
-        let response = await axios.post('/api/itemReturn', objList).catch((err) => console.log(err));
+        let response = await axios.post('/api/itemdispose', objList).catch((err) => console.log(err));
 
         if (response.data.result) {
             alert('처리되었습니다.');

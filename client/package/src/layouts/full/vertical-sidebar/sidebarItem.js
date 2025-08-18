@@ -82,10 +82,6 @@ const sidebarItem = [
                 to: '/mt-004'
             },
             {
-                title: '자재 출고관리',
-                to: ''
-            },
-            {
                 title: '재고조회',
                 to: '/mt-002'
             },
@@ -95,11 +91,11 @@ const sidebarItem = [
             },
             {
                 title: '폐기관리',
-                to: ''
+                to: '/mt-007'
             },
             {
-                title: '폐기/반품 조회',
-                to: ''
+                title: '출고 이력',
+                to: '/mt-008'
             }
         ]
     },
