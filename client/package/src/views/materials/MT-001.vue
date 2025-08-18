@@ -69,20 +69,15 @@
                                     tableStyle="min-width: 50rem"
                                     class="cursor-pointer"
                                 >
-                                    <Column field="item_id" sortable header="품목번호">
-                                        <template #body="slotProps">
-                                            <v-icon class="cursor-pointer" @click="openModal(slotProps.data)" style="margin-left: 8px">
-                                                mdi-magnify
-                                            </v-icon>
-                                            {{ slotProps.data.item_id }}
-                                        </template>
-                                    </Column>
-                                    <Column field="item_name" header="품목명"></Column>
-                                    <Column field="item_type" header="품목구분"></Column>
-                                    <Column field="cutd_cond" header="보관조건"></Column>
-                                    <Column field="spec" header="규격"></Column>
-                                    <Column field="unit" header="단위"></Column>
-                                    <Column field="uon" header="사용여부"></Column>
+                                    <Column field="item_id" sortable header="품목번호" style="width: 200px"></Column>
+                                    <Column field="item_name" header="품목명" style="width: 200px"></Column>
+                                    <Column field="item_type" header="품목구분" style="width: 120px"></Column>
+                                    <Column field="cutd_cond" header="보관조건" style="width: 120px"></Column>
+                                    <Column field="spec" header="규격" style="width: 130px"></Column>
+                                    <Column field="conv_qty" header="환산수량" style="width: 95px; text-align: right"></Column>
+                                    <Column field="unit" header="단위" style="width: 95px"></Column>
+                                    <Column field="exp_date" header="유효기한 일자" style="width: 125px; text-align: right"></Column>
+                                    <Column field="uon" header="사용여부" style="width: 100px; text-align: center"></Column>
                                     <Column field="remk" header="비고"></Column>
                                 </DataTable>
                             </div>
@@ -114,40 +109,51 @@
             <v-row>
                 <v-col cols="12" md="8">
                     <v-row justify="space-between" dense>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="3">
                             <v-text-field label="품목명" v-model="itemName" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="3">
                             <v-text-field label="품목구분" v-model="itemType" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemTypeModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="3">
+                            <v-text-field label="규격" v-model="itemSpec" variant="outlined">
+                                <!-- 직접 입력 -->
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-text-field label="유효기간 일자" v-model="expDate" variant="outlined">
+                                <!-- 직접 입력 -->
+                            </v-text-field>
+                        </v-col>
+                    </v-row>
+
+                    <v-row justify="space-between" dense>
+                        <v-col cols="12" sm="3">
+                            <v-text-field label="환산수량" v-model="convQty" variant="outlined">
+                                <!-- 직접 입력 -->
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="3">
                             <v-text-field label="단위" v-model="selectUnit" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemUnitModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
-                    </v-row>
-                    <v-row justify="space-between" dense>
-                        <v-col cols="12" sm="4">
-                            <v-text-field label="규격" v-model="itemSpec" variant="outlined">
-                                <!-- 직접 입력 -->
-                            </v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="3">
                             <v-text-field label="보관조건" v-model="itemCutd" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="cutdModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="3">
                             <v-radio-group v-model="itemUseYn" label="사용여부" class="mt-0 radio-row">
                                 <v-row justify="space-between" class="px-4">
                                     <v-radio label="사용" value="Y"></v-radio>
@@ -269,11 +275,12 @@ const selectItemList = ref(null);
 const itemId = ref(null);
 const itemName = ref(null);
 const itemType = ref(null);
-const itemUnit = ref(null);
 const itemSpec = ref(null);
 const itemCutd = ref(null);
 const itemUseYn = ref(null);
 const itemRemk = ref(null);
+const convQty = ref(null);
+const expDate = ref(null);
 const itemList = ref(); // 조회 목록
 const itemNameModal = ref(false); // 품목명 모달
 const itemTypeModal = ref(false); // 품목구분 모달
@@ -289,6 +296,9 @@ const selectUnit = ref(null); // 단위 선택
 
 onMounted(() => {});
 
+// 필수체크
+const requiredRule = [(v) => !!v || '필수 입력 항목입니다.'];
+
 // 조회조건 초기화
 function selectReset() {
     selectItemName.value = null;
@@ -303,11 +313,13 @@ function dataReset() {
     itemId.value = null;
     itemName.value = null;
     itemType.value = null;
-    itemUnit.value = null;
+    selectUnit.value = null;
     itemSpec.value = null;
     itemCutd.value = null;
     itemUseYn.value = null;
     itemRemk.value = null;
+    convQty.value = null;
+    expDate.value = null;
 }
 
 // 행 선택
@@ -319,63 +331,87 @@ watch(selectItemList, (newVal) => {
         itemId.value = newVal.item_id;
         itemName.value = newVal.item_name;
         itemType.value = newVal.item_type;
-        itemUnit.value = newVal.unit;
+        convQty.value = newVal.conv_qty;
+        selectUnit.value = newVal.unit;
         itemSpec.value = newVal.spec;
         itemCutd.value = newVal.cutd_cond;
         itemUseYn.value = newVal.uon;
         itemRemk.value = newVal.remk;
+        expDate.value = newVal.exp_date;
     }
 });
 
 // 품목 삭제
 const itemDelete = async () => {
-    let response = await axios.delete('/api/itemDelete', { data: { item_id: itemId.value } }).catch((err) => console.log(err));
+    if (confirm('삭제하시겠습니까?')) {
+        let response = await axios.delete('/api/itemDelete', { data: { item_id: itemId.value } }).catch((err) => console.log(err));
 
-    if (response.data.result) {
-        alert('삭제되었습니다.');
-        select();
-        dataReset();
+        if (response.data.result) {
+            alert('삭제되었습니다.');
+            select();
+            dataReset();
+        }
     }
 };
 
 // 품목 저장
 const itemSave = async () => {
-    if (!itemId.value) {
-        let obj = {
-            item_name: itemName.value,
-            item_type: itemType.value,
-            unit: selectUnit.value,
-            spec: itemSpec.value,
-            cutd_cond: itemCutd.value,
-            uon: itemUseYn.value,
-            remk: itemRemk.value
-        };
+    if (
+        !itemName.value ||
+        !itemType.value ||
+        !itemSpec.value ||
+        !expDate.value ||
+        !convQty.value ||
+        !selectUnit.value ||
+        !itemCutd.value ||
+        !itemUseYn.value
+    ) {
+        alert('모든 필수 항목을 입력해주세요.');
+        return;
+    }
 
-        let response = await axios.post('/api/itemInsert', obj).catch((err) => console.log(err));
+    if (confirm('저장하시겠습니까?')) {
+        if (!itemId.value) {
+            let obj = {
+                item_name: itemName.value,
+                item_type: itemType.value,
+                unit: selectUnit.value,
+                spec: itemSpec.value,
+                cutd_cond: itemCutd.value,
+                uon: itemUseYn.value,
+                remk: itemRemk.value,
+                conv_qty: convQty.value,
+                exp_date: expDate.value
+            };
 
-        if (response.data.result) {
-            alert('등록되었습니다.');
-            select();
-            dataReset();
-        }
-    } else {
-        let obj = {
-            item_name: itemName.value,
-            item_type: itemType.value,
-            unit: selectUnit.value,
-            spec: itemSpec.value,
-            cutd_cond: itemCutd.value,
-            uon: itemUseYn.value,
-            remk: itemRemk.value,
-            item_id: itemId.value
-        };
+            let response = await axios.post('/api/itemInsert', obj).catch((err) => console.log(err));
 
-        let response = await axios.put('/api/itemUpdate', obj).catch((err) => console.log(err));
+            if (response.data.result) {
+                alert('등록되었습니다.');
+                select();
+                dataReset();
+            }
+        } else {
+            let obj = {
+                item_name: itemName.value,
+                item_type: itemType.value,
+                unit: selectUnit.value,
+                spec: itemSpec.value,
+                cutd_cond: itemCutd.value,
+                uon: itemUseYn.value,
+                remk: itemRemk.value,
+                item_id: itemId.value,
+                conv_qty: convQty.value,
+                exp_date: expDate.value
+            };
 
-        if (response.data.result) {
-            alert('수정되었습니다.');
-            select();
-            dataReset();
+            let response = await axios.put('/api/itemUpdate', obj).catch((err) => console.log(err));
+
+            if (response.data.result) {
+                alert('수정되었습니다.');
+                select();
+                dataReset();
+            }
         }
     }
 };

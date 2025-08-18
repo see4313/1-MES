@@ -13,6 +13,7 @@ const connectionPool = mariadb.createPool({
   insertIdAsNumber: true,
   bigIntAsNumber: true,
   permitSetMultiParamEntries: true,
+  multipleStatements: true,
   logger: {
     query: console.log,
     error: console.log,

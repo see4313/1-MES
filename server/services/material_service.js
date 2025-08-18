@@ -86,6 +86,8 @@ const modifyItem = async (item) => {
     "cutd_cond",
     "uon",
     "remk",
+    "conv_qty",
+    "exp_date",
     "item_id",
   ]);
   let resInfo = await mariadb.query("itemUpdate", updateData);
@@ -111,6 +113,8 @@ const addItem = async (item) => {
     "cutd_cond",
     "uon",
     "remk",
+    "conv_qty",
+    "exp_date",
   ]);
   let resInfo = await mariadb.query("itemInsert", insertData);
 
@@ -147,6 +151,36 @@ const procInsert = async (data) => {
   }
 };
 
+// 발주 조회
+const selectProc = async (params) => {
+  let list = await mariadb.query("selectProc", params);
+  return list;
+};
+
+// 발주상세 조회
+const selectProcDetail = async (params) => {
+  let list = await mariadb.query("selectProcDetail", params);
+  return list;
+};
+
+// 입고 처리
+const receive = async (data) => {
+  let resInfo = await mariadb.query(
+    "receive",
+    [JSON.stringify(data)] // 프로시저에서 JSON 파싱
+  );
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
 function convertToArray(obj, columns) {
   let result = [];
   for (let column of columns) {
@@ -170,4 +204,7 @@ module.exports = {
   selectVend,
   selectEmp,
   procInsert,
+  selectProc,
+  selectProcDetail,
+  receive,
 };
