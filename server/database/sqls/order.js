@@ -22,10 +22,6 @@ const orderList = (filters) => {
     sql += "AND ord.emp_id = ?";
     params.push(filters.emp_id);
   }
-  if (filters.order_id) {
-    sql += "AND ord.order_id = ?";
-    params.push(filters.order_id);
-  }
   if (filters.ordr_date) {
     sql += "AND ord.ordr_date = ?";
     params.push(filters.ordr_date);
@@ -96,27 +92,12 @@ JOIN EMPLOYEE emp
 `;
 
 // 모달 (상세주문)
-const itemModal = `
+const itemModal1 = `
 SELECT item_id,
        item_name,
        item_type
 FROM ITEM 
 WHERE item_type = '완제품'
-`;
-
-// 모달(생산지시)
-const prodModal = `
-SELECT prd.instruct_no,
-       prdp.deta_plan_no,
-       prd.deta_plan_no,
-        prdp.item_id,
-		item.item_id,
-        item.item_name,
-        prd.instruct_datetime
-FROM PROD_PLAN_DETA prdp JOIN PROD_INSTRUCT prd
-							ON prdp.deta_plan_no = prd.deta_plan_no
-JOIN ITEM item 
-				ON prdp.item_id = item.item_id
 `;
 
 // 창고 모달
@@ -134,10 +115,9 @@ module.exports = {
   empModal,
   orderModal,
   detailOrder,
-  itemModal,
+  itemModal1,
   setOrder,
   deleteOrder,
   orderInsert,
   whModal,
-  prodModal,
 };

@@ -118,8 +118,8 @@ const sidebarItem = [
                 to: '/instructionlist'
             },
             {
-                title: 'Blog',
-                to: ''
+                title: '생산 실적 등록',
+                to: '/productionresults'
             },
             {
                 title: 'Blog Details',

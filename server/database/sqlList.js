@@ -10,6 +10,10 @@ const badncode = require("./sqls/badncode.js");
 const bom = require("./sqls/bom.js");
 const facility = require("./sqls/facility.js");
 const cleanHist = require("./sqls/cleanHist.js");
+const product = require("./sqls/product.js");
+const warehouse = require("./sqls/warehouse.js");
+const process = require("./sqls/process.js");
+
 
 module.exports = {
   ...orders,
@@ -24,4 +28,7 @@ module.exports = {
   ...bom,
   ...facility,
   ...cleanHist,
+  ...product,
+  ...warehouse,
+  ...process,
 };
