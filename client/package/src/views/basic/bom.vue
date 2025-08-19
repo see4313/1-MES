@@ -522,7 +522,7 @@ const onClickCreate = async () => {
     };
     console.log('Final payload before sending:', payload);
     try {
-        await axios.post('/api/bomInsert', payload); //  헤더 단건 API가 있다면
+        await axios.post('/api/bomInsert', payload); //  헤더 단건 API
         notify('BOM 등록이 완료되었습니다.');
         resetCreateForm();
     } catch (e) {

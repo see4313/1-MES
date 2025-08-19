@@ -12,4 +12,9 @@ const processTypeList = async (filters = {}) => {
   return db.query("processTypeList", filters);
 };
 
-module.exports = { processList, createProcess, updateProcess, processTypeList };
+module.exports = {
+  processList,
+  createProcess,
+  updateProcess,
+  processTypeList,
+};
