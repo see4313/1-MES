@@ -7,6 +7,10 @@ import draggable from 'vuedraggable';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import { ref, onBeforeMount, watch } from 'vue';
 import axios from 'axios';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
+
+const { snackBar } = useSnackBar();
 
 const prcsRouterList = ref([]);
 const selectedPrcsRouter = ref(null);
@@ -47,7 +51,7 @@ watch(selectedPrcsRouter, async (newVal) => {
 // 품목 목록 조회 (모달용)
 const getItemList = async () => {
     try {
-        const { data } = await axios.get('/api/prod/itemlist');
+        const { data } = await axios.get('/api/prod/itemlist/notmaterial');
         return data ?? [];
     } catch (e) {
         console.error(e);
@@ -64,9 +68,9 @@ const onSelectItem = (item) => {
 // 공정 목록 조회 (모달용)
 const getProcessList = async () => {
     try {
-        const { data } = await axios.get('/api/prod/processlist');
-        const excludeSet = new Set(prcsRouterDetail.value.map((p) => p.opNo));
-        return (data ?? []).filter((it) => !excludeSet.has(it.opNo));
+        const { data } = await axios.get('/api/prod/prcslist');
+        const excludeSet = new Set(prcsRouterDetail.value.map((p) => p.prcsNumber));
+        return (data ?? []).filter((it) => !excludeSet.has(it.prcsNumber));
     } catch (e) {
         console.error(e);
         return [];
@@ -76,27 +80,90 @@ const getProcessList = async () => {
 // 공정 선택 시 처리
 const onSelectProcess = (process) => {
     prcsRouterDetail.value.push({
-        opNo: process.opNo,
-        prcsName: process.prcsName
+        prcsNumber: process.prcsNumber,
+        prcsName: process.prcsName,
+        opNo: prcsRouterDetail.value.length + 1
     });
     visibleProcessModal.value = false;
 };
 
+// 삭제 버튼
+const removeProcess = (index) => {
+    if (typeof index !== 'number' || index < 0 || index >= prcsRouterDetail.value.length) return;
+    prcsRouterDetail.value.splice(index, 1);
+    prcsRouterDetail.value.forEach((p, i) => { p.opNo = i + 1; });
+}
+
+// 공정 추가 버튼 클릭
+const openProcessModal = () => {
+    if (!selectedPrcsRouter.value) {
+        snackBar('품목을 선택하세요.', 'warning');
+        return;
+    }
+    visibleProcessModal.value = true;
+}
+
 // 저장 처리
 const saveProcessRouter = async () => {
     if (!selectedPrcsRouter.value) {
-        alert('먼저 품목을 선택하세요.');
+        snackBar('품목을 선택하세요.', 'warning');
         return;
     }
+
+    const itemId = selectedPrcsRouter.value.itemId;
+    const isExisting = prcsRouterList.value.some(p => p.itemId === itemId);
+
+    if (prcsRouterDetail.value.length === 0) {
+        if (!isExisting) {
+            snackBar('공정을 추가하세요.', 'warning');
+            return;
+        }
+        if (!confirm('저장하시겠습니까?')) return;
+        try {
+            const { data } = await axios.post('/api/prod/saveprcsrouter', {
+                itemId,
+                processes: []
+            });
+            snackBar('성공적으로 삭제되었습니다.', 'error');
+            await getPrcsRouterList();
+            const reselection = prcsRouterList.value.find(p => p.itemId === itemId) || null;
+            selectedPrcsRouter.value = reselection;
+            if (reselection) {
+                const { data } = await axios.get('/api/prod/prcsrouter', { params: { itemId } });
+                prcsRouterDetail.value = (data ?? []).sort((a, b) => a.opNo - b.opNo);
+            } else {
+                prcsRouterDetail.value = [];
+            }
+        } catch (e) {
+            console.error(e);
+            snackBar('저장 중 오류가 발생했습니다.', 'error');
+        }
+        return;
+    }
+
+    if (!confirm('저장하시겠습니까?')) return;
     try {
-        await axios.post('/api/prod/saveprcsrouter', {
-            itemId: selectedPrcsRouter.value.itemId,
-            processes: prcsRouterDetail.value
+        const ordered = prcsRouterDetail.value.map((p, idx) => ({
+            ...p,
+            opNo: idx + 1
+        }));
+        const { data } = await axios.post('/api/prod/saveprcsrouter', {
+            itemId,
+            processes: ordered
         });
-        alert('저장되었습니다.');
+        snackBar('성공적으로 저장되었습니다.', 'success');
+        await getPrcsRouterList();
+        const reselection = prcsRouterList.value.find(p => p.itemId === itemId) || null;
+        selectedPrcsRouter.value = reselection;
+        if (reselection) {
+            const { data } = await axios.get('/api/prod/prcsrouter', { params: { itemId } });
+            prcsRouterDetail.value = (data ?? []).sort((a, b) => a.opNo - b.opNo);
+        } else {
+            prcsRouterDetail.value = [];
+        }
     } catch (e) {
         console.error(e);
-        alert('저장 중 오류가 발생했습니다.');
+        snackBar('저장 중 오류가 발생했습니다.', 'error');
     }
 };
 </script>
@@ -142,16 +209,25 @@ const saveProcessRouter = async () => {
                             <!-- 공정 리스트 (드래그 가능) -->
                             <draggable
                                 v-model="prcsRouterDetail"
-                                item-key="opNo"
+                                item-key="prcsNumber"
                                 :animation="200"
                                 handle=".handle"
                                 ghost-class="ghost"
                                 chosen-class="chosen"
                             >
-                                <template #item="{ element }">
+                                <template #item="{ element, index }">
                                     <div class="row">
                                         <span class="handle">⠿</span>
                                         <span>{{ element.prcsName }}</span>
+                                        <v-btn
+                                            icon
+                                            variant="text"
+                                            color="error"
+                                            style="margin-left:auto"
+                                            @click="removeProcess(index)"
+                                        >
+                                            <v-icon>mdi-delete</v-icon>
+                                        </v-btn>
                                     </div>
                                 </template>
                             </draggable>
@@ -161,7 +237,7 @@ const saveProcessRouter = async () => {
                                     append-icon="mdi-plus-circle"
                                     variant="outlined"
                                     color="primary"
-                                    @click="visibleProcessModal = true"
+                                    @click="openProcessModal"
                                     block
                                 >
                                     공정 추가
@@ -204,19 +280,20 @@ const saveProcessRouter = async () => {
     <ModalSearch
         :visible="visibleProcessModal"
         title="공정 선택"
-        idField="opNo"
+        idField="prcsNumber"
         :columns="[
-            { key: 'opNo', label: '공정 번호' },
+            { key: 'prcsNumber', label: '공정 번호' },
             { key: 'prcsName', label: '공정명' }
         ]"
         :fetchData="getProcessList"
-        :exclude-ids="prcsRouterDetail.map((p) => p.opNo)"
+        :exclude-ids="prcsRouterDetail.map((p) => p.prcsNumber)"
         :page-size="5"
         @select="onSelectProcess"
         @close="visibleProcessModal = false"
     />
 
-    {{ prcsRouterDetail }}
+    <!-- {{ prcsRouterDetail }} -->
+    <SnackBar />
 </template>
 
 <style scoped>
