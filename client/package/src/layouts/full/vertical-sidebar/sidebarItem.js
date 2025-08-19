@@ -142,26 +142,6 @@ const sidebarItem = [
                 title: '생산 실적 등록',
                 to: '/productionresults',
                 roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: 'Blog Details',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: 'Contact Us',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: 'Portfolio',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: 'Pricing',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
             }
         ]
     },
