@@ -4,15 +4,15 @@
         <v-card elevation="10">
             <v-card-item class="py-6 px-6">
                 <CardHeader2
-                    title="출고관리"
+                    title="출고관리 목록"
                     btn-text1="조회"
                     btn-variant1="flat"
                     btn-color1="primary"
-                    @btn-click1="(Select(), DeliverySelect())"
+                    @btn-click1="Select()"
                     btn-text2="출고"
                     btn-variant2="flat"
                     btn-color2="primary"
-                    @btn-click2=""
+                    @btn-click2="delUpdate()"
                 />
             </v-card-item>
             <v-row no-gutters>
@@ -36,7 +36,15 @@
                 </v-col>
             </v-row>
 
-            <DataTable :value="setDelivery" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
+            <DataTable
+                :value="setDelivery"
+                tableStyle="min-width: 50rem"
+                class="cursor-pointer"
+                v-model:selection="setorderId"
+                selectionMode="single"
+                :metaKeySelection="false"
+                dataKey="item_id"
+            >
                 <Column field="detail_id" header="주문상세코드"></Column>
                 <Column field="item_id" header="제품 코드"></Column>
                 <Column field="item_name" header="제품명"></Column>
@@ -56,18 +64,36 @@
                 <CardHeader title="출고 관리" />
             </v-card-item>
 
-            <DataTable :value="deliveryList" tableStyle="min-width: 50rem">
-                <Column field="item_id" header="제품코드"
-                    ><template #body="slotProps">
-                        <v-icon class="cursor-pointer" @click="openProductModal(slotProps.index)" style="margin-left: 8px">
-                            mdi-magnify
-                        </v-icon>
-                        {{ slotProps.data.item_id }}
+            <DataTable
+                :value="deliveryList"
+                tableStyle="min-width: 50rem"
+                v-model:selection="selectItemList"
+                selectionMode="multiple"
+                dataKey="lot_id"
+            >
+                <Column selectionMode="multiple" headerStyle="width: 3em" />
+                <Column field="lot_id" header="LOT번호"></Column>
+                <Column field="item_id" header="제품코드"></Column>
+                <Column field="item_name" header="제품명"></Column>
+                <Column field="vald_date" header="유통기한"
+                    ><template #body="{ data }">
+                        {{ dayjs(data.ordr_date).format('YYYY-MM-DD') }}
                     </template></Column
                 >
-                <Column field="item_name" header="제품명"></Column>
-                <Column field="dlivy_qty" header="출고가능수량"></Column>
-                <Column field="tqty" header="출고수량"></Column>
+                <Column field="bnt" header="출고가능수량"></Column>
+                <Column field="dlivy_qty" header="출고수량"
+                    ><template #body="{ data }">
+                        <v-text-field
+                            type="number"
+                            dense
+                            hide-details
+                            style="width: 100px"
+                            variant="outlined"
+                            min="0"
+                            :max="data.bnt"
+                            v-model="data.qty"
+                        /> </template
+                ></Column>
             </DataTable>
         </v-card>
     </v-row>
@@ -109,11 +135,9 @@ import CardHeader from '@/components/production/card-header.vue';
 import CardHeader2 from '@/components/production/card-header-btn2.vue';
 import Column from 'primevue/column';
 import ModalSearch from '@/views/commons/CommonModal.vue';
-import { ProductService } from '@/service/ProductService';
 import DataTable from 'primevue/datatable';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
-import axios2 from 'axios';
 import dayjs from 'dayjs';
 
 const showModal = ref(false); //주문코드모달
@@ -124,9 +148,54 @@ const selectedItem3 = ref(null);
 const orderId = ref(null);
 const vendId = ref(null);
 const setDelivery = ref(null);
+const deliveryList = ref(null);
+const itemId = ref(null);
+const setorderId = ref(null);
 
-onMounted(() => {
-    ProductService.getProductsMini().then((data) => (products.value = data));
+const selectItemList = ref(null);
+onMounted(() => {});
+
+// 출고 업데이트
+const delUpdate = async () => {
+    try {
+        let obj = selectItemList.value.map((item) => ({
+            lot_id: item.lot_id,
+            dlivy_qty: item.qty
+        }));
+
+        let response = await axios.post('/api/productUpdate', obj);
+
+        if (!confirm('출고하시겠습니까?')) return;
+
+        if (response.data.result) {
+            alert('출고완료');
+            Select();
+        } else {
+            alert('출고실패');
+        }
+    } catch (error) {
+        console.log('수정 중 오류', error);
+        alert('에러발생');
+    }
+};
+
+// 행 선택
+watch(setorderId, async (newVal) => {
+    if (!newVal) {
+        itemId.value = null;
+    } else {
+        itemId.value = newVal.item_id;
+
+        try {
+            const params = {
+                item_id: itemId.value
+            };
+            const response = await axios.get('/api/deliveryList', { params });
+            deliveryList.value = response.data;
+        } catch (error) {
+            console.log('조회실패', error);
+        }
+    }
 });
 
 // 제품전체조회
@@ -143,18 +212,6 @@ const Select = async () => {
     }
 };
 
-// 출고관리 목록
-const DeliverySelect = async () => {
-    try {
-        const params = {
-            item_id: selectedItem.value
-        };
-        const response = await axios2.get('/api/deliveryList', { params });
-        setDelivery.value = response.data;
-    } catch (error) {
-        console.log('조회실패', error);
-    }
-};
 // 주문코드 모달
 const fetchItems = async () => {
     try {

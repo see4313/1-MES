@@ -18,11 +18,19 @@ router.get("/insertList", async (req, res) => {
 
 // 출고관리 목록
 router.get("/deliveryList", async (req, res) => {
-  let list = await productService.deliveryList();
+  const filters = req.query;
+  let list = await productService.deliveryList(filters);
   res.send(list);
 });
 
-// 완제품 입고
+// 완제품 출고
+router.post("/productUpdate", async (req, res) => {
+  let board = req.body;
+  let result = await productService.productUpdate(board);
+  res.send(result);
+});
+
+// 입고관리
 router.post("/productInsert", async (req, res) => {
   let board = req.body;
   let result = await productService.productInsert(board);

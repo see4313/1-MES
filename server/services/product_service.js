@@ -14,26 +14,15 @@ const insertList = async () => {
 };
 
 // 출고관리 목록
-const deliveryList = async () => {
-  let list = await mariadb.query("deliveryList");
+const deliveryList = async (filters) => {
+  let list = await mariadb.query("deliveryList", filters);
   return list;
 };
 
-// 완제품 입고
+// 입고관리
 const productInsert = async (data) => {
-  let list = convertToArray(item, [
-    "item_id",
-    "wh_id",
-    "crea_datem",
-    "vald_date",
-    "entebord_qty",
-    "dlivy_qty",
-    "bnt",
-    "status",
-  ]);
-  let resInfo = await mariadb.query("productInsert", insertData);
-
-  if (resInfo.affctedRows > 0) {
+  let resInfo = await mariadb.query("productInsert", [JSON.stringify(data)]);
+  if (resInfo.affectedRows > 0) {
     return {
       result: true,
     };
@@ -43,6 +32,28 @@ const productInsert = async (data) => {
     };
   }
 };
+
+// 완제품 출고
+const productUpdate = async (data) => {
+  let resInfo = await mariadb.query("productUpdate", [JSON.stringify(data)]);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+function convertToArray(obj, columns) {
+  let result = [];
+  for (let column of columns) {
+    result.push(obj[column]);
+  }
+  return result;
+}
 
 // 출고 관리 목록
 const setDelivery = async (filters) => {
@@ -59,7 +70,8 @@ module.exports = {
   prodModal,
   productList,
   insertList,
-  productInsert,
+  productUpdate,
   setDelivery,
   deliveryList,
+  productInsert,
 };
