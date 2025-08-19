@@ -17,7 +17,7 @@ const instructionList = ref([]); // 생산 지시건 조회
 const selectedProductList = ref([]); // 선택돤 상품 리스트
 const selectedProductType = ref([]); // 선택된 품목 유형
 const selectedInstructionStatus = ref(['0']); // 선택된 생산 지시 상태
-const expandedRows = ref([]); // row 확장 상태
+const expandedRows = ref({}); // row 확장 상태
 const detailCache = ref({}); // { [instructNo]: DetailRow[] }
 const detailLoading = ref(new Set()); // 로딩 중인 instructNo
 
@@ -152,6 +152,12 @@ const toggleRow = (row) => {
     }
     expandedRows.value = next;
 };
+
+const formatNumber = (n) => {
+    const num = Number(n ?? 0);
+    if (Number.isNaN(num)) return '0';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
 </script>
 
 <template>
@@ -244,20 +250,61 @@ const toggleRow = (row) => {
     <v-card elevation="10" class="mt-4">
         <v-card-item class="py-6 px-6">
             <v-container fluid>
-                <DataTable :value="instructionList" paginator :rows="10" dataKey="instructNo" v-model:expandedRows="expandedRows">
-                    <Column field="instructNo" sortable header="지시 번호"></Column>
-                    <Column field="itemType" sortable header="품목 유형"></Column>
-                    <Column header="지시 상태">
+                <DataTable
+                    :value="instructionList"
+                    paginator
+                    :rows="10"
+                    dataKey="instructNo"
+                    v-model:expandedRows="expandedRows"
+                    :tableStyle="{ 'table-layout': 'fixed', width: '100%' }"
+                    size="small"
+                >
+                    <Column
+                        field="instructNo"
+                        sortable
+                        header="지시 번호"
+                        headerClass="th th-center"
+                        bodyClass="td td-center ellipsis"
+                        style="width: 10rem"
+                    />
+                    <Column
+                        field="itemType"
+                        sortable
+                        header="품목 유형"
+                        headerClass="th th-center"
+                        bodyClass="td td-center ellipsis"
+                        style="width: 8rem"
+                    />
+                    <Column header="지시 상태" headerClass="th th-center" bodyClass="td td-center" style="width: 8rem">
                         <template #body="{ data }">
                             <v-chip size="x-small" variant="flat" :color="statusBadge[String(data.status)]?.color || 'grey'" label>
                                 {{ statusBadge[String(data.status)]?.label }}
                             </v-chip>
                         </template>
                     </Column>
-                    <Column field="instructionDatetimeFormatted" sortable header="지시 일자"></Column>
-                    <Column field="startDatetimeFormatted" header="시작 일자"></Column>
-                    <Column field="goalDatetimeFormatted" header="목표 생산 일자"></Column>
-                    <Column expander header="" style="width: 3rem">
+                    <Column
+                        field="instructionDatetimeFormatted"
+                        sortable
+                        header="지시 일자"
+                        headerClass="th th-center"
+                        bodyClass="td td-center ellipsis"
+                        style="width: 10rem"
+                    />
+                    <Column
+                        field="startDatetimeFormatted"
+                        header="시작 일자"
+                        headerClass="th th-center"
+                        bodyClass="td td-center ellipsis"
+                        style="width: 10rem"
+                    />
+                    <Column
+                        field="goalDatetimeFormatted"
+                        header="목표 생산 일자"
+                        headerClass="th th-center"
+                        bodyClass="td td-center ellipsis"
+                        style="width: 12rem"
+                    />
+                    <Column expander header="" headerClass="th th-center th-tight" bodyClass="td td-center" style="width: 3rem">
                         <template #body="{ data }">
                             <button class="row-toggler" @click.stop="toggleRow(data)" :aria-expanded="isExpanded(data)">
                                 <v-icon size="18">{{ isExpanded(data) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
@@ -266,18 +313,46 @@ const toggleRow = (row) => {
                     </Column>
 
                     <template #expansion="{ data }">
-                        <div class="px-4 py-3">
-                            <div v-if="detailLoading.has(data.instructNo)" class="text-caption" style="color: #888">
-                                세부 지시 불러오는 중…
-                            </div>
+                        <div class="expansion-panel">
+                            <div v-if="detailLoading.has(data.instructNo)" class="expansion-loading">세부 지시 불러오는 중…</div>
 
                             <div v-else>
-                                <DataTable :value="detailCache[data.instructNo] || []" size="small" responsiveLayout="scroll">
-                                    <Column field="detaInstructNo" header="상세 지시 번호" />
-                                    <Column field="itemId" header="품목번호" />
-                                    <Column field="itemName" header="품목명" />
-                                    <Column field="goalQty" header="지시 수량" />
-                                    <Column header="상태">
+                                <DataTable
+                                    :value="detailCache[data.instructNo] || []"
+                                    size="small"
+                                    responsiveLayout="scroll"
+                                    :tableStyle="{ 'table-layout': 'fixed', width: '100%' }"
+                                >
+                                    <Column
+                                        field="detaInstructNo"
+                                        header="세부 지시 번호"
+                                        headerClass="th th-left"
+                                        bodyClass="td ellipsis"
+                                        style="width: 14rem"
+                                    />
+                                    <Column
+                                        field="itemId"
+                                        header="품목번호"
+                                        headerClass="th th-left"
+                                        bodyClass="td ellipsis"
+                                        style="width: 10rem"
+                                    />
+                                    <Column
+                                        field="itemName"
+                                        header="품목명"
+                                        headerClass="th th-left"
+                                        bodyClass="td ellipsis"
+                                        style="width: 18rem"
+                                    />
+                                    <Column header="지시 수량" headerClass="th th-right" bodyClass="td td-right" style="width: 12rem">
+                                        <template #body="{ data: d }">
+                                            <span class="nowrap"
+                                                >{{ formatNumber(d.goalQty) }}<span v-if="d.unit"> {{ d.unit }}</span></span
+                                            >
+                                        </template>
+                                    </Column>
+
+                                    <Column header="상태" headerClass="th th-center" bodyClass="td td-center" style="width: 8rem">
                                         <template #body="{ data: d }">
                                             <v-chip
                                                 size="x-small"
@@ -321,8 +396,6 @@ const toggleRow = (row) => {
         @select="onSelectProduct"
         @close="visibleProductModal = false"
     />
-
-    <SnackBar />
 </template>
 
 <style scoped>
@@ -346,8 +419,68 @@ const toggleRow = (row) => {
     cursor: pointer;
     padding: 0;
 }
-
 .row-toggler:focus {
     outline: none;
+}
+
+.th {
+    font-weight: 700;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.td {
+    font-size: 12px;
+    vertical-align: middle;
+}
+.th-center,
+.td-center {
+    text-align: center;
+}
+.th-left,
+.td-left {
+    text-align: left;
+}
+.th-right,
+.td-right {
+    text-align: right;
+}
+.th-tight {
+    padding: 0;
+}
+.ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.expansion-panel {
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 4px 0;
+}
+.expansion-loading {
+    color: #888;
+    font-size: 12px;
+    padding: 6px 0;
+}
+
+.expansion-panel :deep(.p-datatable),
+.expansion-panel :deep(.p-datatable-wrapper),
+.expansion-panel :deep(.p-datatable-table),
+.expansion-panel :deep(.p-datatable-thead > tr > th),
+.expansion-panel :deep(.p-datatable-tbody > tr > td),
+.expansion-panel :deep(.p-datatable-tfoot > tr > td) {
+    background: transparent;
+}
+
+.expansion-panel :deep(.p-datatable-thead > tr > th),
+.expansion-panel :deep(.p-datatable-tbody > tr > td) {
+    border-color: #eaeaea;
+}
+
+.nowrap {
+    white-space: nowrap;
 }
 </style>

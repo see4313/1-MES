@@ -66,16 +66,24 @@
                                     <Column field="item_name" header="품목명" style="width: 100px"> </Column>
                                     <Column field="spec" header="규격" style="width: 100px"> </Column>
                                     <Column field="unit" header="단위" style="width: 100px"> </Column>
-                                    <Column field="qty" header="수량" style="width: 100px">
-                                        <template #body="data">
-                                            {{ Number(data.data.qty).toLocaleString() }}
-                                        </template></Column
-                                    >
+                                    <Column field="remain_qty" header="수량" style="width: 100px">
+                                        <template #body="{ data }">
+                                            <InputNumber
+                                                v-model="data.remain_qty"
+                                                inputClass="text-right"
+                                                style="width: 100px"
+                                                :min="0"
+                                                mode="decimal"
+                                                :useGrouping="true"
+                                                @update:modelValue="onQtyChange(data)"
+                                            />
+                                        </template>
+                                    </Column>
                                     <Column field="untpc" header="단가" style="width: 100px">
                                         <template #body="data">
                                             {{ Number(data.data.untpc).toLocaleString() }}
-                                        </template></Column
-                                    >
+                                        </template>
+                                    </Column>
                                     <Column field="totpc" header="금액" style="width: 100px">
                                         <template #body="data">
                                             {{ Number(data.data.totpc).toLocaleString() }}
@@ -89,6 +97,8 @@
             </v-row>
         </v-card-item>
     </v-card>
+
+    <SnackBar />
 </template>
 
 <script setup>
@@ -99,7 +109,11 @@ import Column from 'primevue/column';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { ref, onMounted, computed } from 'vue';
+import InputNumber from 'primevue/inputnumber';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
+const { snackBar } = useSnackBar();
 const expandedRows = ref({}); // 펼친 행
 const procDetailList = ref({}); // 발주상세 목록
 const procList = ref(); // 발주 목록
@@ -148,9 +162,14 @@ const onSelectDate = async (date) => {
         const response = await axios.get('/api/selectProc', { params });
         procList.value = response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
+};
+
+const onQtyChange = (rowData) => {
+    // rowData.qty 가 바뀌면 금액(totpc) 재계산 같은 로직 실행
+    rowData.totpc = rowData.remain_qty * rowData.untpc;
 };
 
 // 입고
@@ -165,18 +184,36 @@ const handleReceive = async () => {
     });
 
     if (payload.length === 0) {
-        alert('선택된 항목이 없습니다.');
+        snackBar('선택된 항목이 없습니다.', 'warning');
+        return;
+    }
+
+    const invalidItems = payload.filter((item) => !item.remain_qty || Number(item.remain_qty) <= 0);
+    if (invalidItems.length > 0) {
+        snackBar('수량이 입력되지 않았거나 0 이하인 항목이 있습니다.', 'warning');
         return;
     }
 
     if (confirm('등록하시겠습니까?')) {
         try {
             await axios.post('/api/receive', payload);
-            alert('입고 처리 완료');
-            // 필요 시 화면 리로드 또는 상세 초기화
+
+            snackBar('입고 처리 완료', 'success');
+
+            // 체크항목 해제
+            checkedDetails.value = {};
+
+            // 상세항목 초기화
+            procDetailList.value = {};
+
+            // 발주목록 다시 조회
+            await onSelectDate(regDate.value);
+
+            // 펼친 행 닫기
+            expandedRows.value = {};
         } catch (error) {
             console.error(error);
-            alert('입고 처리 실패');
+            snackBar('입고 처리 실패', 'error');
         }
     }
 };

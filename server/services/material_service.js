@@ -7,15 +7,21 @@ const inventoryList = async (filters) => {
   return list;
 };
 
-// 품목목록 조회
-const itemList = async (filters) => {
-  let list = await mariadb.query("itemList", filters);
+// 출고이력 조회
+const historyList = async (filters) => {
+  let list = await mariadb.query("historyList", filters);
   return list;
 };
 
-// 품목번호 조회
-const itemId = async () => {
-  let list = await mariadb.query("itemId");
+// 로그인 조회
+const userLogin = async (filters) => {
+  let list = await mariadb.query("userLogin", filters);
+  return list;
+};
+
+// 품목목록 조회
+const itemList = async (filters) => {
+  let list = await mariadb.query("itemList", filters);
   return list;
 };
 
@@ -181,6 +187,42 @@ const receive = async (data) => {
   }
 };
 
+// 반품 처리
+const itemReturn = async (data) => {
+  let resInfo = await mariadb.query(
+    "itemReturn",
+    [JSON.stringify(data)] // 프로시저에서 JSON 파싱
+  );
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
+// 폐기 처리
+const itemdispose = async (data) => {
+  let resInfo = await mariadb.query(
+    "itemdispose",
+    [JSON.stringify(data)] // 프로시저에서 JSON 파싱
+  );
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
 function convertToArray(obj, columns) {
   let result = [];
   for (let column of columns) {
@@ -192,7 +234,6 @@ function convertToArray(obj, columns) {
 module.exports = {
   inventoryList,
   addItem,
-  itemId,
   lotId,
   itemtype,
   cutdCond,
@@ -207,4 +248,8 @@ module.exports = {
   selectProc,
   selectProcDetail,
   receive,
+  itemReturn,
+  itemdispose,
+  historyList,
+  userLogin,
 };

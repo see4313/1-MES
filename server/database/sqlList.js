@@ -9,8 +9,12 @@ const vendor = require("./sqls/vendor.js");
 const badncode = require("./sqls/badncode.js");
 const bom = require("./sqls/bom.js");
 const facility = require("./sqls/facility.js");
+const cleanHist = require("./sqls/cleanHist.js");
+const product = require("./sqls/product.js");
 const warehouse = require("./sqls/warehouse.js");
 const process = require("./sqls/process.js");
+const prcsRouter = require("./sqls/prcsRouter.js");
+const prcs = require("./sqls/prcs.js");
 
 module.exports = {
   ...orders,
@@ -24,6 +28,10 @@ module.exports = {
   ...badncode,
   ...bom,
   ...facility,
+  ...cleanHist,
+  ...product,
   ...warehouse,
   ...process,
+  ...prcsRouter,
+  ...prcs
 };

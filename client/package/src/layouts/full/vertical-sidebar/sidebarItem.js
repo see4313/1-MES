@@ -6,24 +6,38 @@ const sidebarItem = [
         children: [
             {
                 title: '사원관리',
-                to: '/emp'
+                to: '/emp',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '거래처관리',
-                to: '/vendor'
+                to: '/vendor',
+                roles: ['admin', 'prod', 'mgr']
             },
-
             {
                 title: 'BOM관리',
-                to: '/bom'
+                to: '/bom',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '창고관리',
-                to: '/warehouse'
+                to: '/warehouse',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '공정정보',
-                to: '/process'
+                to: '/process',
+                roles: ['admin', 'prod', 'mgr']
+            },
+            {
+                title: '공정흐름도',
+                to: '/prcsrouter',
+                roles: ['admin', 'prod', 'mgr']
+            },
+            {
+                title: '품목관리',
+                to: '/mt-001',
+                roles: ['admin', 'prod', 'mgr']
             }
         ]
     },
@@ -35,31 +49,38 @@ const sidebarItem = [
         children: [
             {
                 title: '주문조회',
-                to: '/orderList'
+                to: '/orderList',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '주문등록',
-                to: '/orderInsert'
+                to: '/orderInsert',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '주문관리',
-                to: '/setOrder'
+                to: '/setOrder',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '제품조회',
-                to: '/productList'
+                to: '/productList',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '제품입고처리',
-                to: '/productInsert'
+                to: '/productInsert',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '제품관리',
-                to: '/setProduct'
+                to: '/setProduct',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '출고관리',
-                to: '/setDelivery'
+                to: '/setDelivery',
+                roles: ['admin', 'prod', 'mgr']
             }
         ]
     },
@@ -70,36 +91,34 @@ const sidebarItem = [
         to: '/front',
         children: [
             {
-                title: '품목관리',
-                to: '/mt-001'
-            },
-            {
                 title: '자재 발주등록',
-                to: '/mt-003'
+                to: '/mt-003',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '자재 입고등록',
-                to: '/mt-004'
-            },
-            {
-                title: '자재 출고관리',
-                to: ''
+                to: '/mt-004',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '재고조회',
-                to: '/mt-002'
+                to: '/mt-002',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '반품관리',
-                to: '/mt-006'
+                to: '/mt-006',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '폐기관리',
-                to: ''
+                to: '/mt-007',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
-                title: '폐기/반품 조회',
-                to: ''
+                title: '출고 이력',
+                to: '/mt-008',
+                roles: ['admin', 'prod', 'mgr']
             }
         ]
     },
@@ -111,31 +130,38 @@ const sidebarItem = [
         children: [
             {
                 title: '생산 지시',
-                to: '/instruction'
+                to: '/instruction',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '생산 지시 조회',
-                to: '/instructionlist'
+                to: '/instructionlist',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
-                title: 'Blog',
-                to: ''
+                title: '생산 실적 등록',
+                to: '/productionresults',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: 'Blog Details',
-                to: ''
+                to: '',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: 'Contact Us',
-                to: ''
+                to: '',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: 'Portfolio',
-                to: ''
+                to: '',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: 'Pricing',
-                to: ''
+                to: '',
+                roles: ['admin', 'prod', 'mgr']
             }
         ]
     },
@@ -147,35 +173,43 @@ const sidebarItem = [
         children: [
             {
                 title: '검사항목 관리',
-                to: '/insp'
+                to: '/insp',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '불량코드 관리',
-                to: '/badnlist'
+                to: '/badnlist',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '입고 품질 검사 등록',
-                to: '/iqc'
+                to: '/iqc',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '입고 품질 검사 조회',
-                to: '/iqii'
+                to: '/iqii',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '불량이력서 확인',
-                to: ''
+                to: '',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '공정 품질 검사 등록',
-                to: ''
+                to: '',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '공정 품질 검사 조회',
-                to: ''
+                to: '',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '검사서 관리',
-                to: ''
+                to: '',
+                roles: ['admin', 'prod', 'mgr']
             }
         ]
     },
@@ -187,50 +221,41 @@ const sidebarItem = [
         children: [
             {
                 title: '대시보드',
-                to: '/facility/dashboard'
+                to: '/facility/dashboard',
+                roles: ['admin', 'prod', 'mgr']
             },
 
             {
                 title: '설비 관리',
-                to: '/facility/management'
-            },
-
-            {
-                title: '점검 이력 등록',
-                to: '/facility/inspect/add'
+                to: '/facility/management',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '점검 이력 관리',
-                to: '/facility/inspect/manage'
+                to: '/facility/inspect/manage',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
-                title: '세척이력 등록',
-                to: '/facility/cleaning/add'
-            },
-            {
-                title: '세척이력 관리',
-                to: '/facility/cleaning/manage'
+                title: '세척 이력 관리',
+                to: '/facility/cleaning/histmanage',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '고장 등록',
-                to: '/facility/failure/add'
+                to: '/facility/failure/add',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
-                title: '수리이력 등록',
-                to: '/facility/repair/add'
+                title: '수리 이력',
+                to: '/facility/repair/add',
+                roles: ['admin', 'prod', 'mgr']
             },
             {
                 title: '비가동 관리',
-                to: '/facility/downtime'
+                to: '/facility/downtime',
+                roles: ['admin', 'prod', 'mgr']
             }
         ]
-    },
-
-    { header: 'auth' },
-    {
-        title: 'Login',
-        icon: 'login-3-line-duotone',
-        to: '/auth/login'
     }
 ];
 

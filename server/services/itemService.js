@@ -10,6 +10,16 @@ const getItemList = async (type) => {
   }
 };
 
+const getItemListNoRegisteredPrcsRouting = async () => {
+    try {
+    const result = await db.query('selectItemListNoRegisteredPrcsRouting');
+    return result;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 module.exports = {
-  getItemList
+  getItemList,
+  getItemListNoRegisteredPrcsRouting
 };

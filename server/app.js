@@ -28,8 +28,11 @@ const vendorRouter = require("./routers/vendor_router.js");
 const productionRouter = require("./routers/productionRouter.js");
 const bomRouter = require("./routers/bom_router.js");
 const facilityRouter = require("./routers/facility_router.js");
+const cleanHistRouter = require("./routers/clean_hist_router.js");
+const productRouter = require("./routers/product_router.js");
 const warehouseRouter = require("./routers/warehouse_router.js");
 const processRouter = require("./routers/process_router.js");
+
 
 // 기본 라우팅
 app.get("/", (req, res) => {
@@ -44,7 +47,9 @@ app.use(inspItemRouter);
 app.use(vendorRouter);
 app.use(productionRouter);
 app.use(bomRouter);
-app.use(inspItemRouter);
 app.use(facilityRouter);
+app.use(cleanHistRouter);
+app.use(productRouter);
 app.use(warehouseRouter);
 app.use(processRouter);
+

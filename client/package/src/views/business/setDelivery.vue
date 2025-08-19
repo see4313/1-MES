@@ -3,12 +3,22 @@
     <v-row>
         <v-card elevation="10">
             <v-card-item class="py-6 px-6">
-                <CardHeader title="출고 관리" />
+                <CardHeader2
+                    title="출고관리"
+                    btn-text1="조회"
+                    btn-variant1="flat"
+                    btn-color1="primary"
+                    @btn-click1="(Select(), DeliverySelect())"
+                    btn-text2="출고"
+                    btn-variant2="flat"
+                    btn-color2="primary"
+                    @btn-click2=""
+                />
             </v-card-item>
             <v-row no-gutters>
                 <v-col cols="12" sm="4">
                     <v-sheet class="pa-2 ma-2">
-                        <v-text-field variant="outlined" label="주문코드" v-model="selectemp" readonly>
+                        <v-text-field variant="outlined" label="주문코드" v-model="selectedItem" readonly>
                             <template #append-inner>
                                 <v-icon @click="showModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                             </template>
@@ -17,16 +27,7 @@
                 </v-col>
                 <v-col cols="12" sm="4">
                     <v-sheet class="pa-2 ma-2">
-                        <v-text-field variant="outlined" label="제품명" v-model="selectorder" readonly>
-                            <template #append-inner>
-                                <v-icon @click="showModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
-                            </template>
-                        </v-text-field>
-                    </v-sheet>
-                </v-col>
-                <v-col cols="12" sm="4">
-                    <v-sheet class="pa-2 ma-2">
-                        <v-text-field variant="outlined" label="업체명" v-model="selectemp" readonly>
+                        <v-text-field variant="outlined" label="업체명" v-model="selectedItem3" readonly>
                             <template #append-inner>
                                 <v-icon @click="showModal3 = true" class="cursor-pointer">mdi-magnify</v-icon>
                             </template>
@@ -35,28 +36,38 @@
                 </v-col>
             </v-row>
 
-            <DataTable :value="orderList" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
-                <Column field="order_id" header="주문상세코드"></Column>
-                <Column field="ordr" header="제품 코드"></Column>
-                <Column field="ordr_date" header="제품명"></Column>
-                <Column field="emp_name" header="출고일자자"></Column>
-                <Column field="vend_name" header="제품코드"></Column>
-                <Column field="st" header="업체명"></Column>
-                <Column field="remk" header="기납기량"></Column>
-                <Column field="remk" header="미납기량"></Column>
+            <DataTable :value="setDelivery" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
+                <Column field="detail_id" header="주문상세코드"></Column>
+                <Column field="item_id" header="제품 코드"></Column>
+                <Column field="item_name" header="제품명"></Column>
+                <Column field="oust_date" header="출고일자">
+                    <template #body="{ data }">
+                        {{ dayjs(data.ordr_date).format('YYYY-MM-DD') }}
+                    </template></Column
+                >
+                <Column field="vend_name" header="업체명"></Column>
+                <Column field="" header="기납기량"></Column>
+                <Column field="" header="미납기량"></Column>
             </DataTable>
         </v-card>
 
         <v-card elevation="10">
             <v-card-item class="py-6 px-6">
-                <CardHeader title="출고 관리" btn-text="출고" btn-variant="flat" btn-color="primary" @btn-click="Select()" />
+                <CardHeader title="출고 관리" />
             </v-card-item>
 
-            <DataTable :value="detailOrder" tableStyle="min-width: 50rem">
-                <Column field="item_id" header="제품코드"></Column>
-                <Column field="qty" header="제품명"></Column>
-                <Column field="amt" header="출고가능수량"></Column>
-                <Column field="tamt" header="출고수량"></Column>
+            <DataTable :value="deliveryList" tableStyle="min-width: 50rem">
+                <Column field="item_id" header="제품코드"
+                    ><template #body="slotProps">
+                        <v-icon class="cursor-pointer" @click="openProductModal(slotProps.index)" style="margin-left: 8px">
+                            mdi-magnify
+                        </v-icon>
+                        {{ slotProps.data.item_id }}
+                    </template></Column
+                >
+                <Column field="item_name" header="제품명"></Column>
+                <Column field="dlivy_qty" header="출고가능수량"></Column>
+                <Column field="tqty" header="출고수량"></Column>
             </DataTable>
         </v-card>
     </v-row>
@@ -78,27 +89,13 @@
     />
 
     <ModalSearch
-        :visible="showModal2"
-        title="제품코드"
-        idField="product_id"
-        :columns="[
-            { key: 'emp_id', label: '제품코드' },
-            { key: 'dept_id', label: '제품명' }
-        ]"
-        :fetchData="fetchItems2"
-        :pageSize="5"
-        @select="onSelectItem2"
-        @close="showModal2 = false"
-    />
-
-    <ModalSearch
         :visible="showModal3"
         title="업체명"
-        idField="vend_name"
+        idField="vend_id"
         :columns="[
-            { key: 'emp_id', label: '업체번호' },
-            { key: 'dept_id', label: '사업자번호' },
-            { key: 'emp_name', label: '거래처명' }
+            { key: 'vend_id', label: '업체번호' },
+            { key: 'biz_number', label: '사업자번호' },
+            { key: 'vend_name', label: '거래처명' }
         ]"
         :fetchData="fetchItems3"
         :pageSize="5"
@@ -108,18 +105,85 @@
 </template>
 
 <script setup>
-import CardHeader from '@/components/production/card-header-btn.vue';
+import CardHeader from '@/components/production/card-header.vue';
+import CardHeader2 from '@/components/production/card-header-btn2.vue';
 import Column from 'primevue/column';
 import ModalSearch from '@/views/commons/CommonModal.vue';
+import { ProductService } from '@/service/ProductService';
 import DataTable from 'primevue/datatable';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import axios2 from 'axios';
+import dayjs from 'dayjs';
 
-const productList = ref();
 const showModal = ref(false); //주문코드모달
-const showModal2 = ref(false); //제품품코드모달
 const showModal3 = ref(false); //업체명명모달
 
-const selectOrder = ref(null);
-const selectProduct = ref(null);
-const selectVend = ref(null);
+const selectedItem = ref(null);
+const selectedItem3 = ref(null);
+const orderId = ref(null);
+const vendId = ref(null);
+const setDelivery = ref(null);
+
+onMounted(() => {
+    ProductService.getProductsMini().then((data) => (products.value = data));
+});
+
+// 제품전체조회
+const Select = async () => {
+    try {
+        const params = {
+            item_id: selectedItem.value,
+            vend_id: selectedItem3.value
+        };
+        const response = await axios.get('/api/setDelivery', { params });
+        setDelivery.value = response.data;
+    } catch (error) {
+        console.log('조회실패', error);
+    }
+};
+
+// 출고관리 목록
+const DeliverySelect = async () => {
+    try {
+        const params = {
+            item_id: selectedItem.value
+        };
+        const response = await axios2.get('/api/deliveryList', { params });
+        setDelivery.value = response.data;
+    } catch (error) {
+        console.log('조회실패', error);
+    }
+};
+// 주문코드 모달
+const fetchItems = async () => {
+    try {
+        const response = await axios.get('/api/orderModal');
+        return response.data;
+    } catch (error) {
+        console.error('조회 실패', error);
+        return [];
+    }
+};
+
+// 업체명모달
+const fetchItems3 = async () => {
+    try {
+        const response = await axios.get('/api/vend');
+        return response.data;
+    } catch (error) {
+        console.error('조회 실패', error);
+        return [];
+    }
+};
+
+const onSelectItem = (item) => {
+    selectedItem.value = item.order_id;
+    orderId.value = item.order_id;
+};
+
+const onSelectItem3 = (item) => {
+    selectedItem3.value = item.vend_name;
+    vendId.value = item.vend_id;
+};
 </script>

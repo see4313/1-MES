@@ -216,12 +216,8 @@ const joinDate = ref(null);
 const leavMenu = ref(false);
 const leavDate = ref(null);
 
-const vendName = ref(null);
-const empName = ref(null);
 const orderName = ref(null);
-const ordr = ref(null);
-const ordrDate = ref(null);
-const paprdDate = ref(null);
+
 const remk = ref(null);
 
 const showModal = ref(false); // 주문모달

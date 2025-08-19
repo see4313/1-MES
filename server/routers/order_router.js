@@ -51,20 +51,14 @@ router.get("/orderModal", async (req, res) => {
 });
 
 // 모달(상세주문)
-router.get("/itemModal", async (req, res) => {
-  let list = await orderService.itemModal();
+router.get("/itemModal1", async (req, res) => {
+  let list = await orderService.itemModal1();
   res.send(list); // 응답
 });
 
 // 모달(창고주문)
 router.get("/whModal", async (req, res) => {
   let list = await orderService.whModal();
-  res.send(list); // 응답
-});
-
-// 모달(생산지시)
-router.get("/prodModal", async (req, res) => {
-  let list = await orderService.prodModal();
   res.send(list); // 응답
 });
 

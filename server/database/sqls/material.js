@@ -56,6 +56,69 @@ const inventoryList = (filters) => {
   return { sql, params };
 };
 
+// 출고이력 조회
+const historyList = (filters) => {
+  let sql = `
+    SELECT lh.history_id,
+           lh.lot_id,
+           iv.item_id,
+           i.item_name,
+           i.item_type,
+           lh.use_qty,
+           lh.use_date,
+           lh.remk
+    FROM   LOT_HISTORY lh JOIN INVENTORY iv
+                          ON   lh.lot_id = iv.lot_id
+                          JOIN ITEM i
+                          ON   iv.item_id = i.item_id
+    WHERE  1 = 1
+  `;
+
+  const params = [];
+
+  if (filters.item_id) {
+    sql += " AND iv.item_id = ?";
+    params.push(filters.item_id);
+  }
+  if (filters.use_date) {
+    sql += " AND lh.use_date < ?";
+    params.push(filters.use_date);
+  }
+
+  return { sql, params };
+};
+
+// 로그인 조회
+const userLogin = (filters) => {
+  let sql = `
+    SELECT e.emp_id,
+           e.emp_name,
+           e.status,
+           e.leavdorm,
+           e.perm,
+           e.dept_id,
+           d.dept_name,
+           e.phone,
+           e.remk
+    FROM   EMPLOYEE e JOIN DEPARTMENT d
+                      ON   e.dept_id = d.dept_id
+    WHERE  1 = 1
+  `;
+
+  const params = [];
+
+  if (filters.emp_id) {
+    sql += " AND e.emp_id = ?";
+    params.push(filters.emp_id);
+  }
+  if (filters.emp_pw) {
+    sql += " AND e.emp_id = ?";
+    params.push(filters.emp_pw);
+  }
+
+  return { sql, params };
+};
+
 // 품목조회
 const itemList = (filters) => {
   let sql = `
@@ -97,23 +160,6 @@ const itemList = (filters) => {
 
   return { sql, params };
 };
-
-// 품목번호 모달용
-const itemId = `
-SELECT item_id
-     , item_name
-     , item_type
-     , unit
-     , spec
-     , cutd_cond
-     , conv_qty
-     , safe_qty
-     , exp_date
-     , uon
-     , remk
-FROM   ITEM
-WHERE  uon = 'Y'
-`;
 
 // LOT번호 모달용
 const lotId = `
@@ -226,6 +272,16 @@ const receive = `
 CALL proc_receive(?)
 `;
 
+// 반품 처리
+const itemReturn = `
+CALL item_return(?)
+`;
+
+// 폐기 처리
+const itemdispose = `
+CALL item_dispose(?)
+`;
+
 // 발주 조회
 const selectProc = `
 SELECT p.procument_id
@@ -242,7 +298,7 @@ FROM   PROCUMENT p JOIN VENDOR v
                    JOIN EMPLOYEE e
                    ON   p.emp_id = e.emp_id
 WHERE  p.status = '미완료'
-AND    p.regist_date < ?
+AND    p.regist_date <= ?
 `;
 
 // 발주상세 조회
@@ -253,6 +309,7 @@ SELECT pd.pcmt_detail_id
      , pd.qty
      , pd.untpc
      , pd.status
+     , pd.remain_qty
      , i.item_name
      , i.unit
      , i.spec
@@ -266,7 +323,6 @@ AND    pd.procument_id = ?
 module.exports = {
   inventoryList,
   itemList,
-  itemId,
   lotId,
   itemType,
   cutdCond,
@@ -281,4 +337,8 @@ module.exports = {
   selectProc,
   selectProcDetail,
   receive,
+  itemReturn,
+  itemdispose,
+  historyList,
+  userLogin,
 };
