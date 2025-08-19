@@ -32,7 +32,11 @@ const cleanHistRouter = require("./routers/clean_hist_router.js");
 const productRouter = require("./routers/product_router.js");
 const warehouseRouter = require("./routers/warehouse_router.js");
 const processRouter = require("./routers/process_router.js");
-
+const dashboardRouter = require("./routers/dashboard_router.js");
+const inspectHistRouter = require("./routers/inspectHistRouter.js");
+const repairHistRouter = require("./routers/repairHistRouter");
+const failureTypeRouter = require("./routers/failureTypeRouter");
+const downtimeRouter = require("./routers/downtimeRouter");
 
 // 기본 라우팅
 app.get("/", (req, res) => {
@@ -52,4 +56,8 @@ app.use(cleanHistRouter);
 app.use(productRouter);
 app.use(warehouseRouter);
 app.use(processRouter);
-
+app.use(dashboardRouter);
+app.use(inspectHistRouter);
+app.use(repairHistRouter);
+app.use(failureTypeRouter);
+app.use(downtimeRouter);

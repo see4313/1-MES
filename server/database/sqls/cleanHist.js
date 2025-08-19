@@ -13,7 +13,11 @@ const cleanHistList = (filters = {}) => {
       , DATE_FORMAT(c.CLEAN_START_DT,'%Y-%m-%d %H:%i:%s') AS clean_start_dt
       , DATE_FORMAT(c.CLEAN_END_DT  ,'%Y-%m-%d %H:%i:%s') AS clean_end_dt
       , c.REMK                                            AS remk
-      , c.IS_ACTIVE                                       AS is_active
+      , CASE
+            WHEN c.IS_ACTIVE = 'N' THEN '무효'
+            WHEN c.CLEAN_END_DT IS NULL THEN '진행중'
+            ELSE '완료'
+        END                                               AS clean_status
     FROM CLEAN_HIST c
     LEFT JOIN FACILITY f ON f.FACILITY_ID = c.FACILITY_ID
     LEFT JOIN EMPLOYEE e ON e.EMP_ID      = c.EMP_ID
@@ -78,7 +82,6 @@ const cleanHistUpdate = `
        , CLEAN_START_DT  = COALESCE(?, CLEAN_START_DT)
        , CLEAN_END_DT    = COALESCE(?, CLEAN_END_DT)
        , REMK            = COALESCE(?, REMK)
-       , EDIT_REASON     = COALESCE(?, EDIT_REASON)
        , WORK_DTTM       = NOW()
    WHERE CLEAN_HIST_ID   = ?
 `;
@@ -87,7 +90,6 @@ const cleanHistUpdate = `
 const cleanHistVoid = `
   UPDATE CLEAN_HIST
      SET IS_ACTIVE   = 'N'
-       , EDIT_REASON = COALESCE(?, EDIT_REASON)
        , WORK_DTTM   = NOW()
    WHERE CLEAN_HIST_ID = ?
 `;

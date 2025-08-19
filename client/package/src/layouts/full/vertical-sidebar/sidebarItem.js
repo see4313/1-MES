@@ -203,12 +203,8 @@ const sidebarItem = [
                 to: '/facility/cleaning/histmanage'
             },
             {
-                title: '고장 등록',
-                to: '/facility/failure/add'
-            },
-            {
-                title: '수리 이력',
-                to: '/facility/repair/add'
+                title: '고장/수리 관리',
+                to: '/facility/repair/rfmanage'
             },
             {
                 title: '비가동 관리',

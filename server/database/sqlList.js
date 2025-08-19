@@ -13,7 +13,10 @@ const cleanHist = require("./sqls/cleanHist.js");
 const product = require("./sqls/product.js");
 const warehouse = require("./sqls/warehouse.js");
 const process = require("./sqls/process.js");
-
+const dashboard = require("./sqls/dashboard.js");
+const inspectHist = require("./sqls/inspectHist.js");
+const repairHist = require("./sqls/repairHist.js");
+const failureType = require("./sqls/failureType.js");
 
 module.exports = {
   ...orders,
@@ -31,4 +34,8 @@ module.exports = {
   ...product,
   ...warehouse,
   ...process,
+  ...dashboard,
+  ...inspectHist,
+  ...repairHist,
+  ...failureType,
 };

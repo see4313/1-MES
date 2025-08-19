@@ -29,11 +29,6 @@ const FacilityRoutes: RouteRecordRaw[] = [
                 component: () => import('@/views/facility/Status.vue')
             },
             {
-                path: 'inspect/add',
-                name: 'FacilityInspectAdd',
-                component: () => import('@/views/facility/inspect/Add.vue')
-            },
-            {
                 path: 'inspect/manage',
                 name: 'FacilityInspectManage',
                 component: () => import('@/views/facility/inspect/Manage.vue')
@@ -44,14 +39,9 @@ const FacilityRoutes: RouteRecordRaw[] = [
                 component: () => import('@/views/facility/cleaning/CleaningHistMange.vue')
             },
             {
-                path: 'failure/add',
-                name: 'FacilityFailureAdd',
-                component: () => import('@/views/facility/failure/Add.vue')
-            },
-            {
-                path: 'repair/add',
-                name: 'FacilityRepairAdd',
-                component: () => import('@/views/facility/repair/Add.vue')
+                path: 'repair/rfmanage',
+                name: 'FacilityRepairManage',
+                component: () => import('@/views/facility/repair/repair.vue')
             },
             {
                 path: 'downtime',
