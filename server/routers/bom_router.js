@@ -140,4 +140,10 @@ router.post(
   })
 );
 
+// 삭제
+router.delete("/bomDelete", async (req, res) => {
+  const { bom_number } = req.body;
+  let result = await bomService.deleteEmp(bom_number);
+  res.send(result);
+});
 module.exports = router;

@@ -101,9 +101,24 @@ const ensureInsertedOr409 = async (b, result) => {
     ? { status: 409, body: { message: "이미 등록된 사원입니다!" } }
     : { status: 500, body: { ok: false, message: "등록 실패" } };
 };
+// 사원 삭제
+const deleteEmp = async (empId) => {
+  let resInfo = await mapper.query("empDelete", [empId]);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
 
 // 서비스 메서드들
 module.exports = {
+  deleteEmp,
   isDupError,
   pagedQuery,
   empSearchParams,
