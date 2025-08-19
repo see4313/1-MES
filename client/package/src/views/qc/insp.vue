@@ -1,6 +1,4 @@
 <template>
-    <h1>검사항목 관리</h1>
-
     <!-- 🔍 검색 카드 (item 폼 구조 적용) -->
     <v-card elevation="10" class="mb-3">
         <v-card-item class="py-6 px-6">

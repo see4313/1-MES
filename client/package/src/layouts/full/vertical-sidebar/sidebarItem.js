@@ -203,7 +203,12 @@ const sidebarItem = [
             },
             {
                 title: '검사서 관리',
-                to: '',
+                to: '/exam',
+                roles: ['admin', 'prod', 'mgr']
+            },
+            {
+                title: '제품 품질 검사',
+                to: '/itemExam',
                 roles: ['admin', 'prod', 'mgr']
             }
         ]

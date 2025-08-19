@@ -1,6 +1,5 @@
 // services/inspitem.service.js
 const mapper = require("../database/mapper.js");
-
 // 목록
 async function getInspItems() {
   return await mapper.query("inspitem");
@@ -43,9 +42,51 @@ async function deleteInspItem(id) {
   return ret;
 }
 
+// 검사서 세부 조회
+const examDetail = async (filters) => {
+  let list = await mapper.query("examDetail", filters);
+  return list;
+};
+
+// 검사항목 조회
+const inspList = async (filters) => {
+  let list = await mapper.query("inspList", filters);
+  return list;
+};
+
+// 생산실적 조회
+const prodList = async () => {
+  let list = await mapper.query("prodList");
+  return list;
+};
+
+// 검사 등록
+const examInsert = async (data) => {
+  let resInfo = await mapper.query("examInsert", [
+    data.item_id,
+    data.emp_id,
+    data.remk,
+    JSON.stringify(data.details), // 프로시저에서 JSON 파싱
+  ]);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
 module.exports = {
   getInspItems,
   createInspItem,
   updateInspItem,
   deleteInspItem,
+  inspList,
+  examInsert,
+  examDetail,
+  prodList,
 };
