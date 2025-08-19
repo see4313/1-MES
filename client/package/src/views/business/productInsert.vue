@@ -12,7 +12,7 @@
                     btn-text2="입고"
                     btn-variant2="flat"
                     btn-color2="error"
-                    @btn-click2=""
+                    @btn-click2="productInsert()"
                 />
             </v-card-item>
             <v-row no-gutters>
@@ -27,26 +27,20 @@
                 </v-col>
             </v-row>
 
-            <DataTable
-                :value="insertList"
-                tableStyle="min-width: 50rem"
-                v-model:selection="selectedProducts"
-                @row-click="onRowClick"
-                class="cursor-pointer"
-            >
+            <DataTable :value="insertList" tableStyle="min-width: 50rem" v-model:selection="selectedProducts" class="cursor-pointer">
                 <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
                 <Column field="item_id" header="제품코드"></Column>
                 <Column field="item_name" header="제품명"></Column>
                 <Column field="item_type" header="제품유형"></Column>
-                <Column field="pass_qty" header="수량"></Column>
+                <Column field="prod_qty" header="수량"></Column>
                 <Column header="입고수량" style="width: 120px">
-                    <template #body="slotProps">
-                        <v-text-field type="number" dense hide-details style="width: 100px" variant="outlined" min="0" />
+                    <template #body="{ data }">
+                        <v-text-field type="number" dense hide-details style="width: 100px" variant="outlined" min="0" v-model="data.qty" />
                     </template>
                 </Column>
                 <Column header="비고" style="width: 110px">
-                    <template #body="slotProps">
-                        <v-text-field type="text" dense hide-details style="width: 120px" variant="outlined" min="0" />
+                    <template #body="{ data }">
+                        <v-text-field type="text" dense hide-details style="width: 120px" variant="outlined" min="0" v-model="data.remk" />
                     </template>
                 </Column>
             </DataTable>
@@ -68,6 +62,7 @@
         @select="onSelectItem"
         @close="showModal = false"
     />
+    <SnackBar />
 </template>
 <script setup>
 import CardHeader from '@/components/production/card-header-btn2.vue';
@@ -75,17 +70,17 @@ import ModalSearch from '@/views/commons/CommonModal.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
-import { ProductService } from '@/service/ProductService';
-import dayjs from 'dayjs';
 import axios from 'axios';
 
-onMounted(() => {
-    ProductService.getProductsMini().then((data) => (products.value = data));
-});
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
+onMounted(() => {});
+
+const { snackBar } = useSnackBar();
 const showModal = ref(false); // 제품코드모달
 const selectedItem = ref(null); // 제품코드선택
-const selectedProducts = ref([]);
+const selectedProducts = ref(null);
 const insertList = ref();
 
 // 완제품 입고 목록
@@ -97,7 +92,7 @@ const Select = async () => {
         const response = await axios.get('/api/insertList', { params });
         insertList.value = response.data;
     } catch (error) {
-        console.log('조회실패', error);
+        snackBar('조회 실패.', 'error');
     }
 };
 
@@ -107,8 +102,29 @@ const fetchItems = async () => {
         const response = await axios.get('/api/itemModal1');
         return response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
+    }
+};
+
+// 입고처리
+const productInsert = async () => {
+    try {
+        let payload = selectedProducts.value.map((item) => ({
+            item_id: item.item_id,
+            qty: item.qty,
+            remk: item.remk
+        }));
+        const response = await axios.post('/api/productInsert', payload);
+        if (response.data.result) {
+            snackBar('등록 성공', 'success');
+            selectedProducts.value = null;
+        } else {
+            snackBar('등록 실패.', 'error');
+        }
+    } catch (err) {
+        console.log(err);
+        snackBar('에러', 'error');
     }
 };
 

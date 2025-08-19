@@ -7,6 +7,8 @@ const {
   deleteInspItem,
 } = require("../services/inspItemService.js");
 
+const inspService = require("../services/inspItemService.js");
+
 router.get("/inspitem", async (req, res) => {
   try {
     const data = await getInspItems();
@@ -47,6 +49,33 @@ router.delete("/inspitem/:id", async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "DB 삭제 실패" });
   }
+});
+
+// 검사서 세부 조회
+router.get("/examDetail", async (req, res) => {
+  const filters = req.query;
+  let list = await inspService.examDetail(filters);
+  res.send(list); // 응답
+});
+
+// 검사항목 조회
+router.get("/inspList", async (req, res) => {
+  const filters = req.query;
+  let list = await inspService.inspList(filters);
+  res.send(list); // 응답
+});
+
+// 생산실적 조회
+router.get("/prodList", async (req, res) => {
+  let list = await inspService.prodList();
+  res.send(list); // 응답
+});
+
+// 검사 등록
+router.post("/examInsert", async (req, res) => {
+  let item = req.body;
+  let result = await inspService.examInsert(item);
+  res.send(result);
 });
 
 module.exports = router;

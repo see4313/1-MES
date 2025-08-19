@@ -142,26 +142,6 @@ const sidebarItem = [
                 title: '생산 실적 등록',
                 to: '/productionresults',
                 roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: 'Blog Details',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: 'Contact Us',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: 'Portfolio',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: 'Pricing',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
             }
         ]
     },
@@ -208,7 +188,12 @@ const sidebarItem = [
             },
             {
                 title: '검사서 관리',
-                to: '',
+                to: '/exam',
+                roles: ['admin', 'prod', 'mgr']
+            },
+            {
+                title: '제품 품질 검사',
+                to: '/itemExam',
                 roles: ['admin', 'prod', 'mgr']
             }
         ]
@@ -242,7 +227,7 @@ const sidebarItem = [
             },
             {
                 title: '고장/수리 관리',
-                to: '/facility/repair/rfmanage'
+                to: '/facility/repair/rfmanage',
                 roles: ['admin', 'prod', 'mgr']
             },
             {

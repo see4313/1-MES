@@ -38,6 +38,13 @@ router.delete("/deleteOrder", async (req, res) => {
   res.send(list); // 응답
 });
 
+// 주문삭제
+router.delete("/deleteOrderId", async (req, res) => {
+  const { order_id } = req.body;
+  let list = await orderService.deleteOrderId(order_id);
+  res.send(list); // 응답
+});
+
 // 모달(담당자)
 router.get("/empModal", async (req, res) => {
   let list = await orderService.empModal();

@@ -3,6 +3,7 @@ const productList = (filters) => {
   SELECT inv.lot_id, 
         inv.item_id,
         inv.crea_date,
+        inv.vald_date,
         item.item_name, 
         item.item_type,
         inv.wh_id,
@@ -12,7 +13,8 @@ const productList = (filters) => {
 FROM INVENTORY inv 
 JOIN ITEM item
               ON inv.item_id = item.item_id
-WHERE 1 = 1 AND item.item_type = '반제품' AND item.item_type = '완제품'
+WHERE 1 = 1
+AND item.item_type = '완제품'
 `;
   const params = [];
 
@@ -28,40 +30,77 @@ const insertList = `
 SELECT item.item_id,
 	   item.item_name,
        item.item_type,
-       ins.pass_qty,
-       ins.remk
-FROM INSP_ACMSLT ins
-JOIN ITEM item ON  ins.item_id = item.item_id
-WHERE item.item_type = '완제품'
+       his.rsrt_id,
+	     prod.remk,
+       prod.prod_qty,
+       his.exam_id
+FROM ITEM item JOIN ITEM_EXAM_HIS his 
+                    ON item.item_id = his.item_id
+JOIN PROD_ACMSLT prod
+                    ON  prod.rsrt_id = his.rsrt_id
+WHERE 1 = 1
+AND item.item_type = '완제품'
+
 `;
 
 // 출고관리 목록
-const deliveryList = `
-SELECT inv.item_id,
+const deliveryList = (filters) => {
+  let sql = `
+ SELECT inv.item_id,
+        inv.lot_id,
+        inv.vald_date,
        item.item_name,
-       inv.dlivy_qty
+       inv.bnt
 FROM INVENTORY inv JOIN ITEM item
-                      ON inv.item_id = item.item_id; 
+                      ON inv.item_id = item.item_id
+WHERE 1=1
+AND inv.status = '사용가능' 
 `;
+
+  const params = [];
+  if (filters.item_id) {
+    sql += "AND inv.item_id = ?";
+    params.push(filters.item_id);
+  }
+  return { sql, params };
+};
 
 // 완제품 입고
-const productInsert = `
-INSERT INTO INVENTORY (lot_id, item_id, wh_id, crea_date, vald_date, entebord_qty, bnt, status)
-VALUES (next_code('LOT'), ?, ?, ?, ?, ?, ?, ?)
+const productUpdate = `
+CALL delivery_update(?)
 `;
 
 // 출고관리 목록
-const setDelivery = `
-SELECT ordt.detail_id,
+const setDelivery = (filters) => {
+  let sql = `
+   SELECT ordt.detail_id,
        ordt.item_id,
        item.item_name,
        ord.vend_id,
        vend.vend_name
 FROM ORDER_DETAIL ordt
-JOIN ITEM item ON ordt.item_id = item.item_id
-JOIN ORDER_INFO ord ON ordt.order_id = ord.order_id
-JOIN VENDOR vend ON ord.vend_id = vend.vend_id;
+JOIN ITEM item 
+                ON ordt.item_id = item.item_id
+JOIN ORDER_INFO ord
+                ON ordt.order_id = ord.order_id
+JOIN VENDOR vend 
+                ON ord.vend_id = vend.vend_id
+WHERE 1=1 
 `;
+
+  const params = [];
+  if (filters.item_id) {
+    sql += "AND ord.item_id = ?";
+    params.push(filters.item_id);
+  }
+  return { sql, params };
+};
+
+// 입고 관리
+const productInsert = `
+CALL product_insert(?)
+`;
+
 // 모달(생산지시번호)
 const prodModal = `
  SELECT inv.lot_id, 
@@ -81,7 +120,8 @@ module.exports = {
   prodModal,
   productList,
   insertList,
-  productInsert,
+  productUpdate,
   setDelivery,
   deliveryList,
+  productInsert,
 };
