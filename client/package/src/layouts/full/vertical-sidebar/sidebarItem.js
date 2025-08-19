@@ -247,7 +247,7 @@ const sidebarItem = [
             },
             {
                 title: '고장/수리 관리',
-                to: '/facility/repair/rfmanage'
+                to: '/facility/repair/rfmanage',
                 roles: ['admin', 'prod', 'mgr']
             },
             {
