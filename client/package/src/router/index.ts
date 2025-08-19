@@ -29,3 +29,17 @@ export const router = createRouter({
         insp
     ]
 });
+
+
+const noLoginPage = ['/auth/login'];
+
+router.beforeEach((to, from, next) => {
+    const isLoggedIn = sessionStorage.getItem('userId');
+    const authRequired = !noLoginPage.includes(to.path);
+
+    if (authRequired && !isLoggedIn) {
+        next('/auth/login');
+    } else {
+        next();
+    }
+});
