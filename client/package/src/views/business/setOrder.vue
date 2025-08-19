@@ -314,7 +314,6 @@ const onSelectItem3 = (item) => {
 };
 
 const deleteOrderDetail = async (itemId) => {
-    console.log(itemId);
     if (!confirm('삭제하시겠습니까?')) return;
     try {
         await axios.delete('/api/deleteOrder', { data: { detail_id: itemId } });
@@ -346,9 +345,10 @@ const setOrder = async () => {
         let response = await axios.put('/api/setOrder', obj);
 
         if (response.data.result) {
+            if (!confirm('수정하시겠습니까?')) return;
             alert('수정완료');
             // select();
-            // dataReset();
+            dataReset();
         } else {
             alert('수정실패');
         }
@@ -357,6 +357,18 @@ const setOrder = async () => {
         alert('에러발생');
     }
 };
+
+// 상세입력 초기화
+function dataReset() {
+    selectOrder.value = null;
+    orderName.value = null;
+    vendId.value = null;
+    empId.value = null;
+    joinDate.value = null;
+    leavDate.value = null;
+    remk.value = null;
+    orderDetails.value = null;
+}
 </script>
 
 <style scoped>
