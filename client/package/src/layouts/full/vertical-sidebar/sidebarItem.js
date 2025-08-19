@@ -241,8 +241,8 @@ const sidebarItem = [
                 roles: ['admin', 'prod', 'mgr']
             },
             {
-                title: '고장 등록',
-                to: '/facility/failure/add',
+                title: '고장/수리 관리',
+                to: '/facility/repair/rfmanage'
                 roles: ['admin', 'prod', 'mgr']
             },
             {

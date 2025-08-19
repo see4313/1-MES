@@ -67,7 +67,7 @@
                 <Column field="clean_end_dt" header="종료일시" />
                 <Column field="duration_min" header="소요(분)" />
                 <Column field="remk" header="비고" />
-                <Column field="is_active" header="상태" />
+                <Column field="clean_status" header="상태" />
             </DataTable>
             <p v-if="!histList.length" class="text-grey mt-3">조회 결과가 없습니다.</p>
         </v-card-item>
@@ -124,12 +124,6 @@
             <v-row dense>
                 <v-col cols="12">
                     <v-textarea label="비고" v-model="remk" outlined rows="4" />
-                </v-col>
-            </v-row>
-
-            <v-row dense v-if="histId">
-                <v-col cols="12">
-                    <v-textarea label="정정 사유" v-model="editReason" outlined rows="3" />
                 </v-col>
             </v-row>
         </v-card-item>

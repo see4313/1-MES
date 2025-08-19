@@ -12,7 +12,7 @@ router.get("/cleanHistList", async (req, res) => {
       from_dt: from_dt || null, // 'YYYY-MM-DD HH:mm:ss'
       to_dt: to_dt || null, // 'YYYY-MM-DD HH:mm:ss'
     });
-    res.json(rows); // ⚠️ 래핑 금지 (프론트에서 바로 map)
+    res.json(rows);
   } catch (err) {
     console.error("[cleanHistList] error:", err);
     res.status(500).json([]);
@@ -58,15 +58,8 @@ router.post("/cleanHistInsert", async (req, res) => {
 // 정정(수정)
 router.put("/cleanHistUpdate", async (req, res) => {
   try {
-    const {
-      hist_id,
-      facility_id,
-      emp_id,
-      clean_start_dt,
-      clean_end_dt,
-      remk,
-      edit_reason,
-    } = req.body || {};
+    const { hist_id, facility_id, emp_id, clean_start_dt, clean_end_dt, remk } =
+      req.body || {};
     if (!hist_id)
       return res.status(400).json({ success: false, error: "hist_id 누락" });
 
@@ -87,7 +80,6 @@ router.put("/cleanHistUpdate", async (req, res) => {
       clean_start_dt,
       clean_end_dt,
       remk,
-      edit_reason,
     });
     res.json({ success: !!ok });
   } catch (err) {
@@ -99,11 +91,11 @@ router.put("/cleanHistUpdate", async (req, res) => {
 // 무효 처리
 router.patch("/cleanHistVoid", async (req, res) => {
   try {
-    const { hist_id, edit_reason } = req.body || {};
+    const { hist_id } = req.body || {};
     if (!hist_id)
       return res.status(400).json({ success: false, error: "hist_id 누락" });
 
-    const ok = await svc.voidCleanHist(hist_id, edit_reason || null);
+    const ok = await svc.voidCleanHist(hist_id || null);
     res.json({ success: !!ok });
   } catch (err) {
     console.error("[cleanHistVoid] error:", err);
