@@ -106,6 +106,12 @@ ORDER BY E.EMP_ID
 LIMIT ? OFFSET ?;
 `;
 
+//삭제
+const vendDelete = `
+DELETE FROM VENDOR
+WHERE VEND_ID = ?
+`;
+
 module.exports = {
   // mapper 별칭 키에 맞춰 export
   "VENDOR.SEARCH": VENDOR_SEARCH,
@@ -115,4 +121,5 @@ module.exports = {
   selectVendPsch,
   selectVendType,
   selectVendId,
+  vendDelete,
 };

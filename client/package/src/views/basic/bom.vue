@@ -184,10 +184,11 @@
                     btn-color3="primary"
                     btn-variant3="flat"
                     @btn-click3="onClickCreate"
-                    btn-text2="수정"
-                    btn-color2="warning"
+                    btn-text2="삭제"
                     btn-variant2="flat"
-                    @btn-click2="onClickUpdate"
+                    btn-color2="error"
+                    :btn-disabled2="!createForm.id"
+                    @btn-click2="onClickDel"
                     btn-text1="초기화"
                     btn-color1="secondary"
                     btn-variant1="flat"
@@ -486,32 +487,59 @@ const onSelectItem = (row) => {
     const name = row?.item_name ?? '';
     const spec = row?.spec ?? '';
     const unit = row?.unit ?? '';
-    if (!id) return (showItemModal.value = false);
+
+    if (!id) {
+        showItemModal.value = false;
+        return;
+    }
 
     if (itemModalTarget.value === 'create') {
+        // 헤더(등록 폼)
         createForm.value.itemId = id;
         createForm.value.itemName = name;
     } else if (itemModalTarget.value === 'detail') {
+        // 상세 행 선택
         if (itemTargetRow.value) {
+            // 중복 방지: 같은 (item_id, unit) 조합이 다른 행에 이미 있는지 검사
+            const keyId = id;
+            const keyUnit = unit || '';
+            const hasDup = detailRows.value.some(
+                (r) =>
+                    r !== itemTargetRow.value && // 자기 자신 제외
+                    (r?.item_id ?? '') === keyId &&
+                    (r?.unit ?? '') === keyUnit
+            );
+            if (hasDup) {
+                notify('같은 품목/단위가 이미 있습니다.', 'warning');
+                showItemModal.value = false;
+                return;
+            }
+
+            // 통과 시 반영
             itemTargetRow.value.item_id = id;
             itemTargetRow.value.item_name = name;
             itemTargetRow.value.spec = spec;
             itemTargetRow.value.unit = unit;
         }
     } else {
+        // 검색 폼
         searchForm.value.itemId = id;
         searchForm.value.itemName = name;
     }
+
     showItemModal.value = false;
 };
 
 /* ===== 등록/수정/초기화 ===== */
+
 const validateRequired = (f) => !!(f.itemId && f.itemName && f.startDate);
 
-const onClickCreate = async () => {
+const onClickSave = async () => {
     if (!validateRequired(createForm.value)) {
         return notify('필수 항목을 확인하세요.', 'warning');
     }
+
+    // 공통 payload
     const payload = {
         itemId: createForm.value.itemId,
         ver: createForm.value.ver,
@@ -520,32 +548,72 @@ const onClickCreate = async () => {
         use: createForm.value.useYn,
         remk: createForm.value.remark
     };
-    console.log('Final payload before sending:', payload);
+
+    const isUpdate = !!createForm.value.id;
+
     try {
-        await axios.post('/api/bomInsert', payload); //  헤더 단건 API
-        notify('BOM 등록이 완료되었습니다.');
-        resetCreateForm();
+        if (isUpdate) {
+            // 수정
+            await axios.put(`/api/bom/${encodeURIComponent(createForm.value.id)}`, {
+                ...createForm.value,
+                startDate: payload.startDate,
+                endDate: payload.endDate
+            });
+            notify('수정이 완료되었습니다.');
+        } else {
+            // 신규 등록 (헤더만)
+            await axios.post('/api/bomInsert', payload);
+            notify('BOM 등록이 완료되었습니다.');
+            resetCreateForm(); // 기존 동작 유지
+        }
     } catch (e) {
-        notify(e?.response?.data?.message || '등록 중 오류가 발생했습니다.', 'error');
+        const msg = e?.response?.data?.message || (isUpdate ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.');
+        notify(msg, 'error');
     }
 };
 
-const onClickUpdate = async () => {
-    if (!validateRequired(createForm.value)) return notify('필수 항목을 확인하세요.', 'warning');
+// (선택) 기존 핸들러를 새 함수로 매핑해두면 다른 곳에서 호출해도 동작 동일
+const onClickCreate = onClickSave;
+// const onClickCreate = async () => {
+//     if (!validateRequired(createForm.value)) {
+//         return notify('필수 항목을 확인하세요.', 'warning');
+//     }
+//     const payload = {
+//         itemId: createForm.value.itemId,
+//         ver: createForm.value.ver,
+//         startDate: toDateStr(createForm.value.startDate),
+//         endDate: toDateStr(createForm.value.endDate),
+//         use: createForm.value.useYn,
+//         remk: createForm.value.remark
+//     };
+//     console.log('Final payload before sending:', payload);
+//     try {
+//         await axios.post('/api/bomInsert', payload); //  헤더 단건 API
+//         notify('BOM 등록이 완료되었습니다.');
+//         resetCreateForm();
+//     } catch (e) {
+//         notify(e?.response?.data?.message || '등록 중 오류가 발생했습니다.', 'error');
+//     }
+// };
 
-    const payload = {
-        ...createForm.value,
-        startDate: toDateStr(createForm.value.startDate),
-        endDate: toDateStr(createForm.value.endDate)
-    };
-    try {
-        await axios.put(`/api/bom/${createForm.value.id}`, payload); // (선택) 필요 시 유지
-        notify('수정이 완료되었습니다.');
-    } catch (e) {
-        notify(e?.response?.data?.message || '수정 중 오류가 발생했습니다.', 'error');
-    }
-};
+// const onClickUpdate = async () => {
+//     if (!validateRequired(createForm.value)) return notify('필수 항목을 확인하세요.', 'warning');
 
+//     const payload = {
+//         ...createForm.value,
+//         startDate: toDateStr(createForm.value.startDate),
+//         endDate: toDateStr(createForm.value.endDate)
+//     };
+//     try {
+//         console.log(payload);
+//         await axios.put(`/api/bom/${createForm.value.id}`, payload); // (선택) 필요 시 유지
+//         notify('수정이 완료되었습니다.');
+//     } catch (e) {
+//         notify(e?.response?.data?.message || '수정 중 오류가 발생했습니다.', 'error');
+//     }
+// };
+
+//초기화
 const resetCreateForm = () => {
     createForm.value = {
         id: null,
@@ -672,6 +740,8 @@ const onClickDetailInsert = async () => {
                     loss: Number(r.loss ?? 0) || 0
                 }))
             };
+
+            console.log(body);
             await axios.post(`/api/bom/${enc(createForm.value.id)}/details`, body);
 
             // 재조회 및 안내

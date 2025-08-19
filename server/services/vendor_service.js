@@ -100,6 +100,20 @@ const ensureVendorInsertedOr409 = async (b, result) => {
     : { status: 500, body: { ok: false, message: "등록 실패" } };
 };
 
+//  삭제
+const deleteVend = async (vendId) => {
+  let resInfo = await mapper.query("vendDelete", [vendId]);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
 module.exports = {
   // 유틸
   toNull,
@@ -117,6 +131,7 @@ module.exports = {
   // 등록/수정
   vendorInsertParams,
   vendorUpdateParams,
+  deleteVend,
   // 등록 후 재확인
   ensureVendorInsertedOr409,
 };

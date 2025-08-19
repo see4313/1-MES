@@ -2,6 +2,8 @@
 const mapper = require("../database/mapper");
 const bom_sql = require("../database/sqls/bom");
 
+// ...
+
 /* ====================== 공용 유틸 (심플) ====================== */
 // 다양한 DB 결과 형식을 "행 배열"로 통일
 const rowsOf = (r) => {
@@ -111,6 +113,7 @@ function validateDetails(details, isNew) {
 }
 
 async function saveBomViaProc(data = {}) {
+  console.log(data);
   try {
     const bomNumber = data.bomNumber ?? data.p_bom_number ?? null;
     const header = data.header ?? null;
@@ -123,10 +126,8 @@ async function saveBomViaProc(data = {}) {
     const itemId = isNew ? data.p_item_id ?? header?.item_id ?? null : null;
     const useYn = isNew ? data.p_use_yn ?? header?.use_yn ?? "Y" : null;
     const ver = isNew ? data.p_ver ?? header?.ver ?? 1 : null;
-    const start = isNew
-      ? toDateStr(data.p_start_date ?? header?.start_date)
-      : null;
-    const end = isNew ? toDateStr(data.p_end_date ?? header?.end_date) : null;
+    const start = isNew ? data.p_start_date ?? header?.start_date : null;
+    const end = isNew ? data.p_end_date ?? header?.end_date : null;
     const remk = isNew ? data.p_remk ?? header?.remk ?? null : null;
 
     const params = [

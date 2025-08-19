@@ -79,10 +79,16 @@ ORDER BY D.DEPT_ID
 LIMIT ? OFFSET ?;
 `;
 
+// 사원 삭제
+const empDelete = `
+DELETE FROM EMPLOYEE
+WHERE EMP_ID = ?
+`;
 module.exports = {
   selectStatus,
   selectPerm,
   selectDept,
+  empDelete,
   "EMP.SEARCH": EMP_SEARCH,
   "EMP.INSERT": insertEmp,
   "EMP.UPDATE": updateEmp,
