@@ -19,6 +19,13 @@ const deleteOrder = async (detail_id) => {
   return list;
 };
 
+// 주문삭제
+const deleteOrderId = async (order_id) => {
+  let list = await mariadb.query("deleteOrderId", [order_id]);
+  return list;
+};
+deleteOrderId;
+
 // 모달(담당자)
 const empModal = async () => {
   let list = await mariadb.query("empModal");
@@ -108,4 +115,5 @@ module.exports = {
   orderToArray,
   deleteOrder,
   whModal,
+  deleteOrderId,
 };

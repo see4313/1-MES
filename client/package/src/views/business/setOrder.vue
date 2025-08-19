@@ -12,7 +12,7 @@
                     btn-text2="삭제"
                     btn-variant2="flat"
                     btn-color2="error"
-                    @btn-click2=""
+                    @btn-click2="deleteOrderId()"
                 />
             </v-card-item>
         </v-col>
@@ -193,6 +193,7 @@
         @select="onSelectItem3"
         @close="showModal3 = false"
     />
+    <SnackBar />
 </template>
 <script setup>
 import CardHeader from '@/components/production/card-header-btn2.vue';
@@ -204,11 +205,14 @@ import dayjs from 'dayjs';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import axios from 'axios';
 import { watch } from 'vue';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
 onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
 });
 
+const { snackBar } = useSnackBar();
 const products = ref([]);
 const orderDetails = ref([]);
 const joinMenu = ref(false);
@@ -229,6 +233,7 @@ const selectedItem3 = ref(null);
 const editingRows = ref([]);
 const vendId = ref(null);
 const empId = ref(null);
+const order_Id = ref(null);
 
 const formattedJoinDate = computed(() => {
     return joinDate.value ? dayjs(joinDate.value).format('YYYY-MM-DD') : '';
@@ -313,13 +318,26 @@ const onSelectItem3 = (item) => {
     vendId.value = item.vend_id;
 };
 
+// 주문 삭제
+const deleteOrderId = async (orderId) => {
+    if (!confirm('삭제하시겠습니까?')) return;
+    try {
+        snackBar('삭제성공', 'success');
+        await axios.delete('/api/deleteOrderId', { data: { order_id: orderId } });
+    } catch (error) {
+        snackBar('삭제실패', 'error');
+    }
+};
+
+// 상세 삭제
 const deleteOrderDetail = async (itemId) => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
+        snackBar('삭제성공', 'success');
         await axios.delete('/api/deleteOrder', { data: { detail_id: itemId } });
         orderDetails.value = orderDetails.value.filter((item) => item.detail_id !== itemId);
     } catch (error) {
-        console.error('삭제 실패', error);
+        snackBar('삭제실패', 'error');
     }
 };
 
@@ -346,15 +364,14 @@ const setOrder = async () => {
 
         if (response.data.result) {
             if (!confirm('수정하시겠습니까?')) return;
-            alert('수정완료');
+            snackBar('수정성공', 'success');
             // select();
             dataReset();
         } else {
-            alert('수정실패');
+            snackBar('수정실패', 'error');
         }
     } catch (error) {
-        console.log('수정 중 오류', error);
-        alert('에러발생');
+        snackBar('에러', 'error');
     }
 };
 

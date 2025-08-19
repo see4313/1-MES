@@ -128,6 +128,7 @@
         @select="onSelectItem3"
         @close="showModal3 = false"
     />
+    <SnackBar />
 </template>
 
 <script setup>
@@ -140,6 +141,10 @@ import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
+
+const { snackBar } = useSnackBar();
 const showModal = ref(false); //주문코드모달
 const showModal3 = ref(false); //업체명명모달
 
@@ -168,14 +173,13 @@ const delUpdate = async () => {
         if (!confirm('출고하시겠습니까?')) return;
 
         if (response.data.result) {
-            alert('출고완료');
+            snackBar('출고완료', 'success');
             Select();
         } else {
-            alert('출고실패');
+            snackBar('출고실패.', 'error');
         }
     } catch (error) {
-        console.log('수정 중 오류', error);
-        alert('에러발생');
+        snackBar('에러', 'error');
     }
 };
 
@@ -193,7 +197,7 @@ watch(setorderId, async (newVal) => {
             const response = await axios.get('/api/deliveryList', { params });
             deliveryList.value = response.data;
         } catch (error) {
-            console.log('조회실패', error);
+            snackBar('조회실패', 'error');
         }
     }
 });
@@ -208,7 +212,7 @@ const Select = async () => {
         const response = await axios.get('/api/setDelivery', { params });
         setDelivery.value = response.data;
     } catch (error) {
-        console.log('조회실패', error);
+        snackBar('조회실패', 'error');
     }
 };
 
@@ -218,7 +222,7 @@ const fetchItems = async () => {
         const response = await axios.get('/api/orderModal');
         return response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회실패', 'error');
         return [];
     }
 };
@@ -229,7 +233,7 @@ const fetchItems3 = async () => {
         const response = await axios.get('/api/vend');
         return response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회실패', 'error');
         return [];
     }
 };

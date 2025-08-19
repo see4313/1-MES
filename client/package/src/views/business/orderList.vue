@@ -94,6 +94,7 @@
         @select="onSelectItem"
         @close="showModal1 = false"
     />
+    <SnackBar />
 </template>
 <script setup>
 import DataTable from 'primevue/datatable';
@@ -104,8 +105,12 @@ import axios from 'axios';
 import CardHeader from '@/components/production/card-header-btn.vue';
 import dayjs from 'dayjs';
 
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
+
 onMounted(() => {});
 
+const { snackBar } = useSnackBar();
 const selectOrder = ref(null); // 선택된 행
 const orderList = ref(); // 조회목록
 const detailOrder = ref(); // 조회목록
@@ -130,7 +135,7 @@ const Select = async () => {
         const response = await axios.get('/api/orderList', { params });
         orderList.value = response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
     }
 };
 
@@ -142,7 +147,7 @@ const onRowClick = async (event) => {
         });
         detailOrder.value = response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -153,7 +158,7 @@ const fetchItems = async () => {
         const response = await axios.get('/api/empModal');
         return response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };

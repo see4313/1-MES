@@ -20,13 +20,13 @@
             <DataTable :value="productList" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
                 <Column field="lot_id" header="LOT"></Column>
                 <Column field="item_id" header="제품 코드"></Column>
+                <Column field="item_name" header="완제품명"></Column>
                 <Column field="crea_date" header="입고 일자">
+                    <Column field="item_type" header="제품유형"></Column>
                     <template #body="{ data }">
                         {{ dayjs(data.ordr_date).format('YYYY-MM-DD') }}
                     </template></Column
                 >
-                <Column field="item_name" header="완제품명"></Column>
-                <Column field="item_type" header="제품유형"></Column>
                 <Column field="wh_id" header="창고코드"></Column>
                 <Column field="safe_qty" header="안전재고량"></Column>
                 <Column field="bnt" header="현수량"></Column>
@@ -50,6 +50,7 @@
         @select="onSelectItem"
         @close="showModal = false"
     />
+    <SnackBar />
 </template>
 
 <script setup>
@@ -60,8 +61,12 @@ import DataTable from 'primevue/datatable';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
 onMounted(() => {});
+
+const { snackBar } = useSnackBar();
 const showModal = ref(false); //  주문코드 모달
 const selectedItem = ref(null);
 
@@ -76,7 +81,7 @@ const Select = async () => {
         const response = await axios.get('/api/productList', { params });
         productList.value = response.data;
     } catch (error) {
-        console.log('조회실패', error);
+        snackBar('조회 실패.', 'error');
     }
 };
 
@@ -86,7 +91,7 @@ const fetchItems = async () => {
         const response = await axios.get('/api/itemModal1');
         return response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
