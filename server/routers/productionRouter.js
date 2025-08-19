@@ -5,6 +5,7 @@ const router = express.Router();
 const itemService = require("../services/itemService");
 const productionService = require("../services/productionService");
 const prcsRouterService = require("../services/prcsRouterService");
+const prcsServive = require("../services/prcsService")
 
 // getItemList -- 품목 리스트 조회
 router.get("/prod/itemlist/:type", async (req, res) => {
@@ -12,6 +13,16 @@ router.get("/prod/itemlist/:type", async (req, res) => {
   const { type } = req.params;
   try {
     const result = await itemService.getItemList(type);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+// 공정흐름도 미등록 품목 리스트 조회
+router.get("/prod/noprcsrouteritemlist", async (req, res) => {
+  try {
+    const result = await itemService.getItemListNoRegisteredPrcsRouting();
     res.send(result);
   } catch (e) {
     console.error(e);
@@ -67,6 +78,27 @@ router.get("/prod/prcsrouter", async (req, res) => {
   console.log(query)
   try {
     const result = await prcsRouterService.getPrcsRouter(query);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+//getPrcs -- 공정리스트 조회
+router.get("/prod/prcslist", async (req, res) => {
+  try {
+    const result = await prcsServive.getPrcs();
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+})
+
+// addPrcsRouter -- 공정흐름도 CRUD
+router.post("/prod/saveprcsrouter", async (req, res) => {
+  const { body } = req;
+  try {
+    const result = await prcsRouterService.savePrcsRouter(body);
     res.send(result);
   } catch (e) {
     console.error(e);

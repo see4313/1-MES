@@ -6,8 +6,8 @@ const getPrcsRouterList = async () => {
     const result = await db.query("selectPrcsRouterList");
     return result;
   } catch (e) {
-    console.errpr(e);
-    return { err: e};
+    console.error(e);
+    return { err: e };
   }
 };
 
@@ -21,7 +21,18 @@ const getPrcsRouter = async (query) => {
   }
 };
 
+const savePrcsRouter = async (data) => {
+  try {
+    const result = await db.query("savePrcsRouter", data);
+    return result;
+  } catch (e) {
+    console.error(e);
+    return { err: e };
+  }
+}
+
 module.exports = { 
   getPrcsRouterList, 
-  getPrcsRouter 
+  getPrcsRouter,
+  savePrcsRouter
 };

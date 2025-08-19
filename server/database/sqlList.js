@@ -14,7 +14,7 @@ const product = require("./sqls/product.js");
 const warehouse = require("./sqls/warehouse.js");
 const process = require("./sqls/process.js");
 const prcsRouter = require("./sqls/prcsRouter.js");
-
+const prcs = require("./sqls/prcs.js");
 
 module.exports = {
   ...orders,
@@ -32,5 +32,6 @@ module.exports = {
   ...product,
   ...warehouse,
   ...process,
-  ...prcsRouter
+  ...prcsRouter,
+  ...prcs
 };

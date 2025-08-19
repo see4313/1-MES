@@ -30,6 +30,11 @@ const sidebarItem = [
                 roles: ['admin', 'prod', 'mgr']
             },
             {
+                title: '공정흐름도',
+                to: '/prcsrouter',
+                roles: ['admin', 'prod', 'mgr']
+            },
+            {
                 title: '품목관리',
                 to: '/mt-001',
                 roles: ['admin', 'prod', 'mgr']

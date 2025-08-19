@@ -39,6 +39,30 @@ const selectItemList = (type) => {
   return { sql, params };
 };
 
+const selectItemListNoRegisteredPrcsRouting = () => {
+  const sql = `
+    select
+      i.item_id     AS itemId,
+      i.item_name   AS itemName,
+      i.item_type   AS itemType,
+      i.unit,
+      i.spec,
+      i.cutd_cond   AS cutdCond,
+      i.safe_qty    AS safeQty,
+      i.exp_date    AS expDate,
+      i.uon,
+      i.remk
+    from ITEM i
+    where not exists (
+      select 1
+      from PROCESS_ROUTING pr
+      where pr.item_id = i.item_id
+    )
+  `
+  return { sql };
+}
+
 module.exports = {
-  selectItemList
+  selectItemList,
+  selectItemListNoRegisteredPrcsRouting
 };
