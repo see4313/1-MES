@@ -52,7 +52,8 @@ watch(selectedPrcsRouter, async (newVal) => {
 const getItemList = async () => {
     try {
         const { data } = await axios.get('/api/prod/itemlist/notmaterial');
-        return data ?? [];
+        const excludeSet = new Set(prcsRouterList.value.map(p => p.itemId));
+        return (data ?? []).filter(it => !excludeSet.has(it.itemId));
     } catch (e) {
         console.error(e);
         return [];
