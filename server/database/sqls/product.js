@@ -3,6 +3,7 @@ const productList = (filters) => {
   SELECT inv.lot_id, 
         inv.item_id,
         inv.crea_date,
+        inv.vald_date,
         item.item_name, 
         item.item_type,
         inv.wh_id,

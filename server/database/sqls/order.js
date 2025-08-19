@@ -61,6 +61,12 @@ DELETE FROM ORDER_DETAIL
 WHERE detail_id = ?
 `;
 
+// 주문 삭제
+const deleteOrderId = `
+DELETE FROM ORDER_INFO
+WHERE order_id = ?
+`;
+
 // 모달(담당자)
 const empModal = `
 SELECT emp.emp_id
@@ -120,4 +126,5 @@ module.exports = {
   deleteOrder,
   orderInsert,
   whModal,
+  deleteOrderId,
 };

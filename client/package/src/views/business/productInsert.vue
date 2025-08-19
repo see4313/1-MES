@@ -62,6 +62,7 @@
         @select="onSelectItem"
         @close="showModal = false"
     />
+    <SnackBar />
 </template>
 <script setup>
 import CardHeader from '@/components/production/card-header-btn2.vue';
@@ -71,8 +72,12 @@ import Column from 'primevue/column';
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
+
 onMounted(() => {});
 
+const { snackBar } = useSnackBar();
 const showModal = ref(false); // 제품코드모달
 const selectedItem = ref(null); // 제품코드선택
 const selectedProducts = ref(null);
@@ -87,7 +92,7 @@ const Select = async () => {
         const response = await axios.get('/api/insertList', { params });
         insertList.value = response.data;
     } catch (error) {
-        console.log('조회실패', error);
+        snackBar('조회 실패.', 'error');
     }
 };
 
@@ -97,7 +102,7 @@ const fetchItems = async () => {
         const response = await axios.get('/api/itemModal1');
         return response.data;
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -112,14 +117,14 @@ const productInsert = async () => {
         }));
         const response = await axios.post('/api/productInsert', payload);
         if (response.data.result) {
-            alert('등록 성공');
+            snackBar('등록 성공', 'success');
             selectedProducts.value = null;
         } else {
-            alert('등록 실패');
+            snackBar('등록 실패.', 'error');
         }
     } catch (err) {
         console.log(err);
-        alert('에러발생');
+        snackBar('에러', 'error');
     }
 };
 
