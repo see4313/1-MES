@@ -11,8 +11,30 @@ router.get("/processList", async (req, res, next) => {
     next(err);
   }
 });
-//등록
+
+
+// 등록
 router.post("/process", async (req, res, next) => {
+  try {
+    const { prcsName, useYn } = req.body || {};
+    if (!prcsName || !useYn) {
+      return res
+        .status(400)
+        .json({ message: "필수값(prcsName, useYn)을 확인하세요." });
+    }
+    const result = await processService.createProcess(req.body);
+    res.status(201).json({ message: "등록 완료", result });
+  } catch (err) {
+    if (err?.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({ message: "이미 존재하는 공정번호입니다." });
+    }
+    next(err);
+  }
+});
+
+// 등록 - 단순 체크
+router.post("/warehouses", async (req, res, next) => {
+
   try {
     const { prcsName, useYn } = req.body || {};
     if (!prcsName || !useYn) {
