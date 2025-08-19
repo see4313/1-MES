@@ -4,6 +4,8 @@ const express = require("express");
 const router = express.Router();
 const itemService = require("../services/itemService");
 const productionService = require("../services/productionService");
+const prcsRouterService = require("../services/prcsRouterService");
+const prcsServive = require("../services/prcsService")
 
 // getItemList -- 품목 리스트 조회
 router.get("/prod/itemlist/:type", async (req, res) => {
@@ -11,6 +13,16 @@ router.get("/prod/itemlist/:type", async (req, res) => {
   const { type } = req.params;
   try {
     const result = await itemService.getItemList(type);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+// 공정흐름도 미등록 품목 리스트 조회
+router.get("/prod/noprcsrouteritemlist", async (req, res) => {
+  try {
+    const result = await itemService.getItemListNoRegisteredPrcsRouting();
     res.send(result);
   } catch (e) {
     console.error(e);
@@ -41,9 +53,52 @@ router.get("/prod/detailinstruction", async (req, res) => {
 
 // addProdInstructions -- 생산 지시
 router.post("/prod/instructions", async (req, res) => {
+  const { body } = req;
   try {
-    const { body } = req;
     const result = await productionService.addProdInstructions(body);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+// getPrcsRouterList -- 공정흐름도 리스트 조회
+router.get("/prod/prcsrouterlist", async (req, res) => {
+  try {
+    const result = await prcsRouterService.getPrcsRouterList();
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+// getPrcsRouter -- 공정흐름도 리스트 조회
+router.get("/prod/prcsrouter", async (req, res) => {
+  const { query } = req;
+  console.log(query)
+  try {
+    const result = await prcsRouterService.getPrcsRouter(query);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+//getPrcs -- 공정리스트 조회
+router.get("/prod/prcslist", async (req, res) => {
+  try {
+    const result = await prcsServive.getPrcs();
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+})
+
+// addPrcsRouter -- 공정흐름도 CRUD
+router.post("/prod/saveprcsrouter", async (req, res) => {
+  const { body } = req;
+  try {
+    const result = await prcsRouterService.savePrcsRouter(body);
     res.send(result);
   } catch (e) {
     console.error(e);

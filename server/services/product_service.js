@@ -13,9 +13,9 @@ const insertList = async () => {
   return list;
 };
 
-// 모달(생산지시)
-const prodModal = async () => {
-  let list = await mariadb.query("prodModal");
+// 출고관리 목록
+const deliveryList = async () => {
+  let list = await mariadb.query("deliveryList");
   return list;
 };
 
@@ -44,9 +44,22 @@ const productInsert = async (data) => {
   }
 };
 
+// 출고 관리 목록
+const setDelivery = async (filters) => {
+  let list = await mariadb.query("setDelivery", filters);
+  return list;
+};
+
+// 모달(생산지시)
+const prodModal = async () => {
+  let list = await mariadb.query("prodModal");
+  return list;
+};
 module.exports = {
   prodModal,
   productList,
   insertList,
   productInsert,
+  setDelivery,
+  deliveryList,
 };

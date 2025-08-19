@@ -8,7 +8,7 @@
                     btn-text1="조회"
                     btn-variant1="flat"
                     btn-color1="primary"
-                    @btn-click1="Select()"
+                    @btn-click1="(Select(), DeliverySelect())"
                     btn-text2="출고"
                     btn-variant2="flat"
                     btn-color2="primary"
@@ -36,7 +36,7 @@
                 </v-col>
             </v-row>
 
-            <DataTable :value="orderList" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
+            <DataTable :value="setDelivery" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
                 <Column field="detail_id" header="주문상세코드"></Column>
                 <Column field="item_id" header="제품 코드"></Column>
                 <Column field="item_name" header="제품명"></Column>
@@ -56,11 +56,18 @@
                 <CardHeader title="출고 관리" />
             </v-card-item>
 
-            <DataTable :value="detailOrder" tableStyle="min-width: 50rem">
-                <Column field="item_id" header="제품코드"></Column>
-                <Column field="qty" header="제품명"></Column>
-                <Column field="amt" header="출고가능수량"></Column>
-                <Column field="tamt" header="출고수량"></Column>
+            <DataTable :value="deliveryList" tableStyle="min-width: 50rem">
+                <Column field="item_id" header="제품코드"
+                    ><template #body="slotProps">
+                        <v-icon class="cursor-pointer" @click="openProductModal(slotProps.index)" style="margin-left: 8px">
+                            mdi-magnify
+                        </v-icon>
+                        {{ slotProps.data.item_id }}
+                    </template></Column
+                >
+                <Column field="item_name" header="제품명"></Column>
+                <Column field="dlivy_qty" header="출고가능수량"></Column>
+                <Column field="tqty" header="출고수량"></Column>
             </DataTable>
         </v-card>
     </v-row>
@@ -106,6 +113,7 @@ import { ProductService } from '@/service/ProductService';
 import DataTable from 'primevue/datatable';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import axios2 from 'axios';
 import dayjs from 'dayjs';
 
 const showModal = ref(false); //주문코드모달
@@ -115,6 +123,7 @@ const selectedItem = ref(null);
 const selectedItem3 = ref(null);
 const orderId = ref(null);
 const vendId = ref(null);
+const setDelivery = ref(null);
 
 onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
@@ -127,13 +136,25 @@ const Select = async () => {
             item_id: selectedItem.value,
             vend_id: selectedItem3.value
         };
-        const response = await axios.get('/api/productList', { params });
-        productList.value = response.data;
+        const response = await axios.get('/api/setDelivery', { params });
+        setDelivery.value = response.data;
     } catch (error) {
         console.log('조회실패', error);
     }
 };
 
+// 출고관리 목록
+const DeliverySelect = async () => {
+    try {
+        const params = {
+            item_id: selectedItem.value
+        };
+        const response = await axios2.get('/api/deliveryList', { params });
+        setDelivery.value = response.data;
+    } catch (error) {
+        console.log('조회실패', error);
+    }
+};
 // 주문코드 모달
 const fetchItems = async () => {
     try {

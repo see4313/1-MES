@@ -8,12 +8,31 @@ import NavItem from './vertical-sidebar/NavItem/index.vue';
 import ProfileDD from './vertical-header/ProfileDD.vue';
 import { Icon } from '@iconify/vue';
 import NavCollapse from './vertical-sidebar/NavCollapse/NavCollapse.vue';
-const sidebarMenu = shallowRef(sidebarItems);
+const sidebarMenu = ref([]);
 const { mdAndDown } = useDisplay();
 const sDrawer = ref(true);
+
+const updateSidebarMenu = () => {
+    const sessionPerm = sessionStorage.getItem('userPerm');
+    const userRoleMap = { '전체 관리자': 'admin', '부서 관리자': 'mgr', '일반 사용자': 'prod' };
+    const currentRole = userRoleMap[sessionPerm];
+
+    sidebarMenu.value = sidebarItems.map((menu) => {
+        if (!menu.children) return menu;
+        return {
+            ...menu,
+            children: menu.children.filter((child) => child.roles.includes(currentRole))
+        };
+    });
+};
+
 onMounted(() => {
+    if (sessionStorage.getItem('userPerm')) {
+        updateSidebarMenu();
+    }
     sDrawer.value = !mdAndDown.value; // hide on mobile, show on desktop
 });
+
 watch(mdAndDown, (val) => {
     sDrawer.value = !val;
 });

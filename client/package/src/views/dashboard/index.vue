@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 /*Call Components*/
 import RevenueCard from '@/components/dashboard/RevenueCard.vue';
 import NewCustomer from '@/components/dashboard/NewCustomer.vue';
@@ -15,8 +15,8 @@ import BlogCards from '@/components/dashboard/BlogCards.vue';
             ><NewCustomer class="mb-6" />
             <Totalincome />
         </v-col>
-        <v-col cols="12" lg="8"><RevenueProduct/></v-col>
-        <v-col cols="12" lg="4"><DailyActivities/> </v-col>
-        <v-col cols="12"><BlogCards/></v-col>
+        <v-col cols="12" lg="8"><RevenueProduct /></v-col>
+        <v-col cols="12" lg="4"><DailyActivities /> </v-col>
+        <v-col cols="12"><BlogCards /></v-col>
     </v-row>
 </template>

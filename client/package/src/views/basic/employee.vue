@@ -169,12 +169,7 @@
             <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="사원명"
-                            v-model="createForm.name"
-                            :rules="[(v) => !!v || '사원명은 필수입니다.']"
-                        />
+                        <v-text-field variant="outlined" label="사원명" v-model="createForm.name" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -184,17 +179,11 @@
                             v-model="createForm.dept"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openDeptModal('create')"
-                            :rules="[(v) => !!v || '부서명은 필수입니다.']"
                         />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="연락처"
-                            v-model="createForm.phone"
-                            :rules="[(v) => !!v || '연락처는 필수입니다.']"
-                        />
+                        <v-text-field variant="outlined" label="연락처" v-model="createForm.phone" />
                     </v-col>
 
                     <!-- 입사일(등록/수정) -->
@@ -207,7 +196,6 @@
                                     append-inner-icon="mdi-calendar"
                                     variant="outlined"
                                     :model-value="formattedJoinDate1"
-                                    :rules="[(v) => !!createForm.joinDate || '입사일은 필수입니다.']"
                                 />
                             </template>
                             <v-date-picker
@@ -254,7 +242,6 @@
                             v-model="createForm.status"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openStatusModal('create')"
-                            :rules="[(v) => !!v || '사원상태는 필수입니다.']"
                         />
                     </v-col>
 
@@ -266,7 +253,6 @@
                             v-model="createForm.permName"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openPermModal('create')"
-                            :rules="[(v) => !!v || '권한은 필수입니다.']"
                         />
                     </v-col>
 

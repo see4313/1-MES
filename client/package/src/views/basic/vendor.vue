@@ -140,7 +140,6 @@
                             v-model="createForm.address"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openAddressModal"
-                            :rules="[(v) => !!v || '필수 입력입니다.']"
                             readonly
                         />
                     </v-col>

@@ -16,11 +16,23 @@ router.get("/insertList", async (req, res) => {
   res.send(list);
 });
 
+// 출고관리 목록
+router.get("/deliveryList", async (req, res) => {
+  let list = await productService.deliveryList();
+  res.send(list);
+});
+
 // 완제품 입고
 router.post("/productInsert", async (req, res) => {
   let board = req.body;
   let result = await productService.productInsert(board);
   res.send(result);
+});
+
+// 출고관리 목록
+router.get("/setDelivery", async (req, res) => {
+  let list = await productService.setDelivery();
+  res.send(list);
 });
 
 // 모달(생산지시)
