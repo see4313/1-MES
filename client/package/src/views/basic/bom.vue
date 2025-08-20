@@ -156,6 +156,7 @@
                                     style="width: 100px"
                                     variant="outlined"
                                     min="0"
+                                    class="right-align-input"
                                 />
                             </template>
                         </Column>
@@ -169,6 +170,7 @@
                                     style="width: 100px"
                                     variant="outlined"
                                     min="0"
+                                    class="right-align-input"
                                 />
                             </template>
                         </Column>
@@ -729,7 +731,7 @@ const onClickDetailInsert = async () => {
         } else {
             // ===== 신규 BOM: 헤더 + 상세 =====
             if (!validateRequired(createForm.value)) {
-                return notify('헤더(품목번호, 품목명, 시작일)를 먼저 입력하세요.', 'warning');
+                return notify('BOM을 먼저 선택하세요.', 'warning');
             }
             const err = validateDetailRows(); // 전체 검사
             if (err) return notify(err, 'warning');
@@ -784,5 +786,8 @@ const onClickDel = async () => {
 ::v-deep(.v-list-item) {
     display: flex;
     justify-content: center;
+}
+.right-align-input ::v-deep(input) {
+    text-align: right;
 }
 </style>

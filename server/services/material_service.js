@@ -62,8 +62,8 @@ const selectVend = async () => {
 };
 
 // 사원 조회
-const selectEmp = async () => {
-  let list = await mariadb.query("selectEmp");
+const selectEmp = async (filters) => {
+  let list = await mariadb.query("selectEmp", filters);
   return list;
 };
 

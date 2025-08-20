@@ -267,7 +267,11 @@ const fetchVend = async () => {
 
 const fetchEmp = async () => {
     try {
-        const response = await axios.get('/api/selectEmp');
+        const params = {
+            dept_id: 'D002'
+        };
+
+        const response = await axios.get('/api/selectEmp', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         snackBar('조회 실패.', 'error');
