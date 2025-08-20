@@ -41,7 +41,7 @@ DELETE FROM INSP_ITEM
 WHERE INSP_ID = ?
 `;
 
-// 입고 등록
+// 검사서 등록
 const examInsert = `
 CALL exam_insert(?, ?, ?, ?)
 `;
@@ -85,7 +85,6 @@ const examDetail = (filters) => {
            ii.insp_mthd,
            ii.insp_typ,
            ii.basi_val,
-           ed.detail_sttus,
            ed.remk
     FROM   EXAM_DETAIL ed JOIN EXAM_WR ew
 					                ON   ed.exam_id = ew.exam_id
@@ -98,10 +97,6 @@ const examDetail = (filters) => {
 
   const params = [];
 
-  if (filters.detail_sttus) {
-    sql += " AND ed.detail_sttus = ?";
-    params.push(filters.detail_sttus);
-  }
   if (filters.item_id) {
     sql += " AND ew.item_id = ?";
     params.push(filters.item_id);
@@ -133,6 +128,11 @@ FROM   PROD_ACMSLT pa JOIN PRODUCTION p
                       ON   pid.item_id = i.item_id
 `;
 
+// 발주 등록
+const examHisInsert = `
+CALL examHisInsert(?, ?, ?, ?, ?, ?, ?)
+`;
+
 module.exports = {
   inspitem,
   inspInsert,
@@ -142,4 +142,5 @@ module.exports = {
   examInsert,
   examDetail,
   prodList,
+  examHisInsert,
 };

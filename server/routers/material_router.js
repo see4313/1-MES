@@ -69,7 +69,8 @@ router.get("/selectVend", async (req, res) => {
 
 // 사원 조회
 router.get("/selectEmp", async (req, res) => {
-  let list = await materialService.selectEmp();
+  const filters = req.query;
+  let list = await materialService.selectEmp(filters);
   res.send(list); // 응답
 });
 
