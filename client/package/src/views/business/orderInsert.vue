@@ -8,11 +8,11 @@
                         title="주문 등록"
                         btn-text1="등록"
                         btn-variant1="flat"
-                        btn-color1="primary"
+                        btn-color1="warning"
                         @btn-click1="orderInsert()"
                         btn-text2="초기화"
                         btn-variant2="flat"
-                        btn-color2="error"
+                        btn-color2="secondary"
                         @btn-click2="dataReset()"
                     />
                 </v-card-item>
@@ -89,7 +89,7 @@
                             btn-icon="mdi-plus-circle"
                             btn-text="행추가"
                             btn-variant="flat"
-                            btn-color="primary"
+                            btn-color="#424242"
                             @btn-click="addRow"
                     /></v-card-item>
 
