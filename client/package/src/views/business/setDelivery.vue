@@ -11,7 +11,7 @@
                     @btn-click1="Select()"
                     btn-text2="출고"
                     btn-variant2="flat"
-                    btn-color2="primary"
+                    btn-color2="error"
                     @btn-click2="delUpdate()"
                 />
             </v-card-item>
@@ -43,7 +43,9 @@
                 v-model:selection="setorderId"
                 selectionMode="single"
                 :metaKeySelection="false"
-                dataKey="item_id"
+                dataKey="detail_id"
+                paginator
+                :rows="5"
             >
                 <Column field="detail_id" header="주문상세코드"></Column>
                 <Column field="item_id" header="제품 코드"></Column>
@@ -59,7 +61,7 @@
             </DataTable>
         </v-card>
 
-        <v-card elevation="10">
+        <v-card elevation="10" class="mt-4">
             <v-card-item class="py-6 px-6">
                 <CardHeader title="출고 관리" />
             </v-card-item>
@@ -70,6 +72,8 @@
                 v-model:selection="selectItemList"
                 selectionMode="multiple"
                 dataKey="lot_id"
+                paginator
+                :rows="5"
             >
                 <Column selectionMode="multiple" headerStyle="width: 3em" />
                 <Column field="lot_id" header="LOT번호"></Column>
@@ -158,11 +162,29 @@ const itemId = ref(null);
 const setorderId = ref(null);
 
 const selectItemList = ref(null);
+
 onMounted(() => {});
 
 // 출고 업데이트
 const delUpdate = async () => {
+    if (!selectItemList.value || selectItemList.value.length === 0) {
+        snackBar('출고할 제품을 선택해주세요.', 'warning');
+        return;
+    }
+
     try {
+        for (let item of selectItemList.value) {
+            if (item.qty > item.bnt) {
+                snackBar('출고수량이 출고가능수량보다 많습니다.', 'error');
+                return; // 출고 중단
+            }
+            if (item.qty <= 0) {
+                snackBar('출고수량은 0 이상이어야 합니다.', 'error');
+                return;
+            }
+        }
+        if (!confirm('출고하시겠습니까?')) return;
+
         let obj = selectItemList.value.map((item) => ({
             lot_id: item.lot_id,
             dlivy_qty: item.qty
@@ -170,13 +192,11 @@ const delUpdate = async () => {
 
         let response = await axios.post('/api/productUpdate', obj);
 
-        if (!confirm('출고하시겠습니까?')) return;
-
         if (response.data.result) {
             snackBar('출고완료', 'success');
             Select();
         } else {
-            snackBar('출고실패.', 'error');
+            snackBar('항목을 선택해주세요.', 'error');
         }
     } catch (error) {
         snackBar('에러', 'error');
@@ -206,8 +226,8 @@ watch(setorderId, async (newVal) => {
 const Select = async () => {
     try {
         const params = {
-            item_id: selectedItem.value,
-            vend_id: selectedItem3.value
+            order_id: orderId.value,
+            vend_id: vendId.value
         };
         const response = await axios.get('/api/setDelivery', { params });
         setDelivery.value = response.data;

@@ -41,6 +41,8 @@ router.delete("/deleteOrder", async (req, res) => {
 // 주문삭제
 router.delete("/deleteOrderId", async (req, res) => {
   const { order_id } = req.body;
+  console.log(order_id);
+  console.log("++++++++++++++++++");
   let list = await orderService.deleteOrderId(order_id);
   res.send(list); // 응답
 });
