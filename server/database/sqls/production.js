@@ -167,10 +167,22 @@ const selectFacilityListByName = (fNumber) => {
 
 }
 
+const insertProdACMSLT = (data) => {
+
+  const sql = `
+  
+  `;
+
+  params = [];
+
+  return { sql, params };
+};
+
 module.exports = {
   insertProdInstruct,
   selectInstructionList,
   selectDetailInstruction,
   selectStatusZeroProductionList,
-  selectFacilityListByName
+  selectFacilityListByName,
+  insertProdACMSLT
 };

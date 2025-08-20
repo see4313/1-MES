@@ -52,10 +52,21 @@ const getFacilityListByName = async (fNumber) => {
   }
 } 
 
+const addProdACMSLT = async (data) => {
+  try {
+    const result = await db.query("insertProdACMSLT", data);
+    return result;
+  } catch (e) {
+    console.log(e);
+    return { err : e};
+  }
+};
+
 module.exports = {
   addProdInstructions,
   getInstructionList,
   getDetailInstruction,
   getStatusZeroProductionList,
-  getFacilityListByName
+  getFacilityListByName,
+  addProdACMSLT
 };

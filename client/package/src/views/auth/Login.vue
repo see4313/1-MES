@@ -70,7 +70,7 @@ const onSignIn = async () => {
                                 </v-col>
                                 <v-col cols="12" class="pt-0"> </v-col>
                                 <v-col cols="12" class="pt-0">
-                                    <v-btn color="primary" size="large" block flat @click="onSignIn"> Sign in </v-btn>
+                                    <v-btn color="primary" size="large" block flat @click="onSignIn"> 로그인 </v-btn>
                                 </v-col>
                             </v-row>
                         </v-card-item>
