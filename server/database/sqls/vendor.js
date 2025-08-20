@@ -7,8 +7,8 @@ SELECT
   V.VEND_NAME  AS vendName,
   V.BIZ_NUMBER AS bizNumber,
   V.CNTINFO    AS cntinfo,
-  COALESCE(C.CMMN_NAME, V.VEND_TYPE) AS vendType,  -- 코드명 없으면 코드값
-  V.UON      AS useYn,
+  COALESCE(C.CMMN_NAME, V.VEND_TYPE) AS vendType,
+  V.UON     AS useYn,
   V.ADDRESS    AS address,
   V.PSCH       AS psch,
   V.REMK       AS remark
@@ -17,16 +17,17 @@ LEFT JOIN CMMN_CODE C
   ON C.GROUP_ID = 'VENDOR_TYPE'
  AND (C.CMMN_ID = V.VEND_TYPE OR C.CMMN_NAME = V.VEND_TYPE)
 WHERE 1=1
-  AND (? IS NULL OR V.VEND_ID   LIKE CONCAT('%', ?, '%'))
-  AND (? IS NULL OR V.VEND_NAME LIKE CONCAT('%', ?, '%'))
+  AND (COALESCE(?, '') = '' OR V.VEND_ID   LIKE CONCAT('%', ?, '%'))
+  AND (COALESCE(?, '') = '' OR V.VEND_NAME LIKE CONCAT('%', ?, '%'))
   AND (
-    ? IS NULL
-    OR CONCAT(
-         IFNULL(C.CMMN_ID,   ''), ' ',
-         IFNULL(C.CMMN_NAME, ''), ' ',
-         IFNULL(V.VEND_TYPE, '')
-       ) LIKE CONCAT('%', ?, '%')
-  )
+        COALESCE(?, '') = ''
+     OR CONCAT(
+          IFNULL(C.CMMN_ID,   ''), ' ',
+          IFNULL(C.CMMN_NAME, ''), ' ',
+          IFNULL(V.VEND_TYPE, '')
+        ) LIKE CONCAT('%', ?, '%')
+      )
+  AND (COALESCE(?, '') = '' OR V.PSCH LIKE CONCAT('%', ?, '%'))
 ORDER BY V.VEND_ID DESC
 `;
 
@@ -113,7 +114,6 @@ WHERE VEND_ID = ?
 `;
 
 module.exports = {
-  // mapper 별칭 키에 맞춰 export
   "VENDOR.SEARCH": VENDOR_SEARCH,
   "VENDOR.SEARCH_EXACT": VENDOR_SEARCH_EXACT,
   "VENDOR.INSERT": VENDOR_INSERT,

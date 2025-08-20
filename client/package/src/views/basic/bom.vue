@@ -177,7 +177,7 @@
                         <!-- 삭제 버튼 -->
                         <Column style="width: 80px; text-align: center">
                             <template #body="slotProps">
-                                <v-btn icon color="error" @click="deleteRow(slotProps.index)">
+                                <v-btn icon color="error" @click="deleteRow(slotProps.data)">
                                     <v-icon size="20">mdi-delete</v-icon>
                                 </v-btn>
                             </template>
@@ -219,6 +219,7 @@
                             v-model="createForm.itemId"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openItemModal('create')"
+                            readonly
                         />
                     </v-col>
 
@@ -507,7 +508,7 @@ const onSelectItem = (row) => {
     } else if (itemModalTarget.value === 'detail') {
         // 상세 행 선택
         if (itemTargetRow.value) {
-            // 중복 방지: 같은 (item_id, unit) 조합이 다른 행에 이미 있는지 검사
+            // 중복 방지: 같은 (item_id, unit) 조합
             const keyId = id;
             const keyUnit = unit || '';
             const hasDup = detailRows.value.some(
@@ -622,29 +623,32 @@ const addRow = () => {
     });
 };
 //상세삭제
-const deleteRow = async (index) => {
-    const row = detailRows.value[index];
+const deleteRow = async (row) => {
+    if (!row) return;
 
-    // DB에 없는 임시행이면 프런트에서만 제거
-    if (!row?.bom_detail_no || !createForm.value.id) {
-        detailRows.value.splice(index, 1);
+    // 배열 내 실제 인덱스 (객체 동일성 or 상세번호)
+    const idx = detailRows.value.findIndex((r) => r === row || (r.bom_detail_no && r.bom_detail_no === row.bom_detail_no));
+    if (idx < 0) return notify('행을 찾을 수 없습니다.', 'warning');
+
+    const target = detailRows.value[idx];
+
+    // DB에 없는 임시행이면 프론트에서만 제거
+    if (!target?.bom_detail_no || !createForm.value.id) {
+        detailRows.value.splice(idx, 1);
         return;
     }
 
-    const detailCode = String(row.bom_detail_no).trim();
-    if (!detailCode) {
-        notify('상세번호가 올바르지 않습니다.', 'warning');
-        return;
-    }
-
-    const bomNumber = encodeURIComponent(createForm.value.id);
-    const detailParam = encodeURIComponent(detailCode);
+    const detailCode = String(target.bom_detail_no).trim();
+    if (!detailCode) return notify('상세번호가 올바르지 않습니다.', 'warning');
 
     if (!window.confirm(`행 ${detailCode} 를 삭제할까요?`)) return;
 
     try {
+        const bomNumber = encodeURIComponent(createForm.value.id);
+        const detailParam = encodeURIComponent(detailCode);
         await axios.delete(`/api/bom/${bomNumber}/details/${detailParam}`);
-        detailRows.value.splice(index, 1);
+
+        detailRows.value.splice(idx, 1);
         notify('삭제되었습니다.');
     } catch (e) {
         notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
@@ -652,8 +656,6 @@ const deleteRow = async (index) => {
 };
 
 /* ===== 상세 등록(저장) =====
- * - 신규(BOM 없음): /api/bom  (header + details)
- * - 기존(BOM 있음): /api/bom/:bomNumber/details  (details)
  */
 const validateDetailRows = (rows = detailRows.value) => {
     const list = Array.isArray(rows) ? rows : [];
@@ -685,10 +687,8 @@ const onClickDetailInsert = async () => {
         if (createForm.value.id) {
             // ===== 기존 BOM =====
 
-            // (A) 신규 행
             const newRows = detailRows.value.filter((r) => !r.bom_detail_no);
 
-            // (B) 수정된 기존 행(원본과 달라진 항목만)
             const editedRows = detailRows.value.filter(
                 (r) =>
                     !!r.bom_detail_no &&
@@ -698,7 +698,6 @@ const onClickDetailInsert = async () => {
                         Number(r.loss ?? 0) !== Number(r._origLoss ?? 0))
             );
 
-            // 전송 대상 통합
             const sendRows = [...newRows, ...editedRows];
             if (sendRows.length === 0) {
                 return notify('변경할 내용이 없습니다.', 'info');
@@ -708,7 +707,6 @@ const onClickDetailInsert = async () => {
             const err = validateDetailRows(sendRows);
             if (err) return notify(err, 'warning');
 
-            // 서버 전송 (UPSERT 프로시저가 처리)
             const body = {
                 details: sendRows.map((r) => ({
                     item_id: r.item_id,

@@ -180,6 +180,7 @@
                             v-model="createForm.dept"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openDeptModal('create')"
+                            readonly
                         />
                     </v-col>
 
@@ -243,6 +244,7 @@
                             v-model="createForm.status"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openStatusModal('create')"
+                            readonly
                         />
                     </v-col>
 
@@ -254,6 +256,7 @@
                             v-model="createForm.permName"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openPermModal('create')"
+                            readonly
                         />
                     </v-col>
 
@@ -345,7 +348,7 @@ const leavDate = ref(null); // Date
 const formattedJoinDate = computed(() => (joinDate.value ? dayjs(joinDate.value).format('YYYY-MM-DD') : ''));
 const formattedLeavDate = computed(() => (leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : ''));
 
-// vuetify v-date-picker가 내부적으로 문자열로 세팅하는 경우를 대비한 프록시
+// 문자열로 세팅하는 경우를 대비한 프록시
 const searchJoinProxy = computed({
     get: () => joinDate.value,
     set: (v) => (joinDate.value = asDate(v))
@@ -554,7 +557,7 @@ const onClickDel = async () => {
 async function onClickSave() {
     const isUpdate = !!createForm.value.id;
 
-    // 유효성 (지금 로직 유지)
+    // 유효성
     if (!isUpdate && !validateRequired(createForm.value)) {
         notify('필수 항목을 확인하세요.', 'warning');
         return;

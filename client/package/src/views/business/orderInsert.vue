@@ -27,6 +27,7 @@
                             append-inner-icon="mdi-magnify"
                             @click:append-inner="showModal = true"
                             v-model="selectedItem"
+                            readonly
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
@@ -36,6 +37,7 @@
                             append-inner-icon="mdi-magnify"
                             @click:append-inner="showModal2 = true"
                             v-model="selectedItem2"
+                            readonly
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
@@ -101,13 +103,31 @@
                             </template>
                         </Column>
                         <Column field="item_name" header="제품명"></Column>
-                        <Column field="qty" header="수량">
+                        <Column field="qty" header="수량" style="width: 120px">
                             <template #editor="{ data, field }">
-                                <input type="number" v-model.number="data[field]" class="custom-input" style="width: 80px" /> </template
+                                <v-text-field
+                                    type="number"
+                                    dense
+                                    hide-details
+                                    style="width: 100px"
+                                    variant="outlined"
+                                    min="0"
+                                    v-model="data[field]"
+                                    class="custom-input"
+                                /> </template
                         ></Column>
-                        <Column field="amt" header="금액">
+                        <Column field="amt" header="금액" style="width: 120px">
                             <template #editor="{ data, field }">
-                                <input type="number" v-model.number="data[field]" class="custom-input" style="width: 80px" /> </template
+                                <v-text-field
+                                    type="number"
+                                    dense
+                                    hide-details
+                                    style="width: 100px"
+                                    variant="outlined"
+                                    min="0"
+                                    v-model="data[field]"
+                                    class="custom-input"
+                                /> </template
                         ></Column>
                         <Column field="allamt" header="총금액"></Column>
                     </DataTable>
@@ -276,6 +296,31 @@ let orderinfo = ref({
 const isUpdated = ref(false);
 
 const orderInsert = async () => {
+    if (!orderinfo.value.ordr) {
+        snackBar('주문명을 입력해주세요.', 'error');
+        return;
+    }
+    if (!empId.value) {
+        snackBar('담당자를 선택해주세요.', 'error');
+        return;
+    }
+    if (!vendId.value) {
+        snackBar('업체명을 선택해주세요.', 'error');
+        return;
+    }
+    if (!joinDate.value) {
+        snackBar('주문일자를 선택해주세요.', 'error');
+        return;
+    }
+    if (!leavDate.value) {
+        snackBar('납기일자를 선택해주세요.', 'error');
+        return;
+    }
+
+    if (joinDate.value && leavDate.value && new Date(leavDate.value) < new Date(joinDate.value)) {
+        snackBar('납기일자는 주문일자보다 빠를 수 없습니다.', 'error');
+        return;
+    }
     try {
         const payload = {
             ordr: orderinfo.value.ordr,
@@ -307,6 +352,27 @@ const orderInsert = async () => {
 };
 // 상세주문
 const addRow = () => {
+    if (!orderinfo.value.ordr) {
+        snackBar('주문명을 입력해주세요.', 'error');
+        return;
+    }
+    if (!empId.value) {
+        snackBar('담당자를 선택해주세요.', 'error');
+        return;
+    }
+    if (!vendId.value) {
+        snackBar('업체명을 선택해주세요.', 'error');
+        return;
+    }
+    if (!joinDate.value) {
+        snackBar('주문일자를 선택해주세요.', 'error');
+        return;
+    }
+    if (!leavDate.value) {
+        snackBar('납기일자를 선택해주세요.', 'error');
+        return;
+    }
+
     productsDetail.value.push({
         item_id: '',
         item_name: '',

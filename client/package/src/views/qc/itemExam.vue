@@ -163,7 +163,10 @@ onMounted(() => {});
 
 const fetchEmp = async () => {
     try {
-        const response = await axios.get('/api/selectEmp');
+        const params = {
+            dept_id: 'D004'
+        };
+        const response = await axios.get('/api/selectEmp', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         snackBar('조회 실패.', 'error');
@@ -187,7 +190,9 @@ const onSelectProd = async (item) => {
     selectItemName.value = item.item_name;
     selectItemId.value = item.item_id; // 품목번호
     selectEmpId.value = item.emp_id; // 사원번호
+    selectEmpName.value = item.emp_name;
     selectItemQty.value = item.prod_qty;
+    remk.value = item.remk;
     detail_sttus.value = '불합격'; // 결과
 
     try {
@@ -210,15 +215,13 @@ const onSelectEmp = (item) => {
 
 // 입력 값 초기화
 const dataReset = () => {
-    if (confirm('초기화하시겠습니까?')) {
-        selectRsrtId.value = null;
-        selectItemName.value = null;
-        selectItemQty.value = null;
-        selectEmpName.value = null;
-        remk.value = null;
-        detail_sttus.value = null;
-        examDetailList.value = [];
-    }
+    selectRsrtId.value = null;
+    selectItemName.value = null;
+    selectItemQty.value = null;
+    selectEmpName.value = null;
+    remk.value = null;
+    detail_sttus.value = null;
+    examDetailList.value = [];
 };
 
 const checkResult = (index) => {

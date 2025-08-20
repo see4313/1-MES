@@ -17,7 +17,6 @@ router.use((req, res, next) => {
 const asArray = (data) => (Array.isArray(data) ? data : []);
 
 /* ================ BOM 목록 조회 ================ */
-// GET /bom?filters...
 router.get(
   "/bom",
   asyncHandler(async (req, res) => {
@@ -138,8 +137,8 @@ router.post(
 
     const out = await bomService.saveBomViaProc({
       bomNumber,
-      header: null, // 헤더 변경 없음
-      details, // 빈 배열도 허용(전체 삭제 시나리오)
+      header: null,
+      details,
     });
     res.status(200).json(out); // { bom_number, detail_rows }
   })

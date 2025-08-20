@@ -113,6 +113,7 @@ SELECT pa.rsrt_id,
        i.item_type,
        i.item_name,
        pa.emp_id,
+       e.emp_name,
        pa.facility_id,
        pa.input_qty,
        pa.infer_qty,
@@ -126,6 +127,8 @@ FROM   PROD_ACMSLT pa JOIN PRODUCTION p
                       ON   p.deta_instruct_no = pid.deta_instruct_no
                       JOIN ITEM i
                       ON   pid.item_id = i.item_id
+                      JOIN EMPLOYEE e
+                      ON   pa.emp_id = e.emp_id
 `;
 
 // 발주 등록

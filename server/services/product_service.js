@@ -8,8 +8,8 @@ const productList = async (filters) => {
 };
 
 // 완제품입고등록 목록
-const insertList = async () => {
-  let list = await mariadb.query("insertList");
+const insertList = async (filters) => {
+  let list = await mariadb.query("insertList", filters);
   return list;
 };
 

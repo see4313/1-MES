@@ -1,4 +1,3 @@
-// alias → 함수(필터 받아 { sql, params } 반환)
 const processList = (filters = {}) => {
   let sql = `
     SELECT

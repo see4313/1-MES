@@ -52,10 +52,10 @@
                 <v-col cols="12">
                     <div class="card">
                         <DataTable :value="historyList" paginator :rows="10" tableStyle="min-width: 50rem">
-                            <Column field="history_id" sortable header="이력번호" style="width: 130px"></Column>
-                            <Column field="rsrt_id" header="실적번호" style="width: 130px"></Column>
+                            <Column field="history_id" sortable header="이력번호" style="width: 110px"></Column>
+                            <Column field="rsrt_id" header="실적번호" style="width: 110px"></Column>
                             <Column field="lot_id" header="LOT번호" style="width: 130px"></Column>
-                            <Column field="item_name" header="품목명" style="width: 80px"></Column>
+                            <Column field="item_name" header="품목명" style="width: 160px"></Column>
                             <Column field="item_type" header="품목구분" style="width: 100px"></Column>
                             <Column field="use_qty" header="출고수량" style="width: 80px"></Column>
                             <Column field="use_date" header="출고일자" style="width: 80px">

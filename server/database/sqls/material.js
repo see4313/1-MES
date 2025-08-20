@@ -60,19 +60,27 @@ const inventoryList = (filters) => {
 // 출고이력 조회
 const historyList = (filters) => {
   let sql = `
-    SELECT lh.history_id,
-           lh.lot_id,
-           iv.item_id,
-           i.item_name,
-           i.item_type,
-           lh.use_qty,
-           lh.use_date,
-           lh.remk
-    FROM   LOT_HISTORY lh JOIN INVENTORY iv
-                          ON   lh.lot_id = iv.lot_id
-                          JOIN ITEM i
-                          ON   iv.item_id = i.item_id
-    WHERE  1 = 1
+    WITH latest_exam AS (
+    SELECT *,
+           ROW_NUMBER() OVER(PARTITION BY rsrt_id ORDER BY exam_date DESC) AS rn
+    FROM ITEM_EXAM_HIS
+)
+SELECT 
+    lh.history_id,
+    lh.lot_id,
+    COALESCE(iv.item_id, le.item_id) AS item_id,
+    lh.rsrt_id,
+    COALESCE(i.item_name, i2.item_name) AS item_name,
+    COALESCE(i.item_type, i2.item_type) AS item_type,
+    lh.use_qty,
+    lh.use_date,
+    lh.remk
+FROM LOT_HISTORY lh
+LEFT JOIN INVENTORY iv ON lh.lot_id = iv.lot_id
+LEFT JOIN ITEM i ON iv.item_id = i.item_id
+LEFT JOIN latest_exam le ON lh.rsrt_id = le.rsrt_id AND le.rn = 1
+LEFT JOIN ITEM i2 ON le.item_id = i2.item_id
+WHERE 1 = 1
   `;
 
   const params = [];

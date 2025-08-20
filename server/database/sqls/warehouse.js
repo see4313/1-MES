@@ -89,7 +89,7 @@ function warehouseUpdate(payload = {}) {
   const { id } = payload;
   if (!id) throw new Error("warehouseUpdate: id is required");
 
-  const v = (x) => (x === undefined ? null : x); // undefined -> null (COALESCE가 처리)
+  const v = (x) => (x === undefined ? null : x);
 
   const sql = `
     UPDATE WAREHOUSE

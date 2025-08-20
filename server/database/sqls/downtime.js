@@ -9,11 +9,20 @@ module.exports = {
     sort,
   }) => {
     let sql = `
-      SELECT d.DOWN_ID, d.FACILITY_ID, f.FACILITY_NM,
-             d.EMP_ID, e.EMP_NAME,
-             d.DOWN_TYPE_ID, t.DOWN_TYPE_NAME,
-             d.DOWN_START_DT, d.DOWN_END_DT,
-             d.OPER_YN, d.REMK, d.EDIT_REASON, d.IS_ACTIVE
+      SELECT 
+        d.DOWN_ID        AS down_id,
+        d.FACILITY_ID    AS facility_id,
+        f.FACILITY_NM    AS facility_name,
+        d.EMP_ID         AS emp_id,
+        e.EMP_NAME       AS emp_name,
+        d.DOWN_TYPE_ID   AS down_type_id,
+        t.DOWN_TYPE_NAME AS down_type_name,
+        d.DOWN_START_DT  AS down_start_dt,
+        d.DOWN_END_DT    AS down_end_dt,
+        d.OPER_YN        AS oper_yn,
+        d.REMK           AS remk,
+        d.EDIT_REASON    AS edit_reason,
+        d.IS_ACTIVE      AS is_active
       FROM DOWNTIME d
       JOIN FACILITY f   ON d.FACILITY_ID = f.FACILITY_ID
       LEFT JOIN EMPLOYEE e ON d.EMP_ID = e.EMP_ID
