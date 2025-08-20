@@ -211,13 +211,15 @@ const onSelectEmp = (item) => {
 
 // 입력 값 초기화
 const dataReset = () => {
-    selectRsrtId.value = null;
-    selectItemName.value = null;
-    selectItemQty.value = null;
-    selectEmpName.value = null;
-    remk.value = null;
-    detail_sttus.value = null;
-    examDetailList.value = [];
+    if (confirm('초기화하시겠습니까?')) {
+        selectRsrtId.value = null;
+        selectItemName.value = null;
+        selectItemQty.value = null;
+        selectEmpName.value = null;
+        remk.value = null;
+        detail_sttus.value = null;
+        examDetailList.value = [];
+    }
 };
 
 const checkResult = (index) => {
