@@ -106,15 +106,15 @@
             <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="거래처명" v-model="createForm.vendName" :rules="[req]" />
+                        <v-text-field variant="outlined" label="거래처명" v-model="createForm.vendName" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="사업자번호" v-model="createForm.bizNumber" :rules="[req]" />
+                        <v-text-field variant="outlined" label="사업자번호" v-model="createForm.bizNumber" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" v-model="createForm.cntinfo" :rules="[req]" />
+                        <v-text-field variant="outlined" label="연락처" v-model="createForm.cntinfo" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -351,7 +351,7 @@ watch(selectedRow, (row) => {
 });
 
 /* ===== 공용 ===== */
-// const req = (v) => !!v || '필수 값입니다.';
+
 const isValid = (f) => !!(f.vendName && f.bizNumber && f.cntinfo && f.vendType && f.address);
 
 /* ===== 스낵바 ===== */
