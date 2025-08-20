@@ -155,10 +155,11 @@
                     btn-color3="primary"
                     btn-variant3="flat"
                     @btn-click3="onClickCreate"
-                    btn-text2="수정"
-                    btn-color2="warning"
+                    btn-text2="삭제"
                     btn-variant2="flat"
-                    @btn-click2="onClickUpdate"
+                    btn-color2="error"
+                    :btn-disabled2="!createForm.id"
+                    @btn-click2="onClickDel"
                     btn-text1="초기화"
                     btn-color1="secondary"
                     btn-variant1="flat"
@@ -531,59 +532,118 @@ const notify = (message, color = 'success') => {
     snackColor.value = color;
     snackOpen.value = true;
 };
+//사원 삭제
 
-const onClickCreate = async () => {
-    if (!validateRequired(createForm.value)) {
+const onClickDel = async () => {
+    const id = selectedRow.value?.empId;
+    if (!id) return notify('삭제할 사원을 선택해주세요.', 'warning');
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+        const { data } = await axios.delete('/api/empDelete', { data: { emp_id: id } });
+        if (!data?.result) return notify(data?.message || '삭제에 실패했습니다.', 'warning');
+
+        notify('삭제되었습니다.', 'success');
+        await onClickSearch();
+        onClickReset();
+    } catch (e) {
+        notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
+    }
+};
+// const onClickCreate = async () => {
+//     if (!validateRequired(createForm.value)) {
+//         notify('필수 항목을 확인하세요.', 'warning');
+//         return;
+//     }
+//     const payload = {
+//         ...createForm.value,
+//         joinDate: toDateStr(createForm.value.joinDate),
+//         leavDate: toDateStr(createForm.value.leavDate)
+//     };
+//     try {
+//         await axios.post('/api/emp', payload);
+//         notify('등록이 완료되었습니다.', 'success');
+//         await onClickSearch();
+//     } catch (e) {
+//         const status = e?.response?.status;
+//         const msg = e?.response?.data?.message;
+//         if (status === 409) notify(msg || '이미 등록된 사원입니다!', 'warning');
+//         else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
+//         else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
+//     } finally {
+//         await closeAllOverlays();
+//     }
+// };
+
+// /* ===== 수정 ===== */
+// const onClickUpdate = async () => {
+//     if (!createForm.value.id) {
+//         notify('수정할 항목이 선택되지 않았습니다.', 'warning');
+//         return;
+//     }
+//     if (!validateRequired(createForm.value)) {
+//         notify('필수 항목을 확인하세요.', 'warning');
+//         return;
+//     }
+//     const payload = {
+//         ...createForm.value,
+//         joinDate: toDateStr(createForm.value.joinDate),
+//         leavDate: toDateStr(createForm.value.leavDate)
+//     };
+//     try {
+//         await axios.put(`/api/emp/${createForm.value.id}`, payload);
+//         notify('수정이 완료되었습니다.', 'success');
+//         await onClickSearch();
+//     } catch (e) {
+//         console.error(e);
+//         notify('수정 중 오류가 발생했습니다.', 'error');
+//     } finally {
+//         await closeAllOverlays();
+//     }
+// };
+async function onClickSave() {
+    const isUpdate = !!createForm.value.id;
+
+    // 유효성 (지금 로직 유지)
+    if (!isUpdate && !validateRequired(createForm.value)) {
         notify('필수 항목을 확인하세요.', 'warning');
         return;
     }
+    if (isUpdate && !validateRequired(createForm.value)) {
+        notify('필수 항목을 확인하세요.', 'warning');
+        return;
+    }
+
     const payload = {
         ...createForm.value,
         joinDate: toDateStr(createForm.value.joinDate),
         leavDate: toDateStr(createForm.value.leavDate)
     };
+
     try {
-        await axios.post('/api/emp', payload);
-        notify('등록이 완료되었습니다.', 'success');
+        const url = isUpdate ? `/api/emp/${createForm.value.id}` : '/api/emp';
+        const method = isUpdate ? 'put' : 'post';
+        await axios[method](url, payload);
+
+        notify(isUpdate ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.', 'success');
         await onClickSearch();
     } catch (e) {
         const status = e?.response?.status;
         const msg = e?.response?.data?.message;
-        if (status === 409) notify(msg || '이미 등록된 사원입니다!', 'warning');
-        else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
-        else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
+        if (!isUpdate) {
+            if (status === 409) notify(msg || '이미 등록된 사원입니다!', 'warning');
+            else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
+            else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
+        } else {
+            notify(msg || '수정 중 오류가 발생했습니다.', 'error');
+        }
     } finally {
         await closeAllOverlays();
     }
-};
+}
 
-/* ===== 수정 ===== */
-const onClickUpdate = async () => {
-    if (!createForm.value.id) {
-        notify('수정할 항목이 선택되지 않았습니다.', 'warning');
-        return;
-    }
-    if (!validateRequired(createForm.value)) {
-        notify('필수 항목을 확인하세요.', 'warning');
-        return;
-    }
-    const payload = {
-        ...createForm.value,
-        joinDate: toDateStr(createForm.value.joinDate),
-        leavDate: toDateStr(createForm.value.leavDate)
-    };
-    try {
-        await axios.put(`/api/emp/${createForm.value.id}`, payload);
-        notify('수정이 완료되었습니다.', 'success');
-        await onClickSearch();
-    } catch (e) {
-        console.error(e);
-        notify('수정 중 오류가 발생했습니다.', 'error');
-    } finally {
-        await closeAllOverlays();
-    }
-};
-
+// 기존 함수들은 공용함수로 연결만
+const onClickCreate = onClickSave;
 /* ===== 초기화 ===== */
 const onClickReset = async () => {
     createForm.value = {

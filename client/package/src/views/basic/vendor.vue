@@ -82,10 +82,11 @@
                     btn-color3="primary"
                     btn-variant3="flat"
                     @btn-click3="onClickCreate"
-                    btn-text2="수정"
-                    btn-color2="warning"
+                    btn-text2="삭제"
+                    btn-color2="error"
                     btn-variant2="flat"
-                    @btn-click2="onClickUpdate"
+                    :btn-disabled2="!createForm.id"
+                    @btn-click2="onClickDel"
                     btn-text1="초기화"
                     btn-color1="secondary"
                     btn-variant1="flat"
@@ -355,37 +356,69 @@ const buildPayload = () => ({
     remark: createForm.value.remark ?? null
 });
 
-/* ===== 등록 ===== */
-const onClickCreate = async () => {
-    if (!isValid(createForm.value)) return notify('필수 값을 확인하세요.', 'warning');
+const onClickSave = async () => {
+    const isUpdate = !!createForm.value.id;
+
+    if (!isValid(createForm.value)) {
+        return notify('필수 값을 확인하세요.', 'warning');
+    }
+
     const payload = buildPayload();
-    try {
-        await axios.post('/api/vendor', payload);
-        notify('등록이 완료되었습니다.', 'success');
-        await onClickSearch();
-        await onClickReset();
-    } catch (e) {
-        const msg =
-            e?.response?.status === 409
-                ? e?.response?.data?.message || '이미 등록된 거래처입니다!'
-                : e?.response?.data?.message || '등록 중 오류가 발생했습니다.';
-        notify(msg, 'warning');
-    }
-};
-
-/* ===== 수정 ===== */
-const onClickUpdate = async () => {
-    if (!createForm.value.id) return notify('수정할 항목이 선택되지 않았습니다.', 'warning');
-    if (!isValid(createForm.value)) return notify('필수 값을 확인하세요.', 'warning');
 
     try {
-        await axios.put(`/api/vendor/${createForm.value.id}`, { ...buildPayload() });
-        notify('수정이 완료되었습니다.', 'success');
+        if (isUpdate) {
+            await axios.put(`/api/vendor/${encodeURIComponent(createForm.value.id)}`, payload);
+            notify('수정이 완료되었습니다.', 'success');
+        } else {
+            await axios.post('/api/vendor', payload);
+            notify('등록이 완료되었습니다.', 'success');
+            await onClickReset(); // 신규일 때만 폼 초기화
+        }
         await onClickSearch();
     } catch (e) {
-        notify(e?.response?.data?.message || '수정 중 오류가 발생했습니다.', 'error');
+        const status = e?.response?.status;
+        const msg = e?.response?.data?.message;
+        // 중복 에러는 warning, 그 외는 error 톤
+        notify(
+            status === 409
+                ? msg || '이미 등록된 거래처입니다!'
+                : msg || (isUpdate ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.'),
+            status === 409 ? 'warning' : 'error'
+        );
     }
 };
+const onClickCreate = onClickSave;
+// /* ===== 등록 ===== */
+// const onClickCreate = async () => {
+//     if (!isValid(createForm.value)) return notify('필수 값을 확인하세요.', 'warning');
+//     const payload = buildPayload();
+//     try {
+//         await axios.post('/api/vendor', payload);
+//         notify('등록이 완료되었습니다.', 'success');
+//         await onClickSearch();
+//         await onClickReset();
+//     } catch (e) {
+//         const msg =
+//             e?.response?.status === 409
+//                 ? e?.response?.data?.message || '이미 등록된 거래처입니다!'
+//                 : e?.response?.data?.message || '등록 중 오류가 발생했습니다.';
+//         notify(msg, 'warning');
+//     }
+// };
+
+// /* ===== 수정 ===== */
+// const onClickUpdate = async () => {
+//     if (!createForm.value.id) return notify('수정할 항목이 선택되지 않았습니다.', 'warning');
+//     if (!isValid(createForm.value)) return notify('필수 값을 확인하세요.', 'warning');
+
+//     try {
+//         await axios.put(`/api/vendor/${createForm.value.id}`, { ...buildPayload() });
+//         notify('수정이 완료되었습니다.', 'success');
+//         await onClickSearch();
+//     } catch (e) {
+//         notify(e?.response?.data?.message || '수정 중 오류가 발생했습니다.', 'error');
+//     }
+// };
 
 /* ===== 신규(폼 리셋) ===== */
 const onClickReset = async () => {
@@ -401,6 +434,23 @@ const onClickReset = async () => {
         remark: ''
     };
     await closeAll();
+};
+//삭제
+const onClickDel = async () => {
+    const id = selectedRow.value?.vendId;
+    if (!id) return notify('삭제할 거래처를 선택해주세요.', 'warning');
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+        const { data } = await axios.delete('/api/vendDelete', { data: { vend_id: id } });
+        if (!data?.result) return notify(data?.message || '삭제에 실패했습니다.', 'warning');
+
+        notify('삭제되었습니다.', 'success');
+        await onClickSearch();
+        onClickReset();
+    } catch (e) {
+        notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
+    }
 };
 </script>
 

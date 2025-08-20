@@ -37,6 +37,7 @@ const inspectHistRouter = require("./routers/inspectHistRouter.js");
 const repairHistRouter = require("./routers/repairHistRouter");
 const failureTypeRouter = require("./routers/failureTypeRouter");
 const downtimeRouter = require("./routers/downtimeRouter");
+const urgencyRouter = require("./routers/urgencyRouter");
 
 // 기본 라우팅
 app.get("/", (req, res) => {
@@ -61,3 +62,4 @@ app.use(inspectHistRouter);
 app.use(repairHistRouter);
 app.use(failureTypeRouter);
 app.use(downtimeRouter);
+app.use(urgencyRouter);

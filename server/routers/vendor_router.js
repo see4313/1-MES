@@ -101,5 +101,10 @@ router.use((err, req, res, _next) => {
     .status(500)
     .json({ message: err?.sqlMessage || err?.message || "서버 오류" });
 });
-
+/// 품목 삭제
+router.delete("/vendDelete", async (req, res) => {
+  const { vend_id } = req.body;
+  let result = await vendorService.deleteVend(vend_id);
+  res.send(result);
+});
 module.exports = router;

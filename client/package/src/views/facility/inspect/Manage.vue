@@ -90,8 +90,8 @@
                 <Column field="unit_name" header="단위" />
                 <Column header="판정">
                     <template #body="{ data }">
-                        <v-chip size="small" :color="data.result === 'OK' ? 'primary' : 'error'" variant="flat">
-                            {{ data.result }}
+                        <v-chip size="small" :color="data.result === '적합' ? 'success' : 'error'" variant="flat">
+                            {{ data.JUDGE_RESULT }}
                         </v-chip>
                     </template>
                 </Column>
@@ -269,8 +269,8 @@ const filterEmpName = ref('');
 const filterItemId = ref('');
 const filterItemName = ref('');
 const filterResult = ref(''); // '', 'OK', 'NG'
-const filterFromDate = ref(todayStr);
-const filterToDate = ref(todayStr);
+const filterFromDate = ref(null);
+const filterToDate = ref(null);
 
 // ===== 목록 =====
 const rows = ref([]);
@@ -309,7 +309,7 @@ const empModal = ref(false);
 const itemModal = ref(false);
 
 // ===== 선택 데이터 로드 =====
-const fetchFacilities = async () => (await axios.get('/api/facilities')).data;
+const fetchFacilities = async () => (await axios.get('http://localhost:3000/facilityList')).data;
 const fetchUsers = async () => (await axios.get('/api/users')).data;
 const fetchInspectItems = async () => (await axios.get('/api/inspectItems')).data;
 
@@ -350,7 +350,7 @@ async function select() {
             from_dt: filterFromDate.value ? `${formatDate(filterFromDate.value, '-')} 00:00:00` : null,
             to_dt: filterToDate.value ? `${formatDate(filterToDate.value, '-')} 23:59:59` : null
         };
-        const { data } = await axios.get('/api/inspectList', { params });
+        const { data } = await axios.get('/api/inspectHist', { params });
         rows.value = data || [];
     } catch (e) {
         console.error(e);
@@ -369,8 +369,8 @@ function selectReset() {
     filterItemId.value = '';
     filterItemName.value = '';
     filterResult.value = '';
-    filterFromDate.value = todayStr;
-    filterToDate.value = todayStr;
+    filterFromDate.value = null;
+    filterToDate.value = null;
     rows.value = [];
     selectedRow.value = null;
 }

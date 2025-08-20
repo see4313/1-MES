@@ -15,6 +15,7 @@ const inventoryList = (filters) => {
          , iv.bnt
          , iv.status
          , iv.remk
+         , iv.his_id
     FROM   INVENTORY iv JOIN ITEM it
                         ON   iv.item_id = it.item_id
                         JOIN WAREHOUSE wh

@@ -162,11 +162,17 @@ const saveBomDetailsOnly = `
   CALL save_bom_with_details_compat(?, '', '', NULL, NULL, '', ?);
 `;
 
+//삭제
+const bomDelete = `
+DELETE FROM BOM
+WHERE BOM_NUMBER = ?
+`;
 module.exports = {
   selectBomList,
   selectBomDetails,
   deleteBomDetail,
   itemModal,
+  bomDelete,
   callSaveBomProc,
   saveBomWithDetails,
   saveBomDetailsOnly,

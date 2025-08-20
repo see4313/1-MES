@@ -9,18 +9,19 @@ module.exports = {
     sort,
   }) => {
     let sql = `
-      SELECT d.DOWN_ID, d.FACILITY_ID, f.FACILITY_NAME,
+      SELECT d.DOWN_ID, d.FACILITY_ID, f.FACILITY_NM,
              d.EMP_ID, e.EMP_NAME,
              d.DOWN_TYPE_ID, t.DOWN_TYPE_NAME,
              d.DOWN_START_DT, d.DOWN_END_DT,
              d.OPER_YN, d.REMK, d.EDIT_REASON, d.IS_ACTIVE
       FROM DOWNTIME d
-      JOIN FACILITY f ON d.FACILITY_ID = f.FACILITY_ID
+      JOIN FACILITY f   ON d.FACILITY_ID = f.FACILITY_ID
       LEFT JOIN EMPLOYEE e ON d.EMP_ID = e.EMP_ID
-      JOIN DOWN_TYPE t ON d.DOWN_TYPE_ID = t.DOWN_TYPE_ID
+      JOIN DOWN_TYPE t  ON d.DOWN_TYPE_ID = t.DOWN_TYPE_ID
       WHERE d.IS_ACTIVE = 'Y'
     `;
     const params = [];
+
     if (facility_id) {
       sql += " AND d.FACILITY_ID = ?";
       params.push(facility_id);
@@ -46,10 +47,14 @@ module.exports = {
       params.push(oper_yn);
     }
 
-    if (sort === "dur_desc")
+    if (sort === "dur_desc") {
       sql +=
         " ORDER BY TIMESTAMPDIFF(MINUTE, d.DOWN_START_DT, d.DOWN_END_DT) DESC";
-    else sql += " ORDER BY d.DOWN_START_DT DESC";
+    } else if (sort === "start_asc") {
+      sql += " ORDER BY d.DOWN_START_DT ASC";
+    } else {
+      sql += " ORDER BY d.DOWN_START_DT DESC";
+    }
 
     return { sql, params };
   },

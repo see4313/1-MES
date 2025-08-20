@@ -113,14 +113,23 @@ const instructionsBtn = async () => {
     }
 
     try {
-        const result = await axios.post('api/prod/instructions', {
+        const { data } = await axios.post('api/prod/instructions', {
             itemType: selectProductType.value,
             goalDate: formatDate(goalDate.value, '-'),
             startDate: formatDate(startDate.value, '-'),
             remark: remk.value,
             details: detail
         });
-        if (result.data.affectedRows > 0) {
+        console.log(data);
+        // 단건 처리
+        let affected = data?.affectedRows;
+
+        // 복수 처리 (MySQL bulk insert 시 data는 배열 형태일 수 있음)
+        if (Array.isArray(data)) {
+            affected = data.reduce((sum, res) => sum + (res.affectedRows || 0), 0);
+        }
+
+        if (affected > 0) {
             selectProductList.value = [];
             startDate.value = null;
             goalDate.value = null;

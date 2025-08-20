@@ -1,8 +1,9 @@
+// failureTypeRouter.js
 const express = require("express");
 const router = express.Router();
 const failureTypeService = require("../services/failureTypeService");
 
-router.get("/", async (req, res) => {
+router.get("/failureTypes", async (req, res) => {
   try {
     const rows = await failureTypeService.getAll();
     res.json(rows);

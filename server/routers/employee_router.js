@@ -9,6 +9,7 @@ const {
   ensureInsertedOr409,
   isDupError,
 } = require("../services/employee_service.js");
+const empService = require("../services/employee_service.js");
 
 // 공용: async 핸들러
 const asyncH = (fn) => (req, res, next) =>
@@ -106,6 +107,13 @@ router.put(
     res.json({ ok: true, affectedRows: r?.affectedRows ?? 0 });
   })
 );
+
+// 사원 삭제
+router.delete("/empDelete", async (req, res) => {
+  const { emp_id } = req.body;
+  let result = await empService.deleteEmp(emp_id);
+  res.send(result);
+});
 
 // ===== 공용 에러 핸들러 =====
 router.use((err, _req, res, _next) => {

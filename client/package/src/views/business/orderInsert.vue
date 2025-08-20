@@ -159,6 +159,7 @@
         @select="onSelectItem3"
         @close="showModal3 = false"
     />
+    <SnackBar />
 </template>
 <script setup>
 import CardHeader2 from '@/components/production/card-header-btn2.vue';
@@ -170,11 +171,14 @@ import { ref, onMounted, computed } from 'vue';
 import { ProductService } from '@/service/ProductService';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import SnackBar from '@/components/shared/SnackBar.vue';
+import { useSnackBar } from '@/composables/useSnackBar.js';
 
 onMounted(() => {
     ProductService.getProductsMini().then((data) => (products.value = data));
 });
 
+const { snackBar } = useSnackBar();
 const products = ref();
 const productsDetail = ref([]);
 const joinMenu = ref(false);
@@ -213,7 +217,7 @@ const fetchItems = async () => {
         const response = await axios.get('/api/empModal');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -224,7 +228,7 @@ const fetchItems2 = async () => {
         const response = await axios.get('/api/vend');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -235,7 +239,7 @@ const fetchItems3 = async () => {
         const response = await axios.get('/api/itemModal1');
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
-        console.error('조회 실패', error);
+        snackBar('조회 실패.', 'error');
         return [];
     }
 };
@@ -288,16 +292,17 @@ const orderInsert = async () => {
         };
 
         const response = await axios.post('/api/orderInsert', payload);
-        if (response.data.result) {
-            alert('등록 성공');
-            dataReset();
-            productsDetail.value = [];
-        } else {
-            alert('등록 실패');
-        }
+        if (confirm('등록하시겠습니까?'))
+            if (response.data.result) {
+                snackBar('등록 성공', 'success');
+                dataReset();
+                productsDetail.value = [];
+            } else {
+                snackBar('등록 실패', 'warning');
+            }
     } catch (err) {
         console.error(err);
-        alert('에러 발생');
+        snackBar('에러', 'error');
     }
 };
 // 상세주문

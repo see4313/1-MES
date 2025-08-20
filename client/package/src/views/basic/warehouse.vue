@@ -200,9 +200,9 @@ const rows = ref([]);
 const selectedRow = ref(null);
 
 // 첫 진입 시 서버 조회가 필요하면 주석 해제
-// onMounted(() => {
-//   onClickSearch();
-// });
+onMounted(() => {
+    onClickSearch();
+});
 
 /* ===== 검색 폼 ===== */
 const searchForm = ref({
