@@ -78,7 +78,7 @@
                 class="cursor-pointer"
             >
                 <Column field="facility_id" header="설비ID" />
-                <Column field="facility_name" header="설비명" />
+                <Column field="facility_nm" header="설비명" />
                 <Column field="facility_type_name" header="설비유형" />
                 <Column field="failure_type" header="고장 유형" />
                 <Column field="urgency_name" header="긴급도" />
@@ -261,7 +261,7 @@ async function select() {
         };
 
         const response = await axios.get('/api/repairHist', { params });
-        facilityList.value = response.data; // ✅ 목록에 데이터 바인딩
+        facilityList.value = response.data;
         if (!response.data.length) {
             showSnack('조회 결과가 없습니다.', 'warning');
         }

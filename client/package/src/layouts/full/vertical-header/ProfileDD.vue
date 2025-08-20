@@ -43,7 +43,7 @@ const ononclick = () => {
                 </v-list-item>
             </v-list>
             <div class="pt-4 pb-4 px-5 text-center">
-                <v-btn to="/auth/login" color="primary" variant="outlined" block @click="onLogOut">Logout</v-btn>
+                <v-btn to="/auth/login" color="primary" variant="outlined" block @click="onLogOut">로그아웃</v-btn>
             </div>
         </v-sheet>
     </v-menu>

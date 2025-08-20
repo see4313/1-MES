@@ -52,7 +52,10 @@
                 <Column field="wh_id" header="창고코드"></Column>
                 <Column field="safe_qty" header="안전재고량"></Column>
                 <Column field="bnt" header="현수량"></Column>
-                <Column field="psafe" header="안전대비 보유율"></Column>
+                <Column field="psafe" header="안전대비 보유율">
+                    <template #body="slotProps">
+                        <ProgressBar :value="calcStockRate(slotProps.data)" :showValue="true" style="height: 20px" /> </template
+                ></Column>
             </DataTable>
         </v-card-item>
     </v-card>
@@ -63,16 +66,16 @@
                     <v-card-item class="py-6 px-6"> <CardHeader title="완제품관리" /></v-card-item>
                     <v-row dense>
                         <v-col cols="12" sm="6">
-                            <v-text-field variant="outlined" label="LOT번호" v-model="lot_id" readonly density="compact" />
+                            <v-text-field variant="outlined" label="LOT번호" v-model="lotId" readonly density="compact" />
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field variant="outlined" label="제품코드" v-model="item_id" readonly density="compact" />
+                            <v-text-field variant="outlined" label="제품코드" v-model="itemId" readonly density="compact" />
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field variant="outlined" v-model="crea_date" label="입고일자" readonly density="compact" />
+                            <v-text-field variant="outlined" v-model="creaDate" label="입고일자" readonly density="compact" />
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field variant="outlined" v-model="vald_date" label="유통기한" readonly density="compact" />
+                            <v-text-field variant="outlined" v-model="valdDate" label="유통기한" readonly density="compact" />
                         </v-col>
 
                         <v-col cols="12" sm="6">
@@ -137,6 +140,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import SnackBar from '@/components/shared/SnackBar.vue';
 import { useSnackBar } from '@/composables/useSnackBar.js';
+import ProgressBar from 'primevue/progressbar';
 
 const { snackBar } = useSnackBar();
 const showModal = ref(false); //  주문코드 모달
@@ -153,6 +157,13 @@ const creaDate = ref(null);
 const valdDate = ref(null);
 const bnt = ref(null);
 const whId = ref(null);
+
+// 안전보유율 그래프
+const calcStockRate = (row) => {
+    if (!row.safe_qty || row.safe_qty === 0) return 0;
+    // 퍼센트 계산 (보유량 / 안전재고 * 100)
+    return Math.round((row.bnt / row.safe_qty) * 100);
+};
 
 // 제품전체조회
 const Select = async () => {

@@ -4,7 +4,7 @@ module.exports = {
     let sql = `
       SELECT ih.INSPECT_HIST_ID   AS inspect_id
            , ih.OPERATION_LOG_ID  AS operation_log_id
-           , ih.FACILITY_ID2      AS facility_id
+           , ih.FACILITY_ID      AS facility_id
            , f.FACILITY_NM        AS facility_name
            , ih.INSPECT_ITEM      AS inspect_item_name
            , ih.MEASURE_VAL       AS measure_val
@@ -16,7 +16,7 @@ module.exports = {
            , e.EMP_NAME           AS emp_name
            , ih.REMK              AS remk
       FROM INSPECT_HIST ih
-         LEFT JOIN FACILITY f ON ih.FACILITY_ID2 = f.FACILITY_ID
+         LEFT JOIN FACILITY f ON ih.FACILITY_ID = f.FACILITY_ID
          LEFT JOIN EMPLOYEE e ON ih.EMP_ID = e.EMP_ID
       WHERE 1=1
     `;
@@ -55,7 +55,7 @@ module.exports = {
   // 등록
   inspectHistInsert: `
     INSERT INTO INSPECT_HIST
-    (OPERATION_LOG_ID, FACILITY_ID2, INSPECT_ITEM, MEASURE_VAL, UNIT_NM,
+    (OPERATION_LOG_ID, FACILITY_ID, INSPECT_ITEM, MEASURE_VAL, UNIT_NM,
      JUDGE_RESULT, INSPECT_DTTM, INSPECT_STD_ID, EMP_ID, REMK)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
@@ -63,7 +63,7 @@ module.exports = {
   // 수정
   inspectHistUpdate: `
     UPDATE INSPECT_HIST
-       SET FACILITY_ID2   = ?
+       SET FACILITY_ID  = ?
          , INSPECT_ITEM   = ?
          , MEASURE_VAL    = ?
          , UNIT_NM        = ?

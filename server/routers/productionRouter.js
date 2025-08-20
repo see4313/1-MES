@@ -115,4 +115,26 @@ router.get("/prod/getstatuszeroprodlist", async (req, res) => {
   }
 })
 
+// getFacilityByName -- 현재 공정의 설비 가져오기
+router.get('/prod/getfacilitybyname/:fNumber', async (req, res) => {
+  const { fNumber } = req.params;
+  try {
+    const result = await productionService.getFacilityListByName(fNumber);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+// addProdACMSLT -- 생산 실적 등록
+router.post('/prod/addprodacmslt', async (req, res) => {
+  const { body } = req;
+  try {
+    const result = await productionService.addProdACMSLT(body);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 module.exports = router;

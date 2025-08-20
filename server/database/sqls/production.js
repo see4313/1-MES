@@ -115,14 +115,17 @@ const selectDetailInstruction = (query) => {
 
 const selectStatusZeroProductionList = () => {
   const sql = `
-    SELECT
+   SELECT
+   		pid.instruct_no 	  AS instructNo,
+   		prod.deta_instruct_no AS detaInstructNo,
         prod.prod_no          AS prodNo,
-        prod.deta_instruct_no AS detaInstructNo,
         pid.item_id           AS itemId,
         i.item_type           AS itemType,
         i.item_name           AS itemName,
         prod.prcs_number      AS prcsNumber,
+        prcsr.op_no			  AS opNo,
         prcs.prcs_name		  AS prcsName,
+        pi.instruct_datetime  AS instructDatetime,
         prod.drct_qty         AS drctQty,
         prod.status,
         prod.remk
@@ -133,14 +136,53 @@ const selectStatusZeroProductionList = () => {
       ON pid.item_id = i.item_id
     JOIN PROCESS prcs
       ON prod.prcs_number = prcs.prcs_number
+	JOIN PROCESS_ROUTING prcsr
+	  ON prod.prcs_number = prcsr.prcs_number
+	 AND pid.item_id     = prcsr.item_id
+	JOIN PROD_INSTRUCT pi
+	  ON pid.instruct_no = pi.instruct_no
     WHERE prod.status = 0
+    ORDER BY prod.prod_no desc;
  `;
   return { sql };
+};
+
+const selectFacilityListByName = (fNumber) => {
+  console.log(fNumber);
+  const sql =
+  `
+    select
+      f.facility_id as facilityId,
+      f.facility_nm as facilityName
+    from FACILITY f
+    join PROCESS prcs
+    on prcs.prcs_number = f.facility_type
+    where USE_YN = 'Y'
+    and prcs.prcs_number = ?
+  `;
+
+  params = [fNumber];
+
+  return { sql, params };
+
+}
+
+const insertProdACMSLT = (data) => {
+
+  const sql = `
+  
+  `;
+
+  params = [];
+
+  return { sql, params };
 };
 
 module.exports = {
   insertProdInstruct,
   selectInstructionList,
   selectDetailInstruction,
-  selectStatusZeroProductionList
+  selectStatusZeroProductionList,
+  selectFacilityListByName,
+  insertProdACMSLT
 };

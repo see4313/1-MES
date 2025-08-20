@@ -42,9 +42,31 @@ const getStatusZeroProductionList = async () => {
   }
 };
 
+const getFacilityListByName = async (fNumber) => {
+  try {
+    const result = await db.query("selectFacilityListByName", fNumber);
+    return result;
+  } catch (e) {
+    console.log(e);
+    return { err : e }; 
+  }
+} 
+
+const addProdACMSLT = async (data) => {
+  try {
+    const result = await db.query("insertProdACMSLT", data);
+    return result;
+  } catch (e) {
+    console.log(e);
+    return { err : e};
+  }
+};
+
 module.exports = {
   addProdInstructions,
   getInstructionList,
   getDetailInstruction,
-  getStatusZeroProductionList
+  getStatusZeroProductionList,
+  getFacilityListByName,
+  addProdACMSLT
 };

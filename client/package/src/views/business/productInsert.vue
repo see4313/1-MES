@@ -11,7 +11,7 @@
                     @btn-click1="Select()"
                     btn-text2="입고"
                     btn-variant2="flat"
-                    btn-color2="error"
+                    btn-color2="warning"
                     @btn-click2="productInsert()"
                 />
             </v-card-item>
@@ -27,12 +27,24 @@
                 </v-col>
             </v-row>
 
-            <DataTable :value="insertList" tableStyle="min-width: 50rem" v-model:selection="selectedProducts" class="cursor-pointer">
+            <DataTable
+                :value="filteredList"
+                tableStyle="min-width: 50rem"
+                v-model:selection="selectedProducts"
+                class="cursor-pointer"
+                paginator
+                :rows="5"
+            >
                 <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
                 <Column field="item_id" header="제품코드"></Column>
                 <Column field="item_name" header="제품명"></Column>
                 <Column field="item_type" header="제품유형"></Column>
-                <Column field="prod_qty" header="수량"></Column>
+                <Column field="exam_qty" header="수량"></Column>
+                <Column header="입고가능수량">
+                    <template #body="{ data }">
+                        {{ remainQty(data) }}
+                    </template>
+                </Column>
                 <Column header="입고수량" style="width: 120px">
                     <template #body="{ data }">
                         <v-text-field type="number" dense hide-details style="width: 100px" variant="outlined" min="0" v-model="data.qty" />
@@ -81,7 +93,16 @@ const { snackBar } = useSnackBar();
 const showModal = ref(false); // 제품코드모달
 const selectedItem = ref(null); // 제품코드선택
 const selectedProducts = ref(null);
-const insertList = ref();
+const insertList = ref([]);
+
+const remainQty = (row) => {
+    return row.exam_qty - row.bnt;
+};
+
+// 입고가능수량이 0보다 큰 데이터만 표시
+const filteredList = computed(() => {
+    return insertList.value.filter((row) => remainQty(row) > 0);
+});
 
 // 완제품 입고 목록
 const Select = async () => {
@@ -109,15 +130,35 @@ const fetchItems = async () => {
 
 // 입고처리
 const productInsert = async () => {
+    if (!selectedProducts.value || selectedProducts.value.length === 0) {
+        snackBar('입고할 제품을 선택해주세요.', 'warning');
+        return;
+    }
+
+    for (let item of selectedProducts.value) {
+        const availableQty = remainQty(item);
+        if (!item.qty || item.qty <= 0) {
+            snackBar(`입고수량은 0보다 커야 합니다.`, 'warning');
+            return;
+        }
+        if (item.qty > availableQty) {
+            snackBar(`입고수량이 입고가능수량(${availableQty})보다 많습니다.`, 'error');
+            return;
+        }
+    }
+
+    if (!confirm('입고하시겠습니까?')) return;
     try {
         let payload = selectedProducts.value.map((item) => ({
             item_id: item.item_id,
             qty: item.qty,
-            remk: item.remk
+            remk: item.remk,
+            exam_id: item.exam_id
         }));
         const response = await axios.post('/api/productInsert', payload);
+
         if (response.data.result) {
-            snackBar('등록 성공', 'success');
+            snackBar('입고 완료', 'success');
             selectedProducts.value = null;
         } else {
             snackBar('등록 실패.', 'error');

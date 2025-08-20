@@ -104,6 +104,7 @@ SELECT item_id,
        item_type
 FROM ITEM 
 WHERE item_type = '완제품'
+OR item_type ='반제품'
 `;
 
 // 창고 모달
