@@ -77,6 +77,7 @@
                         paginatorTemplate="RowsPerPageDropdown PrevPageLink PageLinks NextPageLink"
                     >
                         <Column field="warehouseId" sortable header="창고번호" />
+                        <Column field="warehouseType" header="창고유형" />
                         <Column field="warehouseName" header="창고명" />
                         <Column field="useYn" header="사용여부" />
                         <Column field="temp" header="온도(℃)" />
@@ -119,6 +120,7 @@
                             v-model="createForm.warehouseType"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openItemModal('warehouseType', 'create')"
+                            readonly
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
@@ -194,7 +196,7 @@ import { ref, onMounted, nextTick, watch } from 'vue';
 const rows = ref([]);
 const selectedRow = ref(null);
 
-// 첫 진입 시 서버 조회가 필요하면 주석 해제
+// 첫 진입 시 서버 조회
 onMounted(() => {
     onClickSearch();
 });
@@ -282,9 +284,8 @@ const onSelectWhType = (row) => {
     const id = row?.cmmn_id ?? '';
     const targetForm = modalTarget.value === 'create' ? createForm : searchForm;
 
-    // 표시값 주입
+    // 표시값
     targetForm.value.warehouseType = label;
-    // targetForm.value.warehouseTypeId = id;
 
     showWhTypeModal.value = false;
 };
@@ -295,7 +296,7 @@ const fetchWhTypes = async ({ page = 1, pageSize = 5, keyword = '' } = {}) => {
         const { data } = await axios.get('/api/whTypes', {
             params: { page, pageSize, keyword }
         });
-        // 반환 값은 반드시 배열 형태여야 합니다.
+        // 반환 값은 반드시 배열 형태
         return Array.isArray(data) ? data : (data.items ?? []);
     } catch (error) {
         console.error('창고유형 조회 실패', error);

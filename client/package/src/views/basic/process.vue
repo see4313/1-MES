@@ -29,6 +29,7 @@
                             v-model="searchForm.prcsName"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openItemModal('processType', 'search')"
+                            readonly
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
@@ -217,7 +218,7 @@ const onSelectProcessType = (row) => {
 const fetchProcessTypes = async () => {
     try {
         const response = await axios.get('/api/processTypes');
-        return response.data; // 반드시 배열 형태여야 함
+        return response.data; // 반드시 배열 형태
     } catch (error) {
         console.error('조회 실패', error);
         return [];
@@ -261,7 +262,7 @@ const onClickSave = async () => {
         return;
     }
 
-    const isUpdate = !!createForm.value.prscNo; // prscNo 있으면 수정
+    const isUpdate = !!createForm.value.prscNo;
     const payload = { ...createForm.value };
 
     if (!isUpdate) {

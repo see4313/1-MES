@@ -5,7 +5,6 @@ const bom_sql = require("../database/sqls/bom");
 // ...
 
 /* ====================== 공용 유틸 (심플) ====================== */
-// 다양한 DB 결과 형식을 "행 배열"로 통일
 const rowsOf = (r) => {
   if (!r) return [];
   if (Array.isArray(r)) {
@@ -19,7 +18,6 @@ const rowsOf = (r) => {
   return r?.rows ?? (typeof r === "object" ? [r] : []);
 };
 
-// 프로시저 멀티 결과셋에서 "첫 행"만 추출
 const firstOut = (r) => rowsOf(r)[0] ?? null;
 
 /* ====================== 조회 ====================== */
@@ -144,7 +142,6 @@ async function saveBomViaProc(data = {}) {
     const raw = await mapper.query("callSaveBomProc", params);
     const out = firstOut(raw) || {};
 
-    //프로시저 핸들러가 ROLLBACK할 때는 `SELECT NULL AS bom_number, 0 AS detail_rows`를 반환함
     if (out.bom_number == null) {
       console.error(
         "[saveBomViaProc] Procedure rolled back or failed. raw:",
@@ -153,7 +150,6 @@ async function saveBomViaProc(data = {}) {
       throw new Error("BOM 저장 처리 실패(프로시저 롤백).");
     }
 
-    // 정상: 프로시저가 알려준 값 그대로 신뢰
     return { bom_number: out.bom_number, detail_rows: out.detail_rows ?? null };
   } catch (error) {
     console.error("Error during saveBomViaProc:", error);

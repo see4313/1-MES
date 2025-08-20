@@ -36,15 +36,13 @@ router.post("/warehouses", async (req, res, next) => {
     return next(err);
   }
 });
-// 수정 - 단순 체크 (자기 자신 제외)
-// 수정 - 부분 업데이트 + 자기 자신 제외 중복 체크(옵션)
+
 router.put("/warehouses/:id", async (req, res, next) => {
   try {
     const id = req.params.id;
     if (!id)
       return res.status(400).json({ message: "필수값(id)을 확인하세요." });
 
-    // 업데이트 가능한 키만 추출 (undefined 제외)
     const updatable = [
       "warehouseName",
       "warehouseType",
@@ -61,7 +59,6 @@ router.put("/warehouses/:id", async (req, res, next) => {
     //
     const result = await warehouseService.warehouseUpdate(id, patch);
 
-    // 영향 행 없음 처리
     if (!result?.affectedRows) {
       return res.status(404).json({ message: "해당 창고를 찾을 수 없습니다." });
     }

@@ -38,6 +38,8 @@ const vendorSearchParams = (b = {}) => [
   nz(b.vendName),
   toNull(b.vendType),
   nz(b.vendType),
+  toNull(b.psch), // Add the 7th parameter
+  nz(b.psch), // Add the 8th parameter
 ];
 
 const vendorSearchParamsExactNameBiz = ({ vendName, bizNumber } = {}) => [
@@ -51,7 +53,6 @@ const listVendor = async (b = {}) => {
   const rows = await mapper.query("VENDOR.SEARCH", vendorSearchParams(b));
   return Array.isArray(rows) ? rows : rows?.rows ?? [];
 };
-
 /* ===== 등록/수정 파라미터 ===== */
 const vendorInsertParams = (b = {}) => [
   b.vendName ?? "",
@@ -76,13 +77,9 @@ const vendorUpdateParams = (b = {}, id) => [
   id,
 ];
 
-/* ===== 등록 후 재확인(선택) ===== */
 const ensureVendorInsertedOr409 = async (b, result) => {
-  // DB가 정상 반영했다면 OK
   if (result && (result.affectedRows === undefined || result.affectedRows > 0))
     return null;
-
-  // 그렇지 않다면 정확 일치로 중복 여부 재확인
   const rows = await mapper.query(
     "VENDOR.SEARCH_EXACT",
     vendorSearchParamsExactNameBiz({

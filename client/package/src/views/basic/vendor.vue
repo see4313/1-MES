@@ -124,7 +124,7 @@
                             v-model="createForm.vendType"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openModal('vendType', 'create')"
-                            :rules="[req]"
+                            readonly
                         />
                     </v-col>
 
@@ -148,6 +148,7 @@
                             v-model="createForm.psch"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openModal('psch', 'create')"
+                            readonly
                         />
                     </v-col>
                     <!-- 주소 -->
@@ -258,7 +259,6 @@ const openModal = async (type, target) => {
 
 /*----주소 모달 ----*/
 async function openAddressModal() {
-    // 스크립트 없으면 로드
     if (!window.daum?.Postcode) {
         await new Promise((resolve, reject) => {
             const s = document.createElement('script');
@@ -402,7 +402,7 @@ const onClickSave = async () => {
     } catch (e) {
         const status = e?.response?.status;
         const msg = e?.response?.data?.message;
-        // 중복 에러는 warning, 그 외는 error 톤
+
         notify(
             status === 409
                 ? msg || '이미 등록된 거래처입니다!'
