@@ -73,11 +73,6 @@ const sidebarItem = [
                 roles: ['admin', 'prod', 'mgr']
             },
             {
-                title: '제품관리',
-                to: '/setProduct',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
                 title: '출고관리',
                 to: '/setDelivery',
                 roles: ['admin', 'prod', 'mgr']

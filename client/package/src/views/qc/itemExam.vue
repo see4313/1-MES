@@ -73,7 +73,6 @@
                                         hide-details
                                         style="width: 120px"
                                         variant="outlined"
-                                        min="0"
                                         @input="checkResult(slotProps.index)"
                                     /> </template
                             ></Column>
@@ -156,8 +155,6 @@ const selectItemQty = ref(null);
 const selectEmpId = ref(null); // 사원 번호
 const selectEmpName = ref(null); // 사원 이름
 const remk = ref(null); // 비고
-const examModal = ref(null);
-const examModalIndex = ref(null);
 const selectRsrtId = ref(null);
 const prodModal = ref(null);
 const detail_sttus = ref(null);
@@ -188,8 +185,10 @@ const fetchProd = async () => {
 const onSelectProd = async (item) => {
     selectRsrtId.value = item.rsrt_id; // 실적번호
     selectItemName.value = item.item_name;
+    selectItemId.value = item.item_id; // 품목번호
+    selectEmpId.value = item.emp_id; // 사원번호
     selectItemQty.value = item.prod_qty;
-    detail_sttus.value = '불합격';
+    detail_sttus.value = '불합격'; // 결과
 
     try {
         const params = {
@@ -243,15 +242,21 @@ const addExam = async () => {
     if (confirm('등록하시겠습니까?')) {
         try {
             const payload = {
+                rsrt_id: selectRsrtId.value, // 생산실적 번호
                 item_id: selectItemId.value,
                 emp_id: selectEmpId.value,
+                sttus: detail_sttus.value,
+                exam_qty: selectItemQty.value,
                 remk: remk.value,
                 details: examDetailList.value.map((item) => ({
-                    insp_id: item.insp_id
+                    insp_id: item.insp_id,
+                    basi_val: item.basi_val,
+                    judt_val: item.judt_val,
+                    sttus: item.detail_sttus
                 }))
             };
 
-            const response = await axios.post('/api/examInsert', payload);
+            const response = await axios.post('/api/examHisInsert', payload);
             if (response.data.result) {
                 snackBar('등록 성공', 'success');
                 dataReset();
