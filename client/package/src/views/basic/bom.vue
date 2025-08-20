@@ -159,7 +159,19 @@
                                 />
                             </template>
                         </Column>
-
+                        <Column field="loss" header="손실률">
+                            <template #body="slotProps">
+                                <v-text-field
+                                    v-model.number="detailRows[slotProps.index].loss"
+                                    type="number"
+                                    dense
+                                    hide-details
+                                    style="width: 100px"
+                                    variant="outlined"
+                                    min="0"
+                                />
+                            </template>
+                        </Column>
                         <!-- 삭제 버튼 -->
                         <Column style="width: 80px; text-align: center">
                             <template #body="slotProps">
@@ -205,17 +217,11 @@
                             v-model="createForm.itemId"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openItemModal('create')"
-                            :rules="[requiredRule(createForm.itemId, '품목번호는 필수입니다.')]"
                         />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field
-                            variant="outlined"
-                            label="품목명"
-                            v-model="createForm.itemName"
-                            :rules="[requiredRule(createForm.itemName, '품목명은 필수입니다.')]"
-                        />
+                        <v-text-field variant="outlined" label="품목명" v-model="createForm.itemName" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -237,7 +243,6 @@
                                     append-inner-icon="mdi-calendar"
                                     variant="outlined"
                                     :model-value="formatDate(createForm.startDate)"
-                                    :rules="[requiredRule(createForm.startDate, '시작일은 필수입니다.')]"
                                 />
                             </template>
                             <v-date-picker v-model="createForm.startDate" @update:model-value="menus.createStart = false" />
@@ -551,6 +556,10 @@ const onClickSave = async () => {
 
     const isUpdate = !!createForm.value.id;
 
+    if (!isUpdate) {
+        const ok = window.confirm('정말 등록하시겠습니까?');
+        if (!ok) return; // 취소하면 요청 중단
+    }
     try {
         if (isUpdate) {
             // 수정
@@ -572,46 +581,7 @@ const onClickSave = async () => {
     }
 };
 
-// (선택) 기존 핸들러를 새 함수로 매핑해두면 다른 곳에서 호출해도 동작 동일
 const onClickCreate = onClickSave;
-// const onClickCreate = async () => {
-//     if (!validateRequired(createForm.value)) {
-//         return notify('필수 항목을 확인하세요.', 'warning');
-//     }
-//     const payload = {
-//         itemId: createForm.value.itemId,
-//         ver: createForm.value.ver,
-//         startDate: toDateStr(createForm.value.startDate),
-//         endDate: toDateStr(createForm.value.endDate),
-//         use: createForm.value.useYn,
-//         remk: createForm.value.remark
-//     };
-//     console.log('Final payload before sending:', payload);
-//     try {
-//         await axios.post('/api/bomInsert', payload); //  헤더 단건 API
-//         notify('BOM 등록이 완료되었습니다.');
-//         resetCreateForm();
-//     } catch (e) {
-//         notify(e?.response?.data?.message || '등록 중 오류가 발생했습니다.', 'error');
-//     }
-// };
-
-// const onClickUpdate = async () => {
-//     if (!validateRequired(createForm.value)) return notify('필수 항목을 확인하세요.', 'warning');
-
-//     const payload = {
-//         ...createForm.value,
-//         startDate: toDateStr(createForm.value.startDate),
-//         endDate: toDateStr(createForm.value.endDate)
-//     };
-//     try {
-//         console.log(payload);
-//         await axios.put(`/api/bom/${createForm.value.id}`, payload); // (선택) 필요 시 유지
-//         notify('수정이 완료되었습니다.');
-//     } catch (e) {
-//         notify(e?.response?.data?.message || '수정 중 오류가 발생했습니다.', 'error');
-//     }
-// };
 
 //초기화
 const resetCreateForm = () => {
@@ -645,28 +615,33 @@ const addRow = () => {
         item_name: '',
         spec: '',
         unit: '',
-        usage: 0
+        usage: 0,
+        loss: 0
     });
 };
-
+//상세삭제
 const deleteRow = async (index) => {
     const row = detailRows.value[index];
-    // 아직 DB에 없는 임시 행이면 그냥 제거
+
+    // DB에 없는 임시행이면 프런트에서만 제거
     if (!row?.bom_detail_no || !createForm.value.id) {
         detailRows.value.splice(index, 1);
         return;
     }
 
-    // 확인 다이얼로그(간단 confirm)
-    const ok = window.confirm(`행 ${row.bom_detail_no} 를 삭제할까요?`);
-    if (!ok) return;
+    const detailCode = String(row.bom_detail_no).trim();
+    if (!detailCode) {
+        notify('상세번호가 올바르지 않습니다.', 'warning');
+        return;
+    }
+
+    const bomNumber = encodeURIComponent(createForm.value.id);
+    const detailParam = encodeURIComponent(detailCode);
+
+    if (!window.confirm(`행 ${detailCode} 를 삭제할까요?`)) return;
 
     try {
-        const bomNumber = createForm.value.id;
-        // BOM 상세 내역 삭제를 위한 DELETE 요청
-        await axios.delete(`/api/bom/${bomNumber}/details/${row.bom_detail_no}`);
-
-        // 프런트 목록에서도 제거
+        await axios.delete(`/api/bom/${bomNumber}/details/${detailParam}`);
         detailRows.value.splice(index, 1);
         notify('삭제되었습니다.');
     } catch (e) {
@@ -782,6 +757,22 @@ const onClickDetailInsert = async () => {
     } catch (e) {
         const msg = e?.response?.data?.message || e?.message || '상세 저장 중 오류가 발생했습니다.';
         notify(msg, 'error');
+    }
+};
+const onClickDel = async () => {
+    if (!createForm.value.id) return notify('삭제할 BOM이 없습니다.', 'warning');
+
+    const ok = window.confirm(`BOM ${createForm.value.id} 를 삭제하시겠습니까?`);
+    if (!ok) return;
+
+    try {
+        const id = encodeURIComponent(createForm.value.id);
+        await axios.delete(`/api/bom/${id}`);
+        notify('BOM이 삭제되었습니다.');
+        resetCreateForm();
+        detailRows.value = [];
+    } catch (e) {
+        notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
     }
 };
 </script>

@@ -122,7 +122,14 @@ FROM   CMMN_CODE
 WHERE  group_id = 'CUTD_COND'
 `;
 
+//삭제
+const whDelete = `
+DELETE FROM WAREHOUSE
+WHERE WH_ID = ?
+`;
+
 module.exports = {
+  whDelete,
   cutdCond,
   warehouseList,
   warehouseCreate,

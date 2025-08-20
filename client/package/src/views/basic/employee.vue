@@ -550,57 +550,7 @@ const onClickDel = async () => {
         notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
     }
 };
-// const onClickCreate = async () => {
-//     if (!validateRequired(createForm.value)) {
-//         notify('필수 항목을 확인하세요.', 'warning');
-//         return;
-//     }
-//     const payload = {
-//         ...createForm.value,
-//         joinDate: toDateStr(createForm.value.joinDate),
-//         leavDate: toDateStr(createForm.value.leavDate)
-//     };
-//     try {
-//         await axios.post('/api/emp', payload);
-//         notify('등록이 완료되었습니다.', 'success');
-//         await onClickSearch();
-//     } catch (e) {
-//         const status = e?.response?.status;
-//         const msg = e?.response?.data?.message;
-//         if (status === 409) notify(msg || '이미 등록된 사원입니다!', 'warning');
-//         else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
-//         else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
-//     } finally {
-//         await closeAllOverlays();
-//     }
-// };
 
-// /* ===== 수정 ===== */
-// const onClickUpdate = async () => {
-//     if (!createForm.value.id) {
-//         notify('수정할 항목이 선택되지 않았습니다.', 'warning');
-//         return;
-//     }
-//     if (!validateRequired(createForm.value)) {
-//         notify('필수 항목을 확인하세요.', 'warning');
-//         return;
-//     }
-//     const payload = {
-//         ...createForm.value,
-//         joinDate: toDateStr(createForm.value.joinDate),
-//         leavDate: toDateStr(createForm.value.leavDate)
-//     };
-//     try {
-//         await axios.put(`/api/emp/${createForm.value.id}`, payload);
-//         notify('수정이 완료되었습니다.', 'success');
-//         await onClickSearch();
-//     } catch (e) {
-//         console.error(e);
-//         notify('수정 중 오류가 발생했습니다.', 'error');
-//     } finally {
-//         await closeAllOverlays();
-//     }
-// };
 async function onClickSave() {
     const isUpdate = !!createForm.value.id;
 
@@ -619,6 +569,10 @@ async function onClickSave() {
         joinDate: toDateStr(createForm.value.joinDate),
         leavDate: toDateStr(createForm.value.leavDate)
     };
+    if (!isUpdate) {
+        const ok = window.confirm('정말 등록하시겠습니까?');
+        if (!ok) return; // 취소하면 요청 중단
+    }
 
     try {
         const url = isUpdate ? `/api/emp/${createForm.value.id}` : '/api/emp';

@@ -28,7 +28,22 @@ const cutdCond = async () => {
   return list;
 };
 
+//삭제
+const deleteWh = async (whId) => {
+  let resInfo = await db.query("whDelete", [whId]);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
 module.exports = {
+  deleteWh,
   cutdCond,
   warehouseList,
   warehouseCreate,

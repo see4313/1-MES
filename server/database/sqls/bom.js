@@ -67,7 +67,8 @@ const selectBomDetails = (bomNumber, filters = {}) => {
         i.ITEM_NAME     AS item_name,
         i.SPEC       AS spec,
         d.UNIT          AS unit,
-        d.USAGE      AS \`usage\`
+        d.USAGE      AS \`usage\`,
+        d.LOSS       AS loss
     FROM
         BOM_DETAIL d
     LEFT JOIN
@@ -163,16 +164,21 @@ const saveBomDetailsOnly = `
 `;
 
 //삭제
-const bomDelete = `
+const BomHeader = `
 DELETE FROM BOM
 WHERE BOM_NUMBER = ?
 `;
+const BomDetail = `
+DELETE FROM BOM_DETAIL
+WHERE BOM_NUMBER = ?;`;
+
 module.exports = {
   selectBomList,
   selectBomDetails,
   deleteBomDetail,
   itemModal,
-  bomDelete,
+  BomHeader,
+  BomDetail,
   callSaveBomProc,
   saveBomWithDetails,
   saveBomDetailsOnly,

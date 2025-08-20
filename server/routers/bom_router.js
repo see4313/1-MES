@@ -49,17 +49,22 @@ router.get(
 
 /* ================ BOM 상세 삭제 ================ */
 // DELETE /bom/:bomNumber/details/:bomDetailNo
-router.delete(
-  "/bom/:bomNumber/details/:bomDetailNo",
-  asyncHandler(async (req, res) => {
-    const { bomNumber, bomDetailNo } = req.params;
-    const result = await bomService.deleteBomDetail(bomNumber, bomDetailNo);
-    res.status(200).json({
-      message: "BOM 상세 내역이 성공적으로 삭제되었습니다.",
-      result,
-    });
-  })
-);
+router.delete("/bom/:bomNumber/details/:detailCode", async (req, res) => {
+  try {
+    const { bomNumber, detailCode } = req.params;
+    if (!bomNumber || !detailCode) {
+      return res.status(400).json({ message: "파라미터 누락" });
+    }
+
+    const r = await bomService.deleteBomDetail(bomNumber, detailCode);
+    return r.deleted
+      ? res.json({ message: "삭제 완료" })
+      : res.status(404).json({ message: "삭제 대상 없음" });
+  } catch (e) {
+    console.error("delete detail error:", e);
+    return res.status(500).json({ message: "삭제 중 오류" });
+  }
+});
 
 /* ================ BOM 헤더 등록/수정 ================ */
 // POST /bomInsert  (헤더 등록)
@@ -141,9 +146,17 @@ router.post(
 );
 
 // 삭제
-router.delete("/bomDelete", async (req, res) => {
-  const { bom_number } = req.body;
-  let result = await bomService.deleteEmp(bom_number);
-  res.send(result);
+router.delete("/bom/:bomNumber", async (req, res) => {
+  const { bomNumber } = req.params;
+  try {
+    const result = await bomService.deleteBom(bomNumber);
+    if (result.deleted) {
+      res.json({ message: "BOM 삭제 완료" });
+    } else {
+      res.status(404).json({ message: "삭제 대상이 없습니다." });
+    }
+  } catch (e) {
+    res.status(500).json({ message: "BOM 삭제 중 오류가 발생했습니다." });
+  }
 });
 module.exports = router;
