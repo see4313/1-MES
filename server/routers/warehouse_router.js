@@ -83,4 +83,18 @@ router.get("/whTypes", async (req, res) => {
   res.send(list); // 응답
 });
 
+//  삭제
+router.delete("/warehouseDelete", async (req, res) => {
+  console.log("body:", req.body); //
+  const { whId } = req.body; //
+  if (!whId) return res.status(400).json({ message: "ckdrh번호 누락" });
+
+  try {
+    const result = await warehouseService.deleteWh(whId);
+    res.json(result);
+  } catch (e) {
+    console.error("delete error:", e);
+    res.status(500).json({ message: "삭제 실패" });
+  }
+});
 module.exports = router;
