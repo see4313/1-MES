@@ -35,6 +35,15 @@
                             @click:append-inner.stop="openModal('vendType', 'search')"
                         />
                     </v-col>
+                    <v-col cols="12" sm="4">
+                        <v-text-field
+                            variant="outlined"
+                            label="담당자"
+                            v-model="searchForm.psch"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner.stop="openModal('psch', 'search')"
+                        />
+                    </v-col>
                 </v-row>
             </v-col>
         </v-card>
@@ -132,7 +141,15 @@
                             </div>
                         </v-radio-group>
                     </v-col>
-
+                    <v-col cols="12" sm="4">
+                        <v-text-field
+                            variant="outlined"
+                            label="담당자"
+                            v-model="createForm.psch"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner.stop="openModal('psch', 'create')"
+                        />
+                    </v-col>
                     <!-- 주소 -->
                     <v-col cols="12" sm="4">
                         <v-text-field
@@ -182,7 +199,7 @@
             { key: 'emp_name', label: '사원명' }
         ]"
         :fetchData="(q, p, s) => fetchModal('/api/vendorPsch', q, p, s)"
-        :pageSize="10"
+        :pageSize="5"
         @select="onSelectVendPsch"
     />
 </template>
@@ -203,7 +220,7 @@ onMounted(() => {
 
 /* ===== 상태 ===== */
 
-const searchForm = ref({ vendId: '', vendName: '', vendType: '' });
+const searchForm = ref({ vendId: '', vendName: '', vendType: '', psch: '' });
 
 const createForm = ref({
     id: null,
@@ -270,10 +287,13 @@ const onSelectVendType = (row) => {
 
 const onSelectVendPsch = (row) => {
     const name = row?.emp_name || row?.empName || '';
-    if (modalTarget.value === 'create') createForm.value.psch = name;
+    if (modalTarget.value === 'create') {
+        createForm.value.psch = name;
+    } else {
+        searchForm.value.psch = name;
+    }
     showVendPschModal.value = false;
 };
-
 /* ===== 모달 API 공통 헬퍼 ===== */
 const fetchModal = async (url, q, page, size) => {
     try {
