@@ -138,9 +138,30 @@ const selectStatusZeroProductionList = () => {
   return { sql };
 };
 
+const selectFacilityListByName = (fNumber) => {
+  console.log(fNumber);
+  const sql =
+  `
+    select
+      f.facility_id as facilityId,
+        f.facility_nm as facilityName
+    from FACILITY f
+    join PROCESS prcs
+    on prcs.prcs_number = f.facility_type
+    where USE_YN = 'Y'
+    and prcs.prcs_number = ?
+  `;
+
+  params = [fNumber];
+
+  return { sql, params };
+
+}
+
 module.exports = {
   insertProdInstruct,
   selectInstructionList,
   selectDetailInstruction,
-  selectStatusZeroProductionList
+  selectStatusZeroProductionList,
+  selectFacilityListByName
 };
