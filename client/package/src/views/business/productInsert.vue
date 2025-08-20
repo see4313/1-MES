@@ -11,7 +11,7 @@
                     @btn-click1="Select()"
                     btn-text2="입고"
                     btn-variant2="flat"
-                    btn-color2="error"
+                    btn-color2="warning"
                     @btn-click2="productInsert()"
                 />
             </v-card-item>
@@ -93,7 +93,7 @@ const { snackBar } = useSnackBar();
 const showModal = ref(false); // 제품코드모달
 const selectedItem = ref(null); // 제품코드선택
 const selectedProducts = ref(null);
-const insertList = ref();
+const insertList = ref([]);
 
 const remainQty = (row) => {
     return row.exam_qty - row.bnt;
