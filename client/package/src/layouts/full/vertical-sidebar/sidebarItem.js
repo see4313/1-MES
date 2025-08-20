@@ -126,7 +126,7 @@ const sidebarItem = [
             {
                 title: '생산 지시',
                 to: '/instruction',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: '생산 지시 조회',

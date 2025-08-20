@@ -139,8 +139,9 @@ const selectEmp = (filters) => {
     `;
 
   const params = [];
-
+  console.log(filters.dept_id);
   if (filters.dept_id) {
+
     sql += " AND dept_id = ?";
     params.push(filters.dept_id);
   }
