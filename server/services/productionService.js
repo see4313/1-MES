@@ -32,8 +32,19 @@ const getDetailInstruction = async (query) => {
   }
 };
 
+const getStatusZeroProductionList = async () => {
+  try {
+    const result = await db.query("selectStatusZeroProductionList");
+    return result;
+  } catch (e) {
+    console.log(e);
+    return { err : e };
+  }
+};
+
 module.exports = {
   addProdInstructions,
   getInstructionList,
   getDetailInstruction,
+  getStatusZeroProductionList
 };

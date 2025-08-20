@@ -19,7 +19,8 @@ const repairHist = require("./sqls/repairHist.js");
 const failureType = require("./sqls/failureType.js");
 const prcsRouter = require("./sqls/prcsRouter.js");
 const prcs = require("./sqls/prcs.js");
-
+const downtime = require("./sqls/downtime.js");
+const urgency = require("./sqls/urgency.js");
 
 module.exports = {
   ...orders,
@@ -42,5 +43,7 @@ module.exports = {
   ...repairHist,
   ...failureType,
   ...prcsRouter,
-  ...prcs
+  ...prcs,
+  ...downtime,
+  ...urgency,
 };

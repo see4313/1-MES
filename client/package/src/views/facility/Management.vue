@@ -97,11 +97,7 @@
             <v-row dense>
                 <v-col cols="12" sm="4"><v-text-field label="설비ID" v-model="itemId" variant="outlined" readonly /></v-col>
                 <v-col cols="12" sm="4">
-                    <v-text-field label="설비명" v-model="itemName" variant="outlined" readonly>
-                        <template #append-inner>
-                            <v-icon @click="itemNameModal = true" class="cursor-pointer">mdi-magnify</v-icon>
-                        </template>
-                    </v-text-field>
+                    <v-text-field label="설비명" v-model="itemName" variant="outlined"> </v-text-field>
                 </v-col>
                 <v-col cols="12" sm="4">
                     <v-text-field label="설비유형" v-model="itemType" variant="outlined" readonly>

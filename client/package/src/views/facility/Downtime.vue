@@ -249,8 +249,8 @@ const filterEmpId = ref('');
 const filterEmpName = ref('');
 const filterDownTypeId = ref('');
 const filterDownTypeName = ref('');
-const filterFromDate = ref(todayStr);
-const filterToDate = ref(todayStr);
+const filterFromDate = ref(null);
+const filterToDate = ref(null);
 
 // ===== 목록/선택 =====
 const rows = ref([]);
@@ -353,8 +353,8 @@ function selectReset() {
     filterEmpName.value = '';
     filterDownTypeId.value = '';
     filterDownTypeName.value = '';
-    filterFromDate.value = todayStr;
-    filterToDate.value = todayStr;
+    filterFromDate.value = null;
+    filterToDate.value = null;
     rows.value = [];
     selectedRow.value = null;
 }

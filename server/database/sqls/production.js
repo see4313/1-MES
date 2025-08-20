@@ -105,7 +105,7 @@ const selectDetailInstruction = (query) => {
     from PROD_INSTRUCT_DETAIL pid
     join ITEM i on i.item_id = pid.item_id
     where pid.instruct_no = ?
-    order by pid.deta_instruct_no;
+    order by pid.deta_instruct_no
   `;
 
   const params = [query.instructNo];
@@ -113,8 +113,34 @@ const selectDetailInstruction = (query) => {
   return { sql, params };
 };
 
+const selectStatusZeroProductionList = () => {
+  const sql = `
+    SELECT
+        prod.prod_no          AS prodNo,
+        prod.deta_instruct_no AS detaInstructNo,
+        pid.item_id           AS itemId,
+        i.item_type           AS itemType,
+        i.item_name           AS itemName,
+        prod.prcs_number      AS prcsNumber,
+        prcs.prcs_name		  AS prcsName,
+        prod.drct_qty         AS drctQty,
+        prod.status,
+        prod.remk
+    FROM PRODUCTION prod
+    JOIN PROD_INSTRUCT_DETAIL pid
+      ON prod.deta_instruct_no = pid.deta_instruct_no
+    JOIN ITEM i
+      ON pid.item_id = i.item_id
+    JOIN PROCESS prcs
+      ON prod.prcs_number = prcs.prcs_number
+    WHERE prod.status = 0
+ `;
+  return { sql };
+};
+
 module.exports = {
   insertProdInstruct,
   selectInstructionList,
   selectDetailInstruction,
+  selectStatusZeroProductionList
 };
