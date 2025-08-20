@@ -105,4 +105,14 @@ router.post("/prod/saveprcsrouter", async (req, res) => {
   }
 });
 
+// getStatusZeroProductionList -- 생산 번호 가져오기
+router.get("/prod/getstatuszeroprodlist", async (req, res) => {
+  try {
+    const result = await productionService.getStatusZeroProductionList();
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+})
+
 module.exports = router;
