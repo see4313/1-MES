@@ -65,7 +65,7 @@
                         :rowsPerPageOptions="[5, 10, 20, 50]"
                         paginatorTemplate="RowsPerPageDropdown PrevPageLink PageLinks NextPageLink"
                     >
-                        <Column field="prscNo" header="공정번호" />
+                        <Column field="prscNo" sortable header="공정번호" />
                         <Column field="prcsName" header="공정명" />
                         <Column field="useYn" header="사용여부" />
                         <Column field="remark" header="비고" />
@@ -83,11 +83,12 @@
                     btn-text3="저장"
                     btn-color3="primary"
                     btn-variant3="flat"
-                    @btn-click3="onClickCreate"
-                    btn-text2="수정"
-                    btn-color2="warning"
+                    @btn-click3="onClickSave"
+                    btn-text2="삭제"
                     btn-variant2="flat"
-                    @btn-click2="onClickUpdate"
+                    btn-color2="error"
+                    :btn-disabled2="!createForm.prscNo"
+                    @btn-click2="onClickDel"
                     btn-text1="초기화"
                     btn-color1="secondary"
                     btn-variant1="flat"
@@ -120,7 +121,7 @@
                         </v-radio-group>
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="비고" v-model="createForm.remark" :rules="[req]" />
+                        <v-text-field variant="outlined" label="비고" v-model="createForm.remark" />
                     </v-col>
                 </v-row>
             </v-col>
@@ -250,46 +251,51 @@ watch(selectedRow, (row) => {
 /* ===== 필수값 검사 ===== */
 const validateRequired = (f) => !!(f.prcsName && f.useYn);
 
-/* ===== 등록 ===== */
-const onClickCreate = async () => {
+const isSaving = ref(false);
+const enc = encodeURIComponent;
+
+const onClickSave = async () => {
+    // 공통 유효성 검사
     if (!validateRequired(createForm.value)) {
         notify('필수 항목(공정번호/공정명/사용여부)을 확인하세요.', 'warning');
         return;
     }
+
+    const isUpdate = !!createForm.value.prscNo; // prscNo 있으면 수정
+    const payload = { ...createForm.value };
+
+    if (!isUpdate) {
+        const ok = window.confirm('정말 등록하시겠습니까?');
+        if (!ok) return; // 취소하면 요청 중단
+    }
+
     try {
-        // 필요 시 서버 스키마에 맞게 payload 변환
-        const payload = { ...createForm.value };
-        await axios.post('/api/process', payload);
-        notify('등록이 완료되었습니다.', 'success');
-        await onClickSearch();
+        isSaving.value = true;
+
+        if (isUpdate) {
+            await axios.put(`/api/process/${enc(createForm.value.prscNo)}`, payload);
+            notify('수정이 완료되었습니다.', 'success');
+        } else {
+            await axios.post('/api/process', payload);
+            notify('등록이 완료되었습니다.', 'success');
+        }
+
+        await onClickSearch(); // 갱신
     } catch (e) {
         const status = e?.response?.status;
         const msg = e?.response?.data?.message;
-        if (status === 409) notify(msg || '이미 등록된 공정입니다!', 'warning');
-        else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
-        else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
-    }
-};
 
-/* ===== 수정 ===== */
-const onClickUpdate = async () => {
-    if (!validateRequired(createForm.value)) {
-        notify('필수 항목(공정번호/공정명/사용여부)을 확인하세요.', 'warning');
-        return;
-    }
-    if (!createForm.value.prscNo) {
-        notify('수정할 공정번호가 없습니다. 행을 선택하세요.', 'warning');
-        return;
-    }
-    try {
-        const payload = { ...createForm.value };
-        // 보통 공정번호(prscNo)를 식별자로 사용
-        await axios.put(`/api/process/${encodeURIComponent(createForm.value.prscNo)}`, payload);
-        notify('수정이 완료되었습니다.', 'success');
-        await onClickSearch();
-    } catch (e) {
-        console.error(e);
-        notify('수정 중 오류가 발생했습니다.', 'error');
+        if (!isUpdate) {
+            // 등록 에러 처리
+            if (status === 409) notify(msg || '이미 등록된 공정입니다!', 'warning');
+            else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
+            else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
+        } else {
+            // 수정 에러 처리
+            notify(msg || '수정 중 오류가 발생했습니다.', 'error');
+        }
+    } finally {
+        isSaving.value = false;
     }
 };
 
@@ -318,6 +324,25 @@ const onClickSearchReset = async () => {
     };
     await nextTick();
     await onClickSearch();
+};
+
+//공정삭제
+const onClickDel = async () => {
+    const id = selectedRow.value?.prscNo;
+    console.log('삭제 시도 ID:', id, selectedRow.value);
+    if (!id) return notify('삭제할 공정을 선택해주세요.', 'warning');
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+        const { data } = await axios.delete('/api/processDelete', { data: { prscNo: id } });
+        if (!data?.result) return notify(data?.message || '삭제에 실패했습니다.', 'warning');
+
+        notify('삭제되었습니다.', 'success');
+        await onClickSearch();
+        onClickReset();
+    } catch (e) {
+        notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
+    }
 };
 </script>
 

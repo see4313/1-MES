@@ -231,11 +231,6 @@ const sidebarItem = [
                 roles: ['admin', 'prod', 'mgr']
             },
             {
-                title: '수리 이력',
-                to: '/facility/repair/add',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
                 title: '비가동 관리',
                 to: '/facility/downtime',
                 roles: ['admin', 'prod', 'mgr']

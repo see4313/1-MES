@@ -76,7 +76,7 @@
                         :rowsPerPageOptions="[5, 10, 20, 50]"
                         paginatorTemplate="RowsPerPageDropdown PrevPageLink PageLinks NextPageLink"
                     >
-                        <Column field="warehouseId" header="창고번호" />
+                        <Column field="warehouseId" sortable header="창고번호" />
                         <Column field="warehouseName" header="창고명" />
                         <Column field="useYn" header="사용여부" />
                         <Column field="temp" header="온도" />
@@ -97,11 +97,12 @@
                     btn-text3="저장"
                     btn-color3="primary"
                     btn-variant3="flat"
-                    @btn-click3="onClickCreate"
-                    btn-text2="수정"
-                    btn-color2="warning"
+                    @btn-click3="onClickSave"
+                    btn-text2="삭제"
                     btn-variant2="flat"
-                    @btn-click2="onClickUpdate"
+                    btn-color2="error"
+                    :btn-disabled2="!createForm.warehouseId"
+                    @btn-click2="onClickDel"
                     btn-text1="초기화"
                     btn-color1="secondary"
                     btn-variant1="flat"
@@ -138,7 +139,14 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="창고위치" v-model="createForm.warehouseLoca" />
+                        <v-text-field
+                            variant="outlined"
+                            label="창고위치"
+                            v-model="createForm.warehouseLoca"
+                            append-inner-icon="mdi-magnify"
+                            @click:append-inner.stop="openAddressModal"
+                            readonly
+                        />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="온도" v-model="createForm.temp" />
@@ -147,7 +155,7 @@
                         <v-text-field variant="outlined" label="습도" v-model="createForm.rh" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="비고" v-model="createForm.remark" :rules="[req]" />
+                        <v-text-field variant="outlined" label="비고" v-model="createForm.remark" />
                     </v-col>
                 </v-row>
             </v-col>
@@ -172,19 +180,6 @@
         :pageSize="5"
         @select="onSelectWhType"
     />
-
-    <!-- <ModalSearch
-        v-model:visible="showWhLocaModal"
-        title="창고위치"
-        idField="wh_id"
-        :columns="[
-            { key: 'warehouse_id', label: '창고코드' },
-            { key: 'warehouse_loca', label: '창고위치' }
-        ]"
-        :fetchData="fetchWhLoca"
-        :pageSize="5"
-        @select="onSelectWhLoca"
-    /> -->
 </template>
 <script setup>
 import ModalSearch from '@/views/commons/CommonModal.vue';
@@ -260,8 +255,29 @@ const openItemModal = async (field = 'warehouseType', target = 'search') => {
     else if (field === 'warehouseLoca') showWhLocaModal.value = true;
 };
 
+/*----주소 모달 ----*/
+async function openAddressModal() {
+    // 스크립트 없으면 로드
+    if (!window.daum?.Postcode) {
+        await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+            s.onload = resolve;
+            document.head.appendChild(s);
+        });
+    }
+
+    // 주소 검색
+    new window.daum.Postcode({
+        oncomplete: (data) => {
+            const baseAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+            const detail = prompt('상세주소를 입력하세요', '') || '';
+            createForm.value.warehouseLoca = detail ? `${baseAddr} ${detail}` : baseAddr;
+        }
+    }).open();
+}
+
 const onSelectWhType = (row) => {
-    // 예시 스키마: { cmmn_id, cmmn_name }
     const label = row?.cmmn_name ?? '';
     const id = row?.cmmn_id ?? '';
     const targetForm = modalTarget.value === 'create' ? createForm : searchForm;
@@ -271,14 +287,7 @@ const onSelectWhType = (row) => {
     // targetForm.value.warehouseTypeId = id;
 
     showWhTypeModal.value = false;
-    setFieldAndFocus();
 };
-// const onSelectWhLoca = (row) => {
-//     const label = row?.warehouse_loca ?? '';
-//     const targetForm = modalTarget.value === 'create' ? createForm : searchForm;
-//     targetForm.value.warehouseLoca = label;
-//     showWhLocaModal.value = false;
-// };
 
 /* ===== 모달 데이터 로딩 함수 ===== */
 const fetchWhTypes = async ({ page = 1, pageSize = 5, keyword = '' } = {}) => {
@@ -293,18 +302,6 @@ const fetchWhTypes = async ({ page = 1, pageSize = 5, keyword = '' } = {}) => {
         return [];
     }
 };
-
-// const fetchWhLoca = async ({ page = 1, pageSize = 5, keyword = '' } = {}) => {
-//     try {
-//         const { data } = await axios.get('/api/whLocations', {
-//             params: { page, pageSize, keyword }
-//         });
-//         return Array.isArray(data) ? data : (data.items ?? []);
-//     } catch (error) {
-//         console.error('창고위치 조회 실패', error);
-//         return [];
-//     }
-// };
 
 /* ===== 조회 ===== */
 const onClickSearch = async () => {
@@ -337,51 +334,55 @@ watch(selectedRow, (row) => {
 /* ===== 필수값 검사 ===== */
 const validateRequired = (f) => !!(f.warehouseName && f.useYn && f.warehouseLoca);
 
-/* ===== 등록 ===== */
-const onClickCreate = async () => {
+const isSaving = ref(false);
+const enc = encodeURIComponent;
+//등록 수정
+const onClickSave = async () => {
+    // 공통 유효성 검사
     if (!validateRequired(createForm.value)) {
         notify('필수 항목을 확인하세요.', 'warning');
         return;
     }
+
+    const isUpdate = !!createForm.value.warehouseId; // 있으면 수정
+    const payload = { ...createForm.value };
+
+    if (!isUpdate) {
+        const ok = window.confirm('정말 등록하시겠습니까?');
+        if (!ok) return; // 취소하면 요청 중단
+    }
+
     try {
-        const payload = { ...createForm.value };
-        await axios.post('/api/warehouses', payload);
-        notify('등록이 완료되었습니다.', 'success');
-        await onClickSearch();
-        // 선택행/폼 초기화
-        selectedRow.value = null;
-        resetCreateForm();
+        isSaving.value = true;
+
+        if (isUpdate) {
+            await axios.put(`/api/warehouses/${enc(createForm.value.warehouseId)}`, payload);
+            notify('수정이 완료되었습니다.', 'success');
+        } else {
+            await axios.post('/api/warehouses', payload);
+            notify('등록이 완료되었습니다.', 'success');
+            selectedRow.value = null; // 신규 후 초기화가 필요하면 유지
+            resetCreateForm();
+        }
+
+        await onClickSearch(); // 목록 갱신
     } catch (e) {
         const status = e?.response?.status;
         const msg = e?.response?.data?.message;
-        if (status === 409) notify(msg || '이미 등록된 창고입니다!', 'warning');
-        else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
-        else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
+
+        if (!isUpdate) {
+            // 등록 에러 처리
+            if (status === 409) notify(msg || '이미 등록된 창고입니다!', 'warning');
+            else if (status === 400) notify(msg || '입력값을 확인하세요.', 'warning');
+            else notify(msg || '등록 중 오류가 발생했습니다.', 'error');
+        } else {
+            // 수정 에러 처리
+            notify(msg || '수정 중 오류가 발생했습니다.', 'error');
+        }
+    } finally {
+        isSaving.value = false;
     }
 };
-
-/* ===== 수정 ===== */
-const onClickUpdate = async () => {
-    if (!validateRequired(createForm.value)) {
-        notify('필수 항목을 확인하세요.', 'warning');
-        return;
-    }
-    if (!createForm.value.warehouseId) {
-        notify('수정할 창고번호가 없습니다. 행을 선택하세요.', 'warning');
-        return;
-    }
-    try {
-        const payload = { ...createForm.value };
-        // 보통 창고번호(warehouseId)를 식별자로 사용
-        await axios.put(`/api/warehouses/${encodeURIComponent(createForm.value.warehouseId)}`, payload);
-        notify('수정이 완료되었습니다.', 'success');
-        await onClickSearch();
-    } catch (e) {
-        console.error(e);
-        notify('수정 중 오류가 발생했습니다.', 'error');
-    }
-};
-
 /* ===== 폼 초기화 ===== */
 function resetCreateForm() {
     createForm.value = {
@@ -414,6 +415,25 @@ const onClickSearchReset = async () => {
     };
     await nextTick();
     await onClickSearch();
+};
+
+//삭제
+const onClickDel = async () => {
+    const id = selectedRow.value?.warehouseId;
+    console.log('삭제 시도 ID:', id, selectedRow.value);
+    if (!id) return notify('삭제할 창고를 선택해주세요.', 'warning');
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+        const { data } = await axios.delete('/api/warehouseDelete', { data: { whId: id } });
+        if (!data?.result) return notify(data?.message || '삭제에 실패했습니다.', 'warning');
+
+        notify('삭제되었습니다.', 'success');
+        await onClickSearch();
+        onClickReset();
+    } catch (e) {
+        notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
+    }
 };
 </script>
 

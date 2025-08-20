@@ -59,4 +59,16 @@ const processTypeList = (filters = {}) => {
   return { sql, params: [] };
 };
 
-module.exports = { processList, processCreate, processUpdate, processTypeList };
+//삭제
+const processDelete = `
+DELETE FROM PROCESS
+WHERE PRCS_NUMBER = ?
+`;
+
+module.exports = {
+  processList,
+  processCreate,
+  processUpdate,
+  processTypeList,
+  processDelete,
+};

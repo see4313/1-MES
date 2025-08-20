@@ -162,13 +162,28 @@ async function saveBomViaProc(data = {}) {
 }
 
 /* ====================== 상세 삭제 ====================== */
-async function deleteBomDetail(bomNumber, bomDetailNo) {
-  if (!bomNumber || bomDetailNo == null) throw new Error("삭제 파라미터 누락");
-  const res = await mapper.query("deleteBomDetail", [
-    bomNumber,
-    Number(bomDetailNo),
-  ]);
+async function deleteBomDetail(bomNumber, detailCode) {
+  if (!bomNumber || !detailCode) throw new Error("삭제 파라미터 누락");
+
+  const res = await mapper.query("deleteBomDetail", [bomNumber, detailCode]);
   return { deleted: !!res?.affectedRows };
+}
+
+//==============삭제
+
+async function deleteBom(bomNumber) {
+  if (!bomNumber) throw new Error("삭제 파라미터 누락");
+
+  try {
+    await mapper.query("BomDetail", [bomNumber]);
+
+    const res = await mapper.query("BomHeader", [bomNumber]);
+
+    return { deleted: !!res?.affectedRows };
+  } catch (err) {
+    console.error("BOM 삭제 오류:", err);
+    throw err;
+  }
 }
 
 /* ====================== 모듈 내보내기 ====================== */
@@ -185,4 +200,5 @@ module.exports = {
   // 저장/삭제
   saveBomViaProc,
   deleteBomDetail,
+  deleteBom,
 };

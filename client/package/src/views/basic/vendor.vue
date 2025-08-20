@@ -331,7 +331,7 @@ watch(selectedRow, (row) => {
 });
 
 /* ===== 공용 ===== */
-const req = (v) => !!v || '필수 값입니다.';
+// const req = (v) => !!v || '필수 값입니다.';
 const isValid = (f) => !!(f.vendName && f.bizNumber && f.cntinfo && f.vendType && f.address);
 
 /* ===== 스낵바 ===== */
@@ -355,7 +355,7 @@ const buildPayload = () => ({
     psch: createForm.value.psch,
     remark: createForm.value.remark ?? null
 });
-
+//등록 수정
 const onClickSave = async () => {
     const isUpdate = !!createForm.value.id;
 
@@ -365,6 +365,10 @@ const onClickSave = async () => {
 
     const payload = buildPayload();
 
+    if (!isUpdate) {
+        const ok = window.confirm('정말 등록하시겠습니까?');
+        if (!ok) return; // 취소하면 요청 중단
+    }
     try {
         if (isUpdate) {
             await axios.put(`/api/vendor/${encodeURIComponent(createForm.value.id)}`, payload);
@@ -388,37 +392,6 @@ const onClickSave = async () => {
     }
 };
 const onClickCreate = onClickSave;
-// /* ===== 등록 ===== */
-// const onClickCreate = async () => {
-//     if (!isValid(createForm.value)) return notify('필수 값을 확인하세요.', 'warning');
-//     const payload = buildPayload();
-//     try {
-//         await axios.post('/api/vendor', payload);
-//         notify('등록이 완료되었습니다.', 'success');
-//         await onClickSearch();
-//         await onClickReset();
-//     } catch (e) {
-//         const msg =
-//             e?.response?.status === 409
-//                 ? e?.response?.data?.message || '이미 등록된 거래처입니다!'
-//                 : e?.response?.data?.message || '등록 중 오류가 발생했습니다.';
-//         notify(msg, 'warning');
-//     }
-// };
-
-// /* ===== 수정 ===== */
-// const onClickUpdate = async () => {
-//     if (!createForm.value.id) return notify('수정할 항목이 선택되지 않았습니다.', 'warning');
-//     if (!isValid(createForm.value)) return notify('필수 값을 확인하세요.', 'warning');
-
-//     try {
-//         await axios.put(`/api/vendor/${createForm.value.id}`, { ...buildPayload() });
-//         notify('수정이 완료되었습니다.', 'success');
-//         await onClickSearch();
-//     } catch (e) {
-//         notify(e?.response?.data?.message || '수정 중 오류가 발생했습니다.', 'error');
-//     }
-// };
 
 /* ===== 신규(폼 리셋) ===== */
 const onClickReset = async () => {

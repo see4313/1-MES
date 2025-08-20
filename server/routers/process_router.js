@@ -31,7 +31,6 @@ router.post("/process", async (req, res, next) => {
   }
 });
 
-
 //수정
 router.put("/process/:prscNo", async (req, res, next) => {
   try {
@@ -62,4 +61,18 @@ router.get("/processTypes", async (req, res, next) => {
   }
 });
 
+//  삭제
+router.delete("/processDelete", async (req, res) => {
+  console.log("body:", req.body); //
+  const { prscNo } = req.body; //
+  if (!prscNo) return res.status(400).json({ message: "공정번호 누락" });
+
+  try {
+    const result = await processService.deleteProcess(prscNo);
+    res.json(result);
+  } catch (e) {
+    console.error("process delete error:", e);
+    res.status(500).json({ message: "삭제 실패" });
+  }
+});
 module.exports = router;
