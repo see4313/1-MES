@@ -45,10 +45,10 @@ const onSignIn = async () => {
                     <v-card elevation="10" class="px-sm-1 px-0 mx-auto" max-width="500">
                         <v-card-item class="pa-sm-8">
                             <div class="d-flex justify-center py-4"></div>
-                            <div class="text-body-1 text-muted text-center mb-3">LogIn</div>
+                            <div class="text-body-1 text-muted text-center mb-3">로그인</div>
                             <v-row class="d-flex mb-3">
                                 <v-col cols="12">
-                                    <v-label class="font-weight-bold mb-1">ID</v-label>
+                                    <v-label class="font-weight-bold mb-1">아이디</v-label>
                                     <v-text-field
                                         variant="outlined"
                                         density="compact"
@@ -58,7 +58,7 @@ const onSignIn = async () => {
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="12">
-                                    <v-label class="font-weight-bold mb-1">Password</v-label>
+                                    <v-label class="font-weight-bold mb-1">비밀번호</v-label>
                                     <v-text-field
                                         variant="outlined"
                                         density="compact"

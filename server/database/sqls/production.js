@@ -116,14 +116,16 @@ const selectDetailInstruction = (query) => {
 const selectStatusZeroProductionList = () => {
   const sql = `
    SELECT
+   		pid.instruct_no 	  AS instructNo,
+   		prod.deta_instruct_no AS detaInstructNo,
         prod.prod_no          AS prodNo,
-        prod.deta_instruct_no AS detaInstructNo,
         pid.item_id           AS itemId,
         i.item_type           AS itemType,
         i.item_name           AS itemName,
         prod.prcs_number      AS prcsNumber,
         prcsr.op_no			  AS opNo,
         prcs.prcs_name		  AS prcsName,
+        pi.instruct_datetime  AS instructDatetime,
         prod.drct_qty         AS drctQty,
         prod.status,
         prod.remk
@@ -137,7 +139,10 @@ const selectStatusZeroProductionList = () => {
 	JOIN PROCESS_ROUTING prcsr
 	  ON prod.prcs_number = prcsr.prcs_number
 	 AND pid.item_id     = prcsr.item_id
+	JOIN PROD_INSTRUCT pi
+	  ON pid.instruct_no = pi.instruct_no
     WHERE prod.status = 0
+    ORDER BY prod.prod_no desc;
  `;
   return { sql };
 };
