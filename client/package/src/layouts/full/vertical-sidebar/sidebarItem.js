@@ -242,12 +242,7 @@ const sidebarItem = [
             },
             {
                 title: '고장/수리 관리',
-                to: '/facility/repair/rfmanage'
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '수리 이력',
-                to: '/facility/repair/add',
+                to: '/facility/repair/rfmanage',
                 roles: ['admin', 'prod', 'mgr']
             },
             {
