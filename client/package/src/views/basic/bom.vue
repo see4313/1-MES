@@ -618,8 +618,8 @@ const addRow = () => {
         item_name: '',
         spec: '',
         unit: '',
-        usage: 0,
-        loss: 0
+        usage: '',
+        loss: ''
     });
 };
 //상세삭제
