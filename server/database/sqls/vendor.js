@@ -114,7 +114,6 @@ WHERE VEND_ID = ?
 `;
 
 module.exports = {
-  // mapper 별칭 키에 맞춰 export
   "VENDOR.SEARCH": VENDOR_SEARCH,
   "VENDOR.SEARCH_EXACT": VENDOR_SEARCH_EXACT,
   "VENDOR.INSERT": VENDOR_INSERT,

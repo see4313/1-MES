@@ -7,37 +7,37 @@ const sidebarItem = [
             {
                 title: '사원관리',
                 to: '/emp',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: '거래처관리',
                 to: '/vendor',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: 'BOM관리',
                 to: '/bom',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: '창고관리',
                 to: '/warehouse',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: '공정정보',
                 to: '/process',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: '공정흐름도',
                 to: '/prcsrouter',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: '품목관리',
                 to: '/mt-001',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             }
         ]
     },

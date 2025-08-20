@@ -11,11 +11,11 @@ const {
 } = require("../services/employee_service.js");
 const empService = require("../services/employee_service.js");
 
-// 공용: async 핸들러
+//  async 핸들러
 const asyncH = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
-// 공용: 결과 → 배열만 꺼내기
+//  배열만 꺼내기
 const rowsOnly = (r) => (Array.isArray(r) ? r : r?.rows ?? []);
 
 // ===== 모달 소스 =====
@@ -62,7 +62,7 @@ router.post(
     const b = req.body ?? {};
     try {
       const result = await mapper.query("EMP.INSERT", empInsertParams(b));
-      // insert 영향행 없거나 정의 안됐으면 로직으로 이중확인
+      // 이중확인
       const verdict = await ensureInsertedOr409(b, result);
       if (verdict) return res.status(verdict.status).json(verdict.body);
       return res

@@ -158,7 +158,7 @@ const saveBomWithDetails = `
   CALL save_bom_with_details_compat(NULL, ?, ?, ?, ?, ?, ?, ?);
 `;
 
-// null 대신 빈 문자열 ''를 명시적으로 전달
+// null 대신 빈 문자열 ''
 const saveBomDetailsOnly = `
   CALL save_bom_with_details_compat(?, '', '', NULL, NULL, '', ?);
 `;

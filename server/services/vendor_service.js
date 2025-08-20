@@ -77,13 +77,9 @@ const vendorUpdateParams = (b = {}, id) => [
   id,
 ];
 
-/* ===== 등록 후 재확인(선택) ===== */
 const ensureVendorInsertedOr409 = async (b, result) => {
-  // DB가 정상 반영했다면 OK
   if (result && (result.affectedRows === undefined || result.affectedRows > 0))
     return null;
-
-  // 그렇지 않다면 정확 일치로 중복 여부 재확인
   const rows = await mapper.query(
     "VENDOR.SEARCH_EXACT",
     vendorSearchParamsExactNameBiz({
