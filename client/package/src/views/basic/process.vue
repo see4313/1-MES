@@ -82,7 +82,7 @@
                 <CardHeader3
                     title="공정정보 등록"
                     btn-text3="저장"
-                    btn-color3="primary"
+                    btn-color3="warning"
                     btn-variant3="flat"
                     @btn-click3="onClickSave"
                     btn-text2="삭제"

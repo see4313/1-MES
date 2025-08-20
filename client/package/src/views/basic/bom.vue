@@ -111,10 +111,10 @@
                             btn-icon2="mdi-plus-circle"
                             btn-text2="행추가"
                             btn-variant2="flat"
-                            btn-color2="primary"
+                            btn-color2="#424242"
                             @btn-click2="addRow"
                             btn-text1="등록"
-                            btn-color1="primary"
+                            btn-color1="warning"
                             btn-variant1="flat"
                             @btn-click1="onClickDetailInsert"
                         />
@@ -195,7 +195,7 @@
                 <CardHeader3
                     title="BOM등록"
                     btn-text3="저장"
-                    btn-color3="primary"
+                    btn-color3="warning"
                     btn-variant3="flat"
                     @btn-click3="onClickCreate"
                     btn-text2="삭제"
@@ -618,8 +618,8 @@ const addRow = () => {
         item_name: '',
         spec: '',
         unit: '',
-        usage: 0,
-        loss: 0
+        usage: '',
+        loss: ''
     });
 };
 //상세삭제
