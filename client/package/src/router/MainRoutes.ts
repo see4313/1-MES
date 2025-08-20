@@ -10,7 +10,6 @@ const MainRoutes = {
             name: 'Dashboard',
             path: '/',
             component: () => import('@/views/dashboard/index.vue')
-            // component: () => import('@/views/auth/Login.vue')
         },
         {
             name: 'Typography',
