@@ -15,6 +15,7 @@ JOIN ITEM item
               ON inv.item_id = item.item_id
 WHERE 1 = 1
 AND item.item_type = '완제품'
+
 `;
   const params = [];
 
@@ -26,22 +27,33 @@ AND item.item_type = '완제품'
 };
 
 // 완제품입고 목록
-const insertList = `
-SELECT item.item_id,
-	   item.item_name,
-       item.item_type,
-       his.rsrt_id,
-	     prod.remk,
-       prod.prod_qty,
-       his.exam_id
-FROM ITEM item JOIN ITEM_EXAM_HIS his 
-                    ON item.item_id = his.item_id
-JOIN PROD_ACMSLT prod
-                    ON  prod.rsrt_id = his.rsrt_id
-WHERE 1 = 1
-AND item.item_type = '완제품'
-
+const insertList = (filters) => {
+  let sql = `
+SELECT i.exam_id,
+      i.rsrt_id,
+       i.item_id,
+       it.item_name,
+       it.item_type,
+       i.sttus,
+       i.exam_qty,
+       s.bnt,
+       s.his_id
+FROM   ITEM_EXAM_HIS i LEFT JOIN (SELECT his_id, bnt
+                      FROM   INVENTORY
+                     ) s
+                  ON   i.exam_id = s.his_id
+                       JOIN ITEM it
+                       ON   i.item_id = it.item_id
+WHERE  i.sttus = '합격'
 `;
+  const params = [];
+
+  if (filters.item_id) {
+    sql += "AND i.item_id = ?";
+    params.push(filters.item_id);
+  }
+  return { sql, params };
+};
 
 // 출고관리 목록
 const deliveryList = (filters) => {
@@ -89,9 +101,13 @@ WHERE 1=1
 `;
 
   const params = [];
-  if (filters.item_id) {
-    sql += "AND ord.item_id = ?";
-    params.push(filters.item_id);
+  if (filters.order_id) {
+    sql += "AND ord.order_id = ?";
+    params.push(filters.order_id);
+  }
+  if (filters.vend_id) {
+    sql += "AND ord.vend_id = ?";
+    params.push(filters.vend_id);
   }
   return { sql, params };
 };

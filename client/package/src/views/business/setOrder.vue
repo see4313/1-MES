@@ -37,6 +37,7 @@
                     append-inner-icon="mdi-magnify"
                     @click:append-inner="showModal2 = true"
                     v-model="selectedItem2"
+                    readonly
                 />
             </v-col>
             <v-col cols="12" sm="3" :rowspan="2" class="merged-cell">
@@ -51,6 +52,7 @@
                     append-inner-icon="mdi-magnify"
                     @click:append-inner="showModal3 = true"
                     v-model="selectedItem3"
+                    readonly
                 />
             </v-col>
 
@@ -64,6 +66,7 @@
                             append-inner-icon="mdi-calendar"
                             variant="outlined"
                             :model-value="formattedJoinDate"
+                            readonly
                         />
                     </template>
                     <v-date-picker v-model="joinDate" @change="joinMenu = false" />
@@ -79,6 +82,7 @@
                             append-inner-icon="mdi-calendar"
                             variant="outlined"
                             :model-value="formattedLeavDate"
+                            readonly
                         />
                     </template>
                     <v-date-picker v-model="leavDate" @change="leavMenu = false" />
@@ -301,8 +305,8 @@ const onSelectItem = (item) => {
     vendId.value = item.vend_id;
     //joinDate.value = dayjs(item.ordr_date).format('YYYY-MM-DD');
     //leavDate.value = dayjs(item.paprd_date).format('YYYY-MM-DD');
-    joinDate.value = dayjs(item.ordr_date).format('YYYY-MM-DD');
-    leavDate.value = dayjs(item.paprd_date).format('YYYY-MM-DD');
+    joinDate.value = new Date(item.ordr_date);
+    leavDate.value = new Date(item.paprd_date);
     remk.value = item.remk;
 };
 
@@ -319,11 +323,11 @@ const onSelectItem3 = (item) => {
 };
 
 // 주문 삭제
-const deleteOrderId = async (orderId) => {
+const deleteOrderId = async () => {
     if (!confirm('삭제하시겠습니까?')) return;
     try {
         snackBar('삭제성공', 'success');
-        await axios.delete('/api/deleteOrderId', { data: { order_id: orderId } });
+        await axios.delete('/api/deleteOrderId', { data: { order_id: selectOrder.value } });
     } catch (error) {
         snackBar('삭제실패', 'error');
     }
@@ -343,6 +347,10 @@ const deleteOrderDetail = async (itemId) => {
 
 // 업데이트
 const setOrder = async () => {
+    if (joinDate.value && leavDate.value && new Date(leavDate.value) < new Date(joinDate.value)) {
+        snackBar('납기일자는 주문일자보다 빠를 수 없습니다.', 'error');
+        return;
+    }
     try {
         let obj = {
             order_id: selectOrder.value,

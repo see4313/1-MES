@@ -12,7 +12,8 @@ router.get("/productList", async (req, res) => {
 
 // 완제품입고등록 목록
 router.get("/insertList", async (req, res) => {
-  let list = await productService.insertList();
+  const filters = req.query;
+  let list = await productService.insertList(filters);
   res.send(list);
 });
 
@@ -39,7 +40,8 @@ router.post("/productInsert", async (req, res) => {
 
 // 출고관리 목록
 router.get("/setDelivery", async (req, res) => {
-  let list = await productService.setDelivery();
+  const filters = req.query;
+  let list = await productService.setDelivery(filters);
   res.send(list);
 });
 

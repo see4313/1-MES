@@ -17,7 +17,14 @@
                 </v-col>
             </v-row>
 
-            <DataTable :value="productList" tableStyle="min-width: 50rem" @row-click="onRowClick" class="cursor-pointer">
+            <DataTable
+                :value="productList"
+                tableStyle="min-width: 50rem"
+                @row-click="onRowClick"
+                class="cursor-pointer"
+                paginator
+                :rows="5"
+            >
                 <Column field="lot_id" header="LOT"></Column>
                 <Column field="item_id" header="제품 코드"></Column>
                 <Column field="item_name" header="완제품명"></Column>
@@ -30,7 +37,11 @@
                 <Column field="wh_id" header="창고코드"></Column>
                 <Column field="safe_qty" header="안전재고량"></Column>
                 <Column field="bnt" header="현수량"></Column>
-                <Column field="psafe" header="안전대비 보유율"></Column>
+                <Column field="psafe" header="안전대비 보유율"
+                    ><template #body="slotProps">
+                        <ProgressBar :value="calcStockRate(slotProps.data)" :showValue="true" style="height: 20px" />
+                    </template>
+                </Column>
             </DataTable>
         </v-card>
     </v-row>
@@ -63,6 +74,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import SnackBar from '@/components/shared/SnackBar.vue';
 import { useSnackBar } from '@/composables/useSnackBar.js';
+import ProgressBar from 'primevue/progressbar';
 
 onMounted(() => {});
 
@@ -71,6 +83,13 @@ const showModal = ref(false); //  주문코드 모달
 const selectedItem = ref(null);
 
 const productList = ref(); // 제품목록
+
+// 안전보유율 그래프
+const calcStockRate = (row) => {
+    if (!row.safe_qty || row.safe_qty === 0) return 0;
+    // 퍼센트 계산 (보유량 / 안전재고 * 100)
+    return Math.round((row.bnt / row.safe_qty) * 100);
+};
 
 // 제품전체조회
 const Select = async () => {
