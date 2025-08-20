@@ -88,7 +88,7 @@
                 <CardHeader3
                     title="거래처 등록"
                     btn-text3="저장"
-                    btn-color3="primary"
+                    btn-color3="warning"
                     btn-variant3="flat"
                     @btn-click3="onClickCreate"
                     btn-text2="삭제"
