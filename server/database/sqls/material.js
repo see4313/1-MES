@@ -86,6 +86,8 @@ const historyList = (filters) => {
     params.push(filters.use_date);
   }
 
+  sql += " ORDER BY lh.use_date desc";
+
   return { sql, params };
 };
 
@@ -115,6 +117,32 @@ const userLogin = (filters) => {
   if (filters.emp_pw) {
     sql += " AND e.emp_id = ?";
     params.push(filters.emp_pw);
+  }
+
+  return { sql, params };
+};
+
+// 사원 모달
+const selectEmp = (filters) => {
+  let sql = `
+    SELECT emp_id
+        , emp_name
+        , status
+        , join_co
+        , leavdorm
+        , perm
+        , dept_id
+        , phone
+        , remk
+    FROM   EMPLOYEE
+    WHERE  status = '재직'
+    `;
+
+  const params = [];
+
+  if (filters.dept_id) {
+    sql += " AND dept_id = ?";
+    params.push(filters.dept_id);
   }
 
   return { sql, params };
@@ -226,22 +254,6 @@ SELECT vend_id
      , remk
 FROM   VENDOR
 WHERE  uon = 'Y'
-`;
-
-// 사원 모달용
-const selectEmp = `
-SELECT emp_id
-     , emp_name
-     , status
-     , join_co
-     , leavdorm
-     , perm
-     , dept_id
-     , phone
-     , remk
-FROM   EMPLOYEE
-WHERE  status = '재직'
-AND    dept_id = 'D002'
 `;
 
 // 품목 삭제

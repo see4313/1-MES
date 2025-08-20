@@ -80,6 +80,29 @@ const examInsert = async (data) => {
   }
 };
 
+// 제품검사 실적 등록
+const examHisInsert = async (data) => {
+  let resInfo = await mapper.query("examHisInsert", [
+    data.rsrt_id,
+    data.item_id,
+    data.emp_id,
+    data.sttus,
+    data.exam_qty,
+    data.remk,
+    JSON.stringify(data.details), // 프로시저에서 JSON 파싱
+  ]);
+
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
+};
+
 module.exports = {
   getInspItems,
   createInspItem,
@@ -89,4 +112,5 @@ module.exports = {
   examInsert,
   examDetail,
   prodList,
+  examHisInsert,
 };

@@ -78,4 +78,11 @@ router.post("/examInsert", async (req, res) => {
   res.send(result);
 });
 
+// 검사 등록
+router.post("/examHisInsert", async (req, res) => {
+  let item = req.body;
+  let result = await inspService.examHisInsert(item);
+  res.send(result);
+});
+
 module.exports = router;

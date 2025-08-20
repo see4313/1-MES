@@ -71,13 +71,12 @@
                                 >
                                     <Column field="item_id" sortable header="품목번호" style="width: 200px"></Column>
                                     <Column field="item_name" header="품목명" style="width: 200px"></Column>
-                                    <Column field="item_type" header="품목구분" style="width: 120px"></Column>
-                                    <Column field="cutd_cond" header="보관조건" style="width: 120px"></Column>
+                                    <Column field="item_type" header="품목구분" style="width: 150px"></Column>
+                                    <Column field="cutd_cond" header="보관조건" style="width: 150px"></Column>
                                     <Column field="spec" header="규격" style="width: 130px"></Column>
-                                    <Column field="conv_qty" header="환산수량" style="width: 95px; text-align: right"></Column>
-                                    <Column field="unit" header="단위" style="width: 95px"></Column>
+                                    <Column field="unit" header="단위" style="width: 100px"></Column>
                                     <Column field="exp_date" header="유효기한 일자" style="width: 125px; text-align: right"></Column>
-                                    <Column field="uon" header="사용여부" style="width: 100px; text-align: center"></Column>
+                                    <Column field="uon" header="사용여부" style="width: 120px"></Column>
                                     <Column field="remk" header="비고"></Column>
                                 </DataTable>
                             </div>
@@ -109,25 +108,20 @@
             <v-row>
                 <v-col cols="12" md="8">
                     <v-row justify="space-between" dense>
-                        <v-col cols="12" sm="3">
+                        <v-col cols="12" sm="4">
                             <v-text-field label="품목명" v-model="itemName" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="3">
+                        <v-col cols="12" sm="4">
                             <v-text-field label="품목구분" v-model="itemType" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemTypeModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="3">
+                        <v-col cols="12" sm="4">
                             <v-text-field label="규격" v-model="itemSpec" variant="outlined">
-                                <!-- 직접 입력 -->
-                            </v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="3">
-                            <v-text-field label="유효기간 일자" v-model="expDate" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
@@ -135,15 +129,15 @@
 
                     <v-row justify="space-between" dense>
                         <v-col cols="12" sm="3">
-                            <v-text-field label="환산수량" v-model="convQty" variant="outlined">
-                                <!-- 직접 입력 -->
-                            </v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="3">
                             <v-text-field label="단위" v-model="selectUnit" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemUnitModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-text-field label="유효기간 일자" v-model="expDate" variant="outlined">
+                                <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="3">
@@ -300,7 +294,9 @@ const selectItemType = ref(null); // 품목구분 선택
 const selectCutd = ref(null); // 보관조건 선택
 const selectUnit = ref(null); // 단위 선택
 
-onMounted(() => {});
+onMounted(() => {
+    select();
+});
 
 // 조회조건 초기화
 function selectReset() {
@@ -334,7 +330,6 @@ watch(selectItemList, (newVal) => {
         itemId.value = newVal.item_id;
         itemName.value = newVal.item_name;
         itemType.value = newVal.item_type;
-        convQty.value = newVal.conv_qty;
         selectUnit.value = newVal.unit;
         itemSpec.value = newVal.spec;
         itemCutd.value = newVal.cutd_cond;
@@ -383,8 +378,8 @@ const itemSave = async () => {
                 cutd_cond: itemCutd.value,
                 uon: itemUseYn.value,
                 remk: itemRemk.value,
-                conv_qty: convQty.value,
-                exp_date: expDate.value
+                exp_date: expDate.value,
+                conv_qty: itemType.value === '원재료' ? (itemSpec.value ? Number(itemSpec.value.replace(/[^0-9]/g, '')) : 0) : 1
             };
 
             let response = await axios.post('/api/itemInsert', obj).catch((err) => console.log(err));
