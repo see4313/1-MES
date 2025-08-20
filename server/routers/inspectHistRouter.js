@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const inspectHistService = require("../services/inspectHistService.js");
-
+console.log("inspectHistService = ", inspectHistService);
 // 점검이력 조회
-router.get("/", async (req, res) => {
+router.get("/inspectHist", async (req, res) => {
   try {
     const filters = {
       facility_nm: req.query.facility_nm,
@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
 });
 
 // 점검이력 등록
-router.post("/", async (req, res) => {
+router.post("/inspectHist", async (req, res) => {
   try {
     const result = await inspectHistService.insert(req.body);
     res.json({ message: "등록 성공", result });
@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
 });
 
 // 점검이력 수정
-router.put("/:id", async (req, res) => {
+router.put("/inspectHist/:id", async (req, res) => {
   try {
     const data = { ...req.body, inspect_hist_id: req.params.id };
     const result = await inspectHistService.update(data);
@@ -44,7 +44,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // 점검이력 삭제
-router.delete("/:id", async (req, res) => {
+router.delete("/inspectHist/:id", async (req, res) => {
   try {
     const result = await inspectHistService.delete(req.params.id);
     res.json({ message: "삭제 성공", result });

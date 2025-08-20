@@ -1,9 +1,8 @@
-const mariadb = require("../database/mapper.js");
+const mapper = require("../database/mapper.js");
 
 const repairHistService = {
   async getAll() {
-    const [rows] = await pool.query(mapper.selectRepairHist);
-    return rows;
+    return await mapper.query("selectRepairHist");
   },
 
   async create(data) {
@@ -19,9 +18,9 @@ const repairHistService = {
       data.REMK,
       data.EMP_ID,
       data.FACILITY_ID,
+      data.URGENCY_ID,
     ];
-    const [result] = await pool.query(mapper.insertRepairHist, params);
-    return result;
+    return await mapper.query("insertRepairHist", params);
   },
 
   async update(id, data) {
@@ -36,15 +35,14 @@ const repairHistService = {
       data.REMK,
       data.EMP_ID,
       data.FACILITY_ID,
+      data.URGENCY_ID,
       id,
     ];
-    const [result] = await pool.query(mapper.updateRepairHist, params);
-    return result;
+    return await mapper.query("updateRepairHist", params);
   },
 
   async remove(id) {
-    const [result] = await pool.query(mapper.deleteRepairHist, [id]);
-    return result;
+    return await mapper.query("deleteRepairHist", [id]);
   },
 };
 

@@ -194,10 +194,10 @@
     <ModalSearch
         :visible="failTypeModal"
         title="고장유형"
-        idField="fail_type_cd"
+        idField="code"
         :columns="[
-            { key: 'fail_type_cd', label: '코드' },
-            { key: 'fail_type_nm', label: '명' }
+            { key: 'code', label: '코드' },
+            { key: 'name', label: '고장유형' }
         ]"
         :fetchData="fetchFailureTypes"
         @select="onSelectFailureType"
@@ -444,31 +444,4 @@ const itemDelete = async () => {
         showSnack('삭제 실패', 'error');
     }
 };
-
-const data = ref([
-    {
-        facility_id: 'FAC250818-0002',
-        facility_nm: '냉동기-002',
-        facility_type_name: '발효',
-        fail_type_nm: '전기 이상',
-        urgency_name: '긴급',
-        fail_dt: '2025-08-18',
-        repair_dt: '',
-        emp_name: '김이박',
-        repair_status: '미수리',
-        remk: '123'
-    },
-    {
-        facility_id: 'FAC250818-0004',
-        facility_nm: '냉동기-005',
-        facility_type_name: '냉동',
-        fail_type_nm: '센서 오류',
-        urgency_name: '보통',
-        fail_dt: '2025-08-19',
-        repair_dt: '2025-08-20',
-        emp_name: '김테스트111',
-        repair_status: '완료',
-        remk: 'ㅋㅋㅋㅋㅋ'
-    }
-]);
 </script>
