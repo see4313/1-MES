@@ -3,7 +3,7 @@ const router = express.Router();
 const service = require("../services/repairHistService");
 
 // 전체 조회
-router.get("/api/repairHist", async (req, res) => {
+router.get("/repairHist", async (req, res) => {
   try {
     const result = await service.getAll();
     res.json(result);
@@ -13,7 +13,7 @@ router.get("/api/repairHist", async (req, res) => {
 });
 
 // 등록
-router.post("/api/repairHist", async (req, res) => {
+router.post("/repairHist", async (req, res) => {
   try {
     const result = await service.create(req.body);
     res.json({ success: true, result });
@@ -23,7 +23,7 @@ router.post("/api/repairHist", async (req, res) => {
 });
 
 // 수정
-router.put("/api/repairHist/:id", async (req, res) => {
+router.put("/repairHist/:id", async (req, res) => {
   try {
     const result = await service.update(req.params.id, req.body);
     res.json({ success: true, result });
@@ -33,7 +33,7 @@ router.put("/api/repairHist/:id", async (req, res) => {
 });
 
 // 삭제
-router.delete("/api/repairHist/:id", async (req, res) => {
+router.delete("/repairHist/:id", async (req, res) => {
   try {
     const result = await service.remove(req.params.id);
     res.json({ success: true, result });
