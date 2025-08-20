@@ -47,10 +47,10 @@
                         <v-text-field variant="outlined" label="창고명" v-model="searchForm.warehouseName" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="온도" v-model="searchForm.temp" />
+                        <v-text-field variant="outlined" label="온도(℃)" v-model="searchForm.temp" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="습도" v-model="searchForm.rh" />
+                        <v-text-field variant="outlined" label="습도(%)" v-model="searchForm.rh" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="창고위치" v-model="searchForm.warehouseLoca" />
@@ -79,8 +79,8 @@
                         <Column field="warehouseId" sortable header="창고번호" />
                         <Column field="warehouseName" header="창고명" />
                         <Column field="useYn" header="사용여부" />
-                        <Column field="temp" header="온도" />
-                        <Column field="rh" header="습도" />
+                        <Column field="temp" header="온도(℃)" />
+                        <Column field="rh" header="습도(%)" />
                         <Column field="warehouseLoca" header="창고위치" />
                         <Column field="remark" header="비고" />
                     </DataTable>
@@ -149,10 +149,10 @@
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="온도" v-model="createForm.temp" />
+                        <v-text-field variant="outlined" label="온도(℃)" v-model="createForm.temp" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="습도" v-model="createForm.rh" />
+                        <v-text-field variant="outlined" label="습도(%)" v-model="createForm.rh" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="비고" v-model="createForm.remark" />
