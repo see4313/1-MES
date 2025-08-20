@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const inspectHistService = require("../services/inspectHistService.js");
-console.log("inspectHistService = ", inspectHistService);
 // 점검이력 조회
 router.get("/inspectHist", async (req, res) => {
   try {
