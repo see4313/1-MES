@@ -240,7 +240,7 @@ const clearSelectedProd = () => {
                     class="ma-1"
                     prepend-icon="mdi-cog"
                   >
-                    공정 순서: {{ selectedProd.opNo }}
+                    {{ "총 " + selectedProd.lastOpNo + "개의 공정 중 " + selectedProd.currentOpNo + "번째 공정" }}
                   </v-chip>
                 </v-col>
 
