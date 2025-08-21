@@ -359,7 +359,7 @@ const itemSave = async () => {
         !itemType.value ||
         !itemSpec.value ||
         !expDate.value ||
-        !convQty.value ||
+        // !convQty.value ||
         !selectUnit.value ||
         !itemCutd.value ||
         !itemUseYn.value

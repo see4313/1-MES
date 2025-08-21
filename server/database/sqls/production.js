@@ -141,12 +141,11 @@ const selectStatusZeroProductionList = () => {
       ON prod.prcs_number = cur.prcs_number
     AND pid.item_id     = cur.item_id
     JOIN (
-        SELECT prcs_number, item_id, MAX(op_no) AS lastOpNo
+        SELECT item_id, MAX(op_no) AS lastOpNo
         FROM PROCESS_ROUTING
         GROUP BY item_id
     ) last
-      ON prod.prcs_number = last.prcs_number
-    AND pid.item_id     = last.item_id
+      ON pid.item_id     = last.item_id
     JOIN PROD_INSTRUCT pi
       ON pid.instruct_no = pi.instruct_no
     WHERE prod.status = 0
@@ -176,12 +175,31 @@ const selectFacilityListByName = (fNumber) => {
 }
 
 const insertProdACMSLT = (data) => {
+  const { prodNo,
+          itemId,
+          empNo,
+          facilityNo,
+          inputQty,
+          inferQty,
+          prodQty,
+          currOpNo,
+          remk
+        } = data;
 
   const sql = `
-  
+    call add_prod_acmslt(?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  params = [];
+  params = [  prodNo,
+              itemId,
+              empNo,
+              facilityNo,
+              inputQty,
+              inferQty,
+              prodQty,
+              currOpNo,
+              remk
+          ];
 
   return { sql, params };
 };

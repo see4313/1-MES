@@ -16,7 +16,7 @@ const queryInstructionNo = ref(''); // 생산 지시 번호 검색
 const instructionList = ref([]); // 생산 지시건 조회
 const selectedProductList = ref([]); // 선택돤 상품 리스트
 const selectedProductType = ref([]); // 선택된 품목 유형
-const selectedInstructionStatus = ref(['0']); // 선택된 생산 지시 상태
+const selectedInstructionStatus = ref([]); // 선택된 생산 지시 상태
 const expandedRows = ref({}); // row 확장 상태
 const detailCache = ref({}); // { [instructNo]: DetailRow[] }
 const detailLoading = ref(new Set()); // 로딩 중인 instructNo
@@ -91,8 +91,10 @@ const productType = ref([
 
 // 지시 상태
 const instructionStatus = ref([
-    { key: '생산 중', value: '0' },
-    { key: '생산 완료', value: '1' }
+  { key: "생산 중", value: "0" },
+  { key: "생산 완료", value: "1" },
+  { key: "중단됨", value: "-1" },
+  { key: "전체 중단됨", value: "-2" }
 ]);
 
 // 지시 상태 뱃지

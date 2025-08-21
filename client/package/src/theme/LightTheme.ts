@@ -1,48 +1,39 @@
 import type { ThemeTypes } from '@/types/themeTypes/ThemeType';
 
 const BLUE_THEME: ThemeTypes = {
-  name: 'BLUE_THEME',
-  dark: false,
-  variables: {
-    'border-color': '#E8EEF3',
-    'border-opacity': 1
-  },
-  colors: {
-    // 고정: 주색
-    primary:   '#914900',
+    name: 'CROISSANT_THEME',
+    dark: false,
+    variables: {
+        'border-color': '#e5d5c5', // 크로와상 반죽 느낌의 옅은 베이지
+        'border-opacity': 1
+    },
+    colors: {
+        primary: '#a47148',       // 구운 크로와상 갈색
+        secondary: '#d9b08c',     // 고소한 버터 베이지
+        info: '#c19a6b',          // 밀가루-누룽지 중간색
+        success: '#5a7d4e',       // 진한 카라멜 브라운
+        warning: '#e6c07b',       // 옅은 꿀빛
+        error: '#b84a3c',         // 구운 붉은기 갈색 (타는 듯한 느낌)
+        
+        lightprimary: '#f1e4d2',  // 밀가루 베이스
+        lightsecondary: '#f6ede4',
+        lightsuccess: '#e9dbc9',
+        lighterror: '#f4d6d2',
+        lightinfo: '#f2e6d9',
+        lightwarning: '#f9f1dd',
 
-    // 밝고 트렌디한 보조 팔레트
-    secondary: '#2ED3B7',
-    // 변경 포인트: 스카이 대신 퍼윈클(인디고 톤) — 검은 글씨와 조합 우수
-    info:      '#C7D2FE',  // periwinkle/indigo-200
-    success:   '#22C55E',
-    warning:   '#FDB022',
-    error:     '#F97066',
-
-    // 라이트 톤
-    lightprimary:   '#F8EADF',
-    lightsecondary: '#E8FBF6',
-    lightsuccess:   '#EAFBF2',
-    lighterror:     '#FFE7E4',
-    // 변경 포인트: 라이트 인디고
-    lightinfo:      '#EEF2FF',
-    lightwarning:   '#FFF4D6',
-
-    // 텍스트 & 베이스
-    textPrimary:   '#0F172A',
-    textSecondary: '#667085',
-    borderColor:   '#E8EEF3',
-    containerBg:   '#FFFFFF',
-    background:    '#F9FAFB',
-    hoverColor:    '#F3F4F6',
-    surface:       '#FFFFFF',
-
-    // 뉴트럴
-    grey100: '#F2F4F7',
-    grey200: '#1F2937',
-    light:   '#F8FAFC',
-    muted:   '#98A2B3'
-  }
+        textPrimary: '#3d2b1f',   // 진한 초콜릿 브라운 (글씨 가독성)
+        textSecondary: '#7a6a58', // 옅은 모카
+        borderColor: '#e5d5c5',   // 베이지 톤 테두리
+        containerBg: '#ffffff',   // 카드/컨테이너 배경
+        background: '#faf6f1',    // 화면 전체 배경 (따뜻한 크림톤)
+        hoverColor: '#f5ede6',    // hover 시 은은한 톤
+        surface: '#fff',
+        grey100: '#ede8e3',       // 연한 회갈색
+        grey200: '#5c4a3a',       // 진한 브라운
+        light: '#faf6f1',
+        muted: '#8c7a6b'          // 부드러운 카푸치노 톤
+    }
 };
 
 export { BLUE_THEME };
