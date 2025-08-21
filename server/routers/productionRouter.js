@@ -19,6 +19,18 @@ router.get("/prod/itemlist/:type", async (req, res) => {
   }
 });
 
+// getItemList -- 품목 리스트 조회
+router.get("/prod/prcsitemlist/:type", async (req, res) => {
+  // type = 'notmaterial' : 원재료 빼고 , semi : 반제품, finish : 완제품,
+  const { type } = req.params;
+  try {
+    const result = await itemService.getPrcsItemList(type);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 // 공정흐름도 미등록 품목 리스트 조회
 router.get("/prod/noprcsrouteritemlist", async (req, res) => {
   try {
