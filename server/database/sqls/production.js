@@ -115,20 +115,21 @@ const selectDetailInstruction = (query) => {
 
 const selectStatusZeroProductionList = () => {
   const sql = `
-   SELECT
-   		pid.instruct_no 	  AS instructNo,
-   		prod.deta_instruct_no AS detaInstructNo,
-        prod.prod_no          AS prodNo,
-        pid.item_id           AS itemId,
-        i.item_type           AS itemType,
-        i.item_name           AS itemName,
-        prod.prcs_number      AS prcsNumber,
-        prcsr.op_no			  AS opNo,
-        prcs.prcs_name		  AS prcsName,
-        pi.instruct_datetime  AS instructDatetime,
-        prod.drct_qty         AS drctQty,
-        prod.status,
-        prod.remk
+    SELECT
+      pid.instruct_no        AS instructNo,
+      prod.deta_instruct_no  AS detaInstructNo,
+      prod.prod_no           AS prodNo,
+      pid.item_id            AS itemId,
+      i.item_type            AS itemType,
+      i.item_name            AS itemName,
+      prod.prcs_number       AS prcsNumber,
+      cur.op_no              AS currentOpNo,
+      last.lastOpNo          AS lastOpNo,
+      prcs.prcs_name         AS prcsName,
+      pi.instruct_datetime   AS instructDatetime,
+      prod.drct_qty          AS drctQty,
+      prod.status,
+      prod.remk
     FROM PRODUCTION prod
     JOIN PROD_INSTRUCT_DETAIL pid
       ON prod.deta_instruct_no = pid.deta_instruct_no
@@ -136,13 +137,20 @@ const selectStatusZeroProductionList = () => {
       ON pid.item_id = i.item_id
     JOIN PROCESS prcs
       ON prod.prcs_number = prcs.prcs_number
-	JOIN PROCESS_ROUTING prcsr
-	  ON prod.prcs_number = prcsr.prcs_number
-	 AND pid.item_id     = prcsr.item_id
-	JOIN PROD_INSTRUCT pi
-	  ON pid.instruct_no = pi.instruct_no
+    JOIN PROCESS_ROUTING cur
+      ON prod.prcs_number = cur.prcs_number
+    AND pid.item_id     = cur.item_id
+    JOIN (
+        SELECT prcs_number, item_id, MAX(op_no) AS lastOpNo
+        FROM PROCESS_ROUTING
+        GROUP BY item_id
+    ) last
+      ON prod.prcs_number = last.prcs_number
+    AND pid.item_id     = last.item_id
+    JOIN PROD_INSTRUCT pi
+      ON pid.instruct_no = pi.instruct_no
     WHERE prod.status = 0
-    ORDER BY prod.prod_no desc;
+    ORDER BY prod.prod_no DESC
  `;
   return { sql };
 };
