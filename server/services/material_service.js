@@ -92,7 +92,6 @@ const modifyItem = async (item) => {
     "cutd_cond",
     "uon",
     "remk",
-    "conv_qty",
     "exp_date",
     "item_id",
   ]);

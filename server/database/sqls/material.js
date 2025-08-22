@@ -149,7 +149,6 @@ const selectEmp = (filters) => {
   const params = [];
   console.log(filters.dept_id);
   if (filters.dept_id) {
-
     sql += " AND dept_id = ?";
     params.push(filters.dept_id);
   }
@@ -274,7 +273,7 @@ WHERE item_id = ?
 // 품목 수정
 const itemUpdate = `
 UPDATE ITEM
-SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?, conv_qty = ?, exp_date = ?
+SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?, exp_date = ?
 WHERE  item_id = ?
 `;
 

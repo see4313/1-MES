@@ -24,10 +24,17 @@ const asString = (q, name) => {
 };
 
 const insertProdInstruct = (data) => {
-  const { itemType, startDate, goalDate, remark, details } = data;
+  const { itemType, startDate, goalDate, remark, details, bomDetails } = data;
   const type = typeMap[itemType];
-  const sql = `call add_prod_instruct(?, ?, ?, ?, ?, @out_no)`;
-  const params = [type, startDate, goalDate, remark, JSON.stringify(details)];
+  const sql = `call add_prod_instruct(?, ?, ?, ?, ?, ?, @out_no)`;
+  const params = [
+    type,
+    startDate,
+    goalDate,
+    remark,
+    JSON.stringify(details),
+    JSON.stringify(bomDetails),
+  ];
   return { sql, params };
 };
 
@@ -218,6 +225,32 @@ const insertProdACMSLT = (data) => {
   return { sql, params };
 };
 
+const bomItemList = (filters) => {
+  let sql = `
+    SELECT bd.item_id,
+           b.item_id as parent_item,
+           i.item_name,
+           i.conv_qty,
+           bd.usage,
+           bd.unit,
+           bd.loss
+    FROM   BOM_DETAIL bd JOIN BOM b
+					               ON   bd.bom_number = b.bom_number
+                         JOIN ITEM i
+                         ON   bd.item_id = i.item_id
+    WHERE  1 = 1
+  `;
+
+  const params = [];
+
+  if (filters.item_id) {
+    sql += " AND b.item_id = ?";
+    params.push(filters.item_id);
+  }
+
+  return { sql, params };
+};
+
 module.exports = {
   insertProdInstruct,
   selectInstructionList,
@@ -225,4 +258,5 @@ module.exports = {
   selectStatusZeroProductionList,
   selectFacilityListByName,
   insertProdACMSLT,
+  bomItemList,
 };
