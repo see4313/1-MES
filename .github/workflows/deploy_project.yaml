@@ -43,13 +43,13 @@ jobs:
     # 서버에 접속하여 배포 실행          
     - name: SSH into server and deploy
       run: |
-        scp   -r -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} client/dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.SSH_USER }}/1-MES/server/public/
+        scp   -r -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} client/package/dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.SSH_USER }}/1-MES/server/public/
         ssh -vvv -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/1-MES
             git pull origin main
             cd server
             npm ci            
-            pm2 restart app || pm2 start app.js --name "app"
+            pm2 restart app || pm2 start app.js -- production --name "app"  
             pm2 save
           EOF
 
