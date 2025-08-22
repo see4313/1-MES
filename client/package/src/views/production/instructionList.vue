@@ -91,10 +91,10 @@ const productType = ref([
 
 // 지시 상태
 const instructionStatus = ref([
-  { key: "생산 중", value: "0" },
-  { key: "생산 완료", value: "1" },
-  { key: "중단됨", value: "-1" },
-  { key: "전체 중단됨", value: "-2" }
+    { key: '생산 중', value: '0' },
+    { key: '생산 완료', value: '1' },
+    { key: '일부 생산 실패', value: '-1' },
+    { key: '생산 실패', value: '-2' }
 ]);
 
 // 지시 상태 뱃지
@@ -171,7 +171,7 @@ const formatNumber = (n) => {
                     <v-col cols="6" class="px-2 d-flex align-center">
                         <v-text-field label="생산 지시 번호" v-model="queryInstructionNo" variant="outlined" hide-details>
                             <template #append-inner>
-                                <v-icon @click="getInstructionList" class="cursor-pointer">mdi-magnify</v-icon>
+                                <v-icon @click="getInstructionList">mdi-magnify</v-icon>
                             </template>
                         </v-text-field>
                     </v-col>
@@ -230,12 +230,21 @@ const formatNumber = (n) => {
                         <div class="d-flex flex-column">
                             <label class="font-weight-bold text-body-2">상태</label>
 
-                            <v-chip-group v-model="selectedInstructionStatus" column multiple selected-class="active">
+                            <v-chip-group v-model="selectedInstructionStatus" column multiple selected-class>
                                 <v-chip
                                     v-for="status in instructionStatus"
                                     :key="status.key"
                                     :value="status.value"
                                     variant="outlined"
+                                    :color="
+                                        status.value == 1
+                                            ? 'success'
+                                            : status.value == 0
+                                              ? 'primary'
+                                              : status.value == -1
+                                                ? 'warning'
+                                                : 'error'
+                                    "
                                     pill
                                     size="small"
                                 >
@@ -279,7 +288,14 @@ const formatNumber = (n) => {
                     />
                     <Column header="지시 상태" headerClass="th th-center" bodyClass="td td-center" style="width: 8rem">
                         <template #body="{ data }">
-                            <v-chip size="x-small" variant="flat" :color="statusBadge[String(data.status)]?.color || 'grey'" label>
+                            <v-chip
+                                size="x-small"
+                                variant="outlined"
+                                :color="
+                                    data.status == 1 ? 'success' : data.status == 0 ? 'primary' : data.status == -1 ? 'warning' : 'error'
+                                "
+                                label
+                            >
                                 {{ statusBadge[String(data.status)]?.label }}
                             </v-chip>
                         </template>
@@ -346,7 +362,7 @@ const formatNumber = (n) => {
                                         bodyClass="td ellipsis"
                                         style="width: 18rem"
                                     />
-                                    <Column header="지시 수량" headerClass="th th-right" bodyClass="td td-right" style="width: 12rem">
+                                    <Column header="지시 수량" headerClass="th th-right" bodyClass="td td-right" style="width: 8rem">
                                         <template #body="{ data: d }">
                                             <span class="nowrap"
                                                 >{{ formatNumber(d.goalQty) }}<span v-if="d.unit"> {{ d.unit }}</span></span
@@ -354,15 +370,29 @@ const formatNumber = (n) => {
                                         </template>
                                     </Column>
 
-                                    <Column header="상태" headerClass="th th-center" bodyClass="td td-center" style="width: 8rem">
+                                    <Column header="현재 생산 수량" headerClass="th th-right" bodyClass="td td-right" style="width: 8rem">
+                                        <template #body="{ data: d }">
+                                            <span class="nowrap"
+                                                >{{ formatNumber(d.currProdQty) }}<span v-if="d.unit"> {{ d.unit }}</span></span
+                                            >
+                                        </template>
+                                    </Column>
+
+                                    <Column header="상태" headerClass="th th-center" bodyClass="td td-center" style="width: 6rem">
                                         <template #body="{ data: d }">
                                             <v-chip
                                                 size="x-small"
-                                                variant="flat"
-                                                :color="statusBadge[String(d.status)]?.color || 'grey'"
+                                                variant="outlined"
+                                                :color="
+                                                    d.prcsName === '생산 완료'
+                                                        ? 'success'
+                                                        : d.prcsName === '전량 폐기'
+                                                          ? 'error'
+                                                          : 'primary'
+                                                "
                                                 label
                                             >
-                                                {{ statusBadge[String(d.status)]?.label }}
+                                                {{ d.prcsName }}
                                             </v-chip>
                                         </template>
                                     </Column>
