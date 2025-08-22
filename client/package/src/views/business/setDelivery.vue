@@ -56,8 +56,9 @@
                     </template></Column
                 >
                 <Column field="vend_name" header="업체명"></Column>
-                <Column field="" header="기납기량"></Column>
-                <Column field="" header="미납기량"></Column>
+                <Column field="order_qty" header="주문수량"></Column>
+                <Column field="delivered_qty" header="기납기량"></Column>
+                <Column field="overdue_qty" header="미납기량"></Column>
             </DataTable>
         </v-card>
 
@@ -110,7 +111,11 @@
             { key: 'order_id', label: '주문번호' },
             { key: 'vend_name', label: '업체명' },
             { key: 'emp_name', label: '담당자' },
-            { key: 'ordr_date', label: '주문일자' }
+            {
+                key: 'ordr_date',
+                label: '주문일자',
+                format: (value) => dayjs(value).format('YYYY-MM-DD')
+            }
         ]"
         :fetchData="fetchItems"
         :pageSize="5"
@@ -185,11 +190,18 @@ const delUpdate = async () => {
         }
         if (!confirm('출고하시겠습니까?')) return;
 
+        console.log(selectItemList.value);
+
+        const emp_id = sessionStorage.getItem('userId'); //세션에서 사원번호 가져옴
+
         let obj = selectItemList.value.map((item) => ({
             lot_id: item.lot_id,
-            dlivy_qty: item.qty
+            dlivy_qty: item.qty,
+            detail_id: item.detail_id,
+            emp_id: emp_id
         }));
 
+        // console.log(obj);
         let response = await axios.post('/api/productUpdate', obj);
 
         if (response.data.result) {
@@ -215,7 +227,10 @@ watch(setorderId, async (newVal) => {
                 item_id: itemId.value
             };
             const response = await axios.get('/api/deliveryList', { params });
-            deliveryList.value = response.data;
+            deliveryList.value = response.data.map((item) => ({
+                ...item,
+                detail_id: setorderId.value.detail_id // 상위 테이블에서 가져온 detail_id 매핑
+            }));
         } catch (error) {
             snackBar('조회실패', 'error');
         }
@@ -240,7 +255,11 @@ const Select = async () => {
 const fetchItems = async () => {
     try {
         const response = await axios.get('/api/orderModal');
-        return response.data;
+        const data = response.data.map((item) => ({
+            ...item,
+            ordr_date: dayjs(item.ordr_date).format('YYYY-MM-DD')
+        }));
+        return data;
     } catch (error) {
         snackBar('조회실패', 'error');
         return [];

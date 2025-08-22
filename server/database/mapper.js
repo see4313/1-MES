@@ -50,7 +50,7 @@ const query = async (alias, values) => {
       sql = sqlEntry;
       params = values || [];
     }
-
+    console.error(sql, params);
     let result = await conn.query(sql, params);
     return result;
   } catch (e) {

@@ -114,9 +114,10 @@
                                     min="0"
                                     v-model="data[field]"
                                     class="custom-input"
-                                /> </template
-                        ></Column>
-                        <Column field="amt" header="금액" style="width: 120px">
+                                />
+                            </template>
+                        </Column>
+                        <Column field="amt" header="금액 (원)" style="width: 120px">
                             <template #editor="{ data, field }">
                                 <v-text-field
                                     type="number"
@@ -127,9 +128,18 @@
                                     min="0"
                                     v-model="data[field]"
                                     class="custom-input"
-                                /> </template
-                        ></Column>
-                        <Column field="allamt" header="총금액"></Column>
+                                    @input="(e) => formatCurrency(e, data, field)"
+                                />
+                            </template>
+                            <template #body="{ data }">
+                                {{ data.amt ? new Intl.NumberFormat('ko-KR').format(data.amt) + '원' : '' }}
+                            </template></Column
+                        >
+                        <Column field="allamt" header="총금액 (원)">
+                            <template #body="{ data }">
+                                {{ data.allamt ? new Intl.NumberFormat('ko-KR').format(data.allamt) + '원' : '' }}
+                            </template></Column
+                        >
                     </DataTable>
                 </div>
             </v-col>
@@ -230,6 +240,18 @@ const selectedItem2 = ref(null);
 const selectedItem3 = ref(null);
 const empId = ref(null);
 const vendId = ref(null);
+
+// 입력 할 때 , + 원으로 출력됨
+const formatCurrency = (event, data, field) => {
+    let value = event.target.value.replace(/[^0-9]/g, ''); // 숫자만 추출
+    if (value === '') {
+        data[field] = 0;
+        event.target.value = '';
+        return;
+    }
+    data[field] = Number(value); // 실제 값은 숫자로 유지
+    event.target.value = new Intl.NumberFormat('ko-KR').format(value) + '원'; // 입력창 표시
+};
 
 // DB에서 리스트 가져오기
 const fetchItems = async () => {
