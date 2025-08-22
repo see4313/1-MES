@@ -266,7 +266,7 @@ const onClickSave = async () => {
     const payload = { ...createForm.value };
 
     if (!isUpdate) {
-        const ok = window.confirm('정말 등록하시겠습니까?');
+        const ok = window.confirm('등록하시겠습니까?');
         if (!ok) return; // 취소하면 요청 중단
     }
 
@@ -332,7 +332,7 @@ const onClickDel = async () => {
     const id = selectedRow.value?.prscNo;
     console.log('삭제 시도 ID:', id, selectedRow.value);
     if (!id) return notify('삭제할 공정을 선택해주세요.', 'warning');
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+    if (!confirm('삭제하시겠습니까?')) return;
 
     try {
         const { data } = await axios.delete('/api/processDelete', { data: { prscNo: id } });

@@ -540,7 +540,7 @@ const notify = (message, color = 'success') => {
 const onClickDel = async () => {
     const id = selectedRow.value?.empId;
     if (!id) return notify('삭제할 사원을 선택해주세요.', 'warning');
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+    if (!confirm('삭제하시겠습니까?')) return;
 
     try {
         const { data } = await axios.delete('/api/empDelete', { data: { emp_id: id } });
@@ -573,7 +573,7 @@ async function onClickSave() {
         leavDate: toDateStr(createForm.value.leavDate)
     };
     if (!isUpdate) {
-        const ok = window.confirm('정말 등록하시겠습니까?');
+        const ok = window.confirm('등록하시겠습니까?');
         if (!ok) return; // 취소하면 요청 중단
     }
 
