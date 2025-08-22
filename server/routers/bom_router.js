@@ -1,3 +1,4 @@
+// server/routes/bom.js
 const express = require("express");
 const router = express.Router();
 const bomService = require("../services/bom_service");
@@ -46,10 +47,25 @@ router.get(
   })
 );
 
+/* ================ 다음 버전 라벨 조회 ================ */
+// GET /bom/maxVersion?itemId=ITEM001
+router.get(
+  "/bom/maxVersion",
+  asyncHandler(async (req, res) => {
+    const { itemId } = req.query || {};
+    if (!itemId)
+      return res.status(400).json({ message: "itemId는 필수입니다." });
+
+    const ver = await bomService.nextVerLabelByItemId(itemId); // "verN"
+    res.status(200).json({ ver });
+  })
+);
+
 /* ================ BOM 상세 삭제 ================ */
-// DELETE /bom/:bomNumber/details/:bomDetailNo
-router.delete("/bom/:bomNumber/details/:detailCode", async (req, res) => {
-  try {
+// DELETE /bom/:bomNumber/details/:detailCode
+router.delete(
+  "/bom/:bomNumber/details/:detailCode",
+  asyncHandler(async (req, res) => {
     const { bomNumber, detailCode } = req.params;
     if (!bomNumber || !detailCode) {
       return res.status(400).json({ message: "파라미터 누락" });
@@ -59,20 +75,18 @@ router.delete("/bom/:bomNumber/details/:detailCode", async (req, res) => {
     return r.deleted
       ? res.json({ message: "삭제 완료" })
       : res.status(404).json({ message: "삭제 대상 없음" });
-  } catch (e) {
-    console.error("delete detail error:", e);
-    return res.status(500).json({ message: "삭제 중 오류" });
-  }
-});
+  })
+);
 
 /* ================ BOM 헤더 등록/수정 ================ */
-// POST /bomInsert  (헤더 등록)
+// POST /bomInsert  (헤더 등록: 서버가 verN 자동 생성)
 router.post(
   "/bomInsert",
   asyncHandler(async (req, res) => {
     try {
       const out = await bomService.insertBomHeader(req.body || {});
-      res.status(200).json(out);
+      // out: { inserted: true/false, ver: "verN" }
+      return res.status(201).json(out);
     } catch (err) {
       if (err.status)
         return res
@@ -83,7 +97,7 @@ router.post(
   })
 );
 
-// PUT /bom/:bomNumber  (헤더 수정)
+// PUT /bom/:bomNumber  (헤더 수정: 전달된 ver 문자열 반영)
 router.put(
   "/bom/:bomNumber",
   asyncHandler(async (req, res) => {
@@ -104,7 +118,6 @@ router.put(
 );
 
 /* ================ 저장(프로시저) ================ */
-// POST /bom  (신규: 헤더 필수, 디테일 옵션)
 router.post(
   "/bom",
   asyncHandler(async (req, res) => {
@@ -117,11 +130,11 @@ router.post(
       header,
       details: details ?? [],
     });
-    res.status(200).json(out); // { bom_number, detail_rows }
+    // out: { bom_number, detail_rows, ver? }
+    res.status(201).json(out);
   })
 );
 
-// POST /bom/:bomNumber/details  (기존 BOM 디테일 추가/수정)
 router.post(
   "/bom/:bomNumber/details",
   asyncHandler(async (req, res) => {
@@ -144,18 +157,18 @@ router.post(
   })
 );
 
-// 삭제
-router.delete("/bom/:bomNumber", async (req, res) => {
-  const { bomNumber } = req.params;
-  try {
+/* ================ BOM 삭제 ================ */
+router.delete(
+  "/bom/:bomNumber",
+  asyncHandler(async (req, res) => {
+    const { bomNumber } = req.params;
     const result = await bomService.deleteBom(bomNumber);
     if (result.deleted) {
       res.json({ message: "BOM 삭제 완료" });
     } else {
       res.status(404).json({ message: "삭제 대상이 없습니다." });
     }
-  } catch (e) {
-    res.status(500).json({ message: "BOM 삭제 중 오류가 발생했습니다." });
-  }
-});
+  })
+);
+
 module.exports = router;

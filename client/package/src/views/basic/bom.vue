@@ -224,11 +224,11 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="품목명" v-model="createForm.itemName" />
+                        <v-text-field variant="outlined" label="품목명" v-model="createForm.itemName" readonly />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="버전" v-model="createForm.ver" />
+                        <v-text-field variant="outlined" label="버전" v-model="createForm.ver" readonly />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -348,7 +348,7 @@ import CardHeader3 from '@/components/production/card-header-btn3k.vue';
 import CardHeader from '@/components/production/card-header-btn2k.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, watch } from 'vue';
 import dayjs from 'dayjs';
 
 /* ===== 유틸 ===== */
@@ -459,6 +459,24 @@ const fetchItemList = async (q = '') => {
     }
 };
 
+// 다음 버전 라벨("verN") 조회
+const fetchNextVerByItem = async (itemId) => {
+    if (!itemId) return '';
+    try {
+        const { data } = await axios.get('/api/bom/maxVersion', { params: { itemId } });
+        return String(data?.ver ?? '').trim(); // ex) "ver4"
+    } catch (e) {
+        console.warn('fetchNextVerByItem error:', e?.message || e);
+        return '';
+    }
+};
+
+// itemId 기준 다음 버전 라벨을 createForm.ver에 반영
+const setNextVerLabel = async (itemId) => {
+    const label = await fetchNextVerByItem(itemId);
+    createForm.value.ver = label; // 화면/저장 모두 "verN"
+};
+
 /* ===== 모달 선택 핸들러 ===== */
 const onSelectBom = async (row) => {
     if (!row) return (showBomModal.value = false);
@@ -469,7 +487,7 @@ const onSelectBom = async (row) => {
         id: bomNumber, // 여기 BOM 번호 저장
         itemId: row.item_id ?? row.itemId ?? '',
         itemName: row.item_name ?? row.itemName ?? '',
-        ver: row.ver ?? 1,
+        ver: row.ver ?? '', // ← 문자열 라벨 그대로
         startDate: row.start_date ? asDate(row.start_date) : null,
         endDate: row.end_date ? asDate(row.end_date) : null,
         useYn: row.use_yn ?? row.useYn ?? 'Y',
@@ -490,7 +508,7 @@ const onSelectBom = async (row) => {
     }
 };
 
-const onSelectItem = (row) => {
+const onSelectItem = async (row) => {
     const id = row?.item_id ?? '';
     const name = row?.item_name ?? '';
     const spec = row?.spec ?? '';
@@ -505,6 +523,9 @@ const onSelectItem = (row) => {
         // 헤더(등록 폼)
         createForm.value.itemId = id;
         createForm.value.itemName = name;
+
+        // 선택 품목의 다음 버전 라벨 "verN" 자동 세팅
+        await setNextVerLabel(id);
     } else if (itemModalTarget.value === 'detail') {
         // 상세 행 선택
         if (itemTargetRow.value) {
@@ -550,7 +571,7 @@ const onClickSave = async () => {
     // 공통 payload
     const payload = {
         itemId: createForm.value.itemId,
-        ver: createForm.value.ver,
+        ver: createForm.value.ver, // "verN" 라벨
         startDate: toDateStr(createForm.value.startDate),
         endDate: toDateStr(createForm.value.endDate),
         use: createForm.value.useYn,
@@ -573,8 +594,15 @@ const onClickSave = async () => {
             });
             notify('수정이 완료되었습니다.');
         } else {
-            // 신규 등록 (헤더만)
-            await axios.post('/api/bomInsert', payload);
+            // 신규 등록 (헤더만) - 서버가 verN 자동 생성(보내더라도 서버가 덮어쓰도록 설계)
+            await axios.post('/api/bomInsert', {
+                itemId: createForm.value.itemId,
+                use: createForm.value.useYn,
+                // ver: createForm.value.ver, // 보내도 되고 안 보내도 됨(서버 자동)
+                startDate: payload.startDate,
+                endDate: payload.endDate,
+                remk: payload.remk
+            });
             notify('BOM 등록이 완료되었습니다.');
             resetCreateForm(); // 기존 동작 유지
         }
@@ -655,8 +683,7 @@ const deleteRow = async (row) => {
     }
 };
 
-/* ===== 상세 등록(저장) =====
- */
+/* ===== 상세 등록(저장) ===== */
 const validateDetailRows = (rows = detailRows.value) => {
     const list = Array.isArray(rows) ? rows : [];
     for (let i = 0; i < list.length; i++) {
@@ -716,7 +743,6 @@ const onClickDetailInsert = async () => {
                 }))
             };
 
-            console.log(body);
             await axios.post(`/api/bom/${enc(createForm.value.id)}/details`, body);
 
             // 재조회 및 안내
@@ -737,7 +763,7 @@ const onClickDetailInsert = async () => {
             const header = {
                 item_id: createForm.value.itemId,
                 use_yn: createForm.value.useYn || 'Y',
-                ver: Number(createForm.value.ver) || 1,
+                ver: createForm.value.ver || null, // "verN" 라벨 그대로
                 start_date: toDateStr(createForm.value.startDate),
                 end_date: toDateStr(createForm.value.endDate),
                 remk: createForm.value.remark || null
@@ -759,6 +785,7 @@ const onClickDetailInsert = async () => {
         notify(msg, 'error');
     }
 };
+
 const onClickDel = async () => {
     if (!createForm.value.id) return notify('삭제할 BOM이 없습니다.', 'warning');
 
@@ -775,6 +802,20 @@ const onClickDel = async () => {
         notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
     }
 };
+
+/* ===== watcher: 신규 작성 중 itemId가 바뀌면 ver 라벨 재계산 ===== */
+watch(
+    () => createForm.value.itemId,
+    async (newId, oldId) => {
+        if (!createForm.value.id) {
+            if (newId) {
+                await setNextVerLabel(newId);
+            } else {
+                createForm.value.ver = '';
+            }
+        }
+    }
+);
 </script>
 
 <style scoped>

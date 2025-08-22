@@ -106,6 +106,17 @@ SELECT 1
    AND VER = ?
  LIMIT 1;
 `;
+//숫자증가
+const SQL_NEXT_VER_BY_ITEM = `
+SELECT CONCAT(
+         'ver',
+         COALESCE(
+           MAX(CAST(NULLIF(REGEXP_REPLACE(VER, '[^0-9]', ''), '') AS UNSIGNED)), 0
+         ) + 1
+       ) AS next_ver
+  FROM BOM
+ WHERE ITEM_ID = ?;
+`;
 
 // BOM INSERT (BOM_NUMBER 는 next_code('BOM') 사용)
 const SQL_BOM_INSERT = `
@@ -118,7 +129,7 @@ VALUES
 const SQL_BOM_UPDATE = `
 UPDATE BOM
    SET ITEM_ID    = ?,
-       \`USE\`      = ?,
+       \`USE\`    = ?,
        VER        = ?,
        START_DATE = ?,
        END_DATE   = ?,
@@ -185,6 +196,6 @@ module.exports = {
   BOM_DUP_BY_ID_VER,
   SQL_BOM_INSERT,
   SQL_BOM_UPDATE,
-
+  SQL_NEXT_VER_BY_ITEM,
   BOM_DUP_BY_ID_VER_EXCEPT,
 };
