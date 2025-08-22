@@ -110,7 +110,12 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="사업자번호" v-model="createForm.bizNumber" />
+                        <v-text-field
+                            variant="outlined"
+                            label="사업자번호"
+                            v-model="createForm.bizNumber"
+                            @update:modelValue="(val) => (createForm.bizNumber = formatBizNo(val))"
+                        />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -386,7 +391,7 @@ const onClickSave = async () => {
     const payload = buildPayload();
 
     if (!isUpdate) {
-        const ok = window.confirm('정말 등록하시겠습니까?');
+        const ok = window.confirm('등록하시겠습니까?');
         if (!ok) return; // 취소하면 요청 중단
     }
     try {
@@ -432,7 +437,7 @@ const onClickReset = async () => {
 const onClickDel = async () => {
     const id = selectedRow.value?.vendId;
     if (!id) return notify('삭제할 거래처를 선택해주세요.', 'warning');
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+    if (!confirm('삭제하시겠습니까?')) return;
 
     try {
         const { data } = await axios.delete('/api/vendDelete', { data: { vend_id: id } });
@@ -444,6 +449,15 @@ const onClickDel = async () => {
     } catch (e) {
         notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
     }
+};
+
+const formatBizNo = (v) => {
+    const d = String(v ?? '')
+        .replace(/\D/g, '')
+        .slice(0, 10);
+    if (d.length <= 3) return d;
+    if (d.length <= 5) return `${d.slice(0, 3)}-${d.slice(3)}`;
+    return `${d.slice(0, 3)}-${d.slice(3, 5)}-${d.slice(5)}`;
 };
 </script>
 
