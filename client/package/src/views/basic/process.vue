@@ -333,7 +333,7 @@ const onClickDel = async () => {
     console.log('삭제 시도 ID:', id, selectedRow.value);
     if (!id) return notify('삭제할 공정을 선택해주세요.', 'warning');
     if (!confirm('삭제하시겠습니까?')) return;
-
+    //
     try {
         const { data } = await axios.delete('/api/processDelete', { data: { prscNo: id } });
         if (!data?.result) return notify(data?.message || '삭제에 실패했습니다.', 'warning');

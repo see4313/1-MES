@@ -147,7 +147,7 @@ router.delete(
       : res.status(404).json({ message: "삭제 대상 없음" });
   })
 );
-
+// /
 // BOM 전체 삭제
 router.delete(
   "/bom/:bomNumber",

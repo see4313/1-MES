@@ -213,7 +213,7 @@ const deleteOrphanDetailsByBom = `
   WHERE d.BOM_NUMBER = ?
     AND i.ITEM_ID IS NULL;
 `;
-//git 안올라감 test 중
+//git 안올라감 test 중 test
 module.exports = {
   selectBomList,
   selectBomDetails,
