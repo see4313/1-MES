@@ -56,6 +56,8 @@ async function listBom(filters = {}) {
 }
 async function getBomDetails(bomNumber) {
   try {
+    // 읽기 전 고아행 정리(아이템 테이블에 없는 상세행 제거)
+    await mapper.query("deleteOrphanDetailsByBom", [bomNumber]).catch(() => {});
     return rows(await mapper.query("selectBomDetails", bomNumber));
   } catch {
     return [];
@@ -79,7 +81,7 @@ async function getBomHeader(bomNumber) {
   const r = await mapper.query("SQL_GET_BOM_HEADER", [bomNumber]);
   return first(r);
 }
-
+//
 /* ========== 헤더 CRUD ========== */
 async function insertBomHeader(b = {}) {
   if (!b.itemId)

@@ -187,7 +187,7 @@
             </v-col>
         </v-card>
     </v-row>
-
+    <!---->
     <!-- ===== 등록/수정 ===== -->
     <v-row>
         <v-card elevation="10" class="pa-6 mt-2">
