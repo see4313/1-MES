@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const publicPath = path.join(__dirname, "public");
 
-const nodeEnv = Boolean(process.env.NODE_ENV);
+const nodeEnv = process.argv[2] == "production";
 // 미들웨어
 // application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
