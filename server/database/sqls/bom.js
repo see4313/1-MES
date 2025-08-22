@@ -206,6 +206,14 @@ SELECT B.BOM_NUMBER                          AS bom_number,
  WHERE B.BOM_NUMBER = ?;
 `;
 
+const deleteOrphanDetailsByBom = `
+  DELETE d
+  FROM BOM_DETAIL d
+  LEFT JOIN ITEM i ON i.ITEM_ID = d.ITEM_ID
+  WHERE d.BOM_NUMBER = ?
+    AND i.ITEM_ID IS NULL;
+`;
+
 module.exports = {
   selectBomList,
   selectBomDetails,
@@ -223,4 +231,5 @@ module.exports = {
   BOM_DUP_BY_ID_VER_EXCEPT,
   SQL_FIND_LATEST_BOM_BY_ITEM,
   SQL_GET_BOM_HEADER,
+  deleteOrphanDetailsByBom,
 };
