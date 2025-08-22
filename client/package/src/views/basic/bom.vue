@@ -141,15 +141,13 @@
                         </Column>
 
                         <Column field="item_name" header="품목명" />
-
                         <Column field="spec" header="규격" />
-
                         <Column field="unit" header="단위" />
 
                         <Column field="usage" header="투입량">
                             <template #body="slotProps">
                                 <v-text-field
-                                    v-model.number="detailRows[slotProps.index].usage"
+                                    v-model.number="slotProps.data.usage"
                                     type="number"
                                     dense
                                     hide-details
@@ -160,10 +158,11 @@
                                 />
                             </template>
                         </Column>
+
                         <Column field="loss" header="손실률">
                             <template #body="slotProps">
                                 <v-text-field
-                                    v-model.number="detailRows[slotProps.index].loss"
+                                    v-model.number="slotProps.data.loss"
                                     type="number"
                                     dense
                                     hide-details
@@ -174,6 +173,7 @@
                                 />
                             </template>
                         </Column>
+
                         <!-- 삭제 버튼 -->
                         <Column style="width: 80px; text-align: center">
                             <template #body="slotProps">
@@ -187,7 +187,7 @@
             </v-col>
         </v-card>
     </v-row>
-
+    <!---->
     <!-- ===== 등록/수정 ===== -->
     <v-row>
         <v-card elevation="10" class="pa-6 mt-2">
@@ -224,11 +224,11 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="품목명" v-model="createForm.itemName" />
+                        <v-text-field variant="outlined" label="품목명" v-model="createForm.itemName" readonly />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="버전" v-model="createForm.ver" />
+                        <v-text-field variant="outlined" label="버전" v-model="createForm.ver" readonly />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -304,7 +304,6 @@
     </v-snackbar>
 
     <!-- ===== 공통 모달 ===== -->
-    <!--조회-->
     <ModalSearch
         v-model:visible="showBomModal"
         max-width="1100px"
@@ -356,7 +355,6 @@ const asDate = (v) => (!v ? null : v instanceof Date ? v : new Date(v));
 const formatDate = (v) => (v ? dayjs(v).format('YYYY-MM-DD') : '');
 const toDateStr = (v) => (v ? dayjs(v).format('YYYY-MM-DD') : null);
 const unwrap = (data) => (Array.isArray(data) ? data : (data?.items ?? data?.rows ?? []));
-const requiredRule = (v, msg) => () => (!!v ? true : msg);
 const enc = encodeURIComponent;
 
 /* ===== 상태 ===== */
@@ -365,7 +363,6 @@ const itemTargetRow = ref(null);
 const showBomModal = ref(false);
 const showItemModal = ref(false);
 const itemModalTarget = ref('search'); // 'search' | 'create' | 'detail'
-const unitTargetRow = ref(null);
 
 /* 폼 */
 const searchForm = ref({
@@ -408,12 +405,10 @@ const closeAllOverlays = async () => {
     await nextTick();
     document.activeElement?.blur?.();
 };
-// 조회모달
 const openBomSearchModal = async () => {
     await closeAllOverlays();
     showBomModal.value = true;
 };
-// 품목모달
 const openItemModal = async (t = 'search', row = null) => {
     await closeAllOverlays();
     itemModalTarget.value = t;
@@ -448,7 +443,6 @@ const fetchBomDetails = async (bomNumber) => {
     return unwrap(data);
 };
 
-// 품목 검색(API는 /api/item?keyword=... 로 맞춤)
 const fetchItemList = async (q = '') => {
     try {
         const { data } = await axios.get('/api/item', { params: { keyword: q || undefined } });
@@ -459,17 +453,31 @@ const fetchItemList = async (q = '') => {
     }
 };
 
+// 다음 버전 라벨("verN")
+const fetchNextVerByItem = async (itemId) => {
+    if (!itemId) return '';
+    try {
+        const { data } = await axios.get('/api/bom/maxVersion', { params: { itemId } });
+        return String(data?.ver ?? '').trim();
+    } catch (e) {
+        console.warn('fetchNextVerByItem error:', e?.message || e);
+        return '';
+    }
+};
+const setNextVerLabel = async (itemId) => {
+    createForm.value.ver = await fetchNextVerByItem(itemId);
+};
+
 /* ===== 모달 선택 핸들러 ===== */
 const onSelectBom = async (row) => {
     if (!row) return (showBomModal.value = false);
 
     const bomNumber = row.bom_number ?? row.bomNumber ?? '';
-    // 등록/수정 폼 채우기
     createForm.value = {
-        id: bomNumber, // 여기 BOM 번호 저장
+        id: bomNumber,
         itemId: row.item_id ?? row.itemId ?? '',
         itemName: row.item_name ?? row.itemName ?? '',
-        ver: row.ver ?? 1,
+        ver: row.ver ?? '',
         startDate: row.start_date ? asDate(row.start_date) : null,
         endDate: row.end_date ? asDate(row.end_date) : null,
         useYn: row.use_yn ?? row.useYn ?? 'Y',
@@ -478,11 +486,9 @@ const onSelectBom = async (row) => {
 
     showBomModal.value = false;
 
-    // 상세 조회
     detailsLoading.value = true;
     try {
-        const rows = await fetchBomDetails(bomNumber);
-        detailRows.value = rows;
+        detailRows.value = await fetchBomDetails(bomNumber);
     } catch (e) {
         notify(e?.response?.data?.message || '상세 조회 중 오류가 발생했습니다.', 'error');
     } finally {
@@ -490,7 +496,7 @@ const onSelectBom = async (row) => {
     }
 };
 
-const onSelectItem = (row) => {
+const onSelectItem = async (row) => {
     const id = row?.item_id ?? '';
     const name = row?.item_name ?? '';
     const spec = row?.spec ?? '';
@@ -502,28 +508,48 @@ const onSelectItem = (row) => {
     }
 
     if (itemModalTarget.value === 'create') {
-        // 헤더(등록 폼)
+        // 등록 폼에서 품목 교체
+        const changed = createForm.value.itemId !== id;
+        if (!changed) {
+            showItemModal.value = false;
+            return;
+        }
+
+        // 입력/상세가 존재하면 경고 후 초기화
+        const needConfirm =
+            !!createForm.value.id ||
+            detailRows.value.length > 0 ||
+            !!createForm.value.ver ||
+            !!createForm.value.startDate ||
+            !!createForm.value.endDate ||
+            !!createForm.value.remark;
+
+        if (needConfirm) {
+            const ok = window.confirm('품목을 변경하면 현재 입력값과 상세내역이 모두 초기화됩니다. 계속할까요?');
+            if (!ok) {
+                showItemModal.value = false;
+                return;
+            }
+        }
+
+        // 품목 반영 + 강제 초기화(편집모드→신규 전환)
         createForm.value.itemId = id;
         createForm.value.itemName = name;
+        resetForNewItem({ hard: true });
+        await setNextVerLabel(id); // 새 품목의 verN 즉시 반영
     } else if (itemModalTarget.value === 'detail') {
-        // 상세 행 선택
+        // 상세 행에서 품목 선택
         if (itemTargetRow.value) {
-            // 중복 방지: 같은 (item_id, unit) 조합
             const keyId = id;
             const keyUnit = unit || '';
             const hasDup = detailRows.value.some(
-                (r) =>
-                    r !== itemTargetRow.value && // 자기 자신 제외
-                    (r?.item_id ?? '') === keyId &&
-                    (r?.unit ?? '') === keyUnit
+                (r) => r !== itemTargetRow.value && (r?.item_id ?? '') === keyId && (r?.unit ?? '') === keyUnit
             );
             if (hasDup) {
                 notify('같은 품목/단위가 이미 있습니다.', 'warning');
                 showItemModal.value = false;
                 return;
             }
-
-            // 통과 시 반영
             itemTargetRow.value.item_id = id;
             itemTargetRow.value.item_name = name;
             itemTargetRow.value.spec = spec;
@@ -539,54 +565,82 @@ const onSelectItem = (row) => {
 };
 
 /* ===== 등록/수정/초기화 ===== */
-
 const validateRequired = (f) => !!(f.itemId && f.itemName && f.startDate);
 
+// 업서트/버전업 성공 후 초기화
+const resetBomEditor = async () => {
+    createForm.value = {
+        id: null,
+        itemId: '',
+        itemName: '',
+        ver: '',
+        startDate: null,
+        endDate: null,
+        useYn: '',
+        remark: ''
+    };
+    detailRows.value = [];
+    selectedRow.value = null;
+    await nextTick();
+};
+
+// 저장 버튼
 const onClickSave = async () => {
     if (!validateRequired(createForm.value)) {
         return notify('필수 항목을 확인하세요.', 'warning');
     }
 
-    // 공통 payload
-    const payload = {
-        itemId: createForm.value.itemId,
-        ver: createForm.value.ver,
-        startDate: toDateStr(createForm.value.startDate),
-        endDate: toDateStr(createForm.value.endDate),
-        use: createForm.value.useYn,
-        remk: createForm.value.remark
-    };
-
     const isUpdate = !!createForm.value.id;
 
-    if (!isUpdate) {
-        const ok = window.confirm('정말 등록하시겠습니까?');
-        if (!ok) return; // 취소하면 요청 중단
-    }
     try {
         if (isUpdate) {
-            // 수정
-            await axios.put(`/api/bom/${encodeURIComponent(createForm.value.id)}`, {
-                ...createForm.value,
-                startDate: payload.startDate,
-                endDate: payload.endDate
-            });
-            notify('수정이 완료되었습니다.');
-        } else {
-            // 신규 등록 (헤더만)
-            await axios.post('/api/bomInsert', payload);
-            notify('BOM 등록이 완료되었습니다.');
-            resetCreateForm(); // 기존 동작 유지
+            // ===== 기존 BOM 헤더 수정 (버전은 변경하지 않고 그대로 유지) =====
+            const payload = {
+                itemId: createForm.value.itemId,
+                use: createForm.value.useYn || 'Y',
+                ver: createForm.value.ver, // 서버가 ver 미전송 시 기본값 처리하는 경우를 막기 위해 현재 ver 전달
+                startDate: toDateStr(createForm.value.startDate),
+                endDate: toDateStr(createForm.value.endDate),
+                remk: createForm.value.remark || null
+            };
+            await axios.put(`/api/bom/${enc(createForm.value.id)}`, payload);
+            notify('BOM 헤더가 수정되었습니다.');
+            // 필요 시 재조회/동기화 로직 추가 가능
+            return;
         }
+
+        // ===== 신규 BOM 생성 (헤더+상세) =====
+        const ok = window.confirm('등록하시겠습니까?');
+        if (!ok) return;
+
+        const header = {
+            item_id: createForm.value.itemId,
+            use_yn: createForm.value.useYn || 'Y',
+            start_date: toDateStr(createForm.value.startDate),
+            end_date: toDateStr(createForm.value.endDate),
+            remk: createForm.value.remark || null
+        };
+
+        const details = Array.isArray(detailRows.value)
+            ? detailRows.value.map((r) => ({
+                  item_id: r.item_id,
+                  unit: r.unit,
+                  usage: Number(r.usage) || 0,
+                  loss: Number(r.loss ?? 0) || 0
+              }))
+            : [];
+
+        await axios.post('/api/bom', { header, details });
+        notify('BOM 등록이 완료되었습니다.');
+        resetCreateForm();
+        detailRows.value = [];
     } catch (e) {
-        const msg = e?.response?.data?.message || (isUpdate ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.');
-        notify(msg, 'error');
+        notify(e?.response?.data?.message || (isUpdate ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.'), 'error');
     }
 };
 
 const onClickCreate = onClickSave;
 
-//초기화
 const resetCreateForm = () => {
     createForm.value = {
         id: null,
@@ -600,9 +654,11 @@ const resetCreateForm = () => {
     };
 };
 
-const onClickReset = () => {
+const onClickReset = async () => {
     resetCreateForm();
-    closeAllOverlays();
+    detailRows.value = [];
+    selectedRow.value = null;
+    await closeAllOverlays();
 };
 
 const onClickSearchReset = () => {
@@ -622,17 +678,14 @@ const addRow = () => {
         loss: ''
     });
 };
-//상세삭제
+
 const deleteRow = async (row) => {
     if (!row) return;
-
-    // 배열 내 실제 인덱스 (객체 동일성 or 상세번호)
     const idx = detailRows.value.findIndex((r) => r === row || (r.bom_detail_no && r.bom_detail_no === row.bom_detail_no));
     if (idx < 0) return notify('행을 찾을 수 없습니다.', 'warning');
 
     const target = detailRows.value[idx];
 
-    // DB에 없는 임시행이면 프론트에서만 제거
     if (!target?.bom_detail_no || !createForm.value.id) {
         detailRows.value.splice(idx, 1);
         return;
@@ -647,7 +700,6 @@ const deleteRow = async (row) => {
         const bomNumber = encodeURIComponent(createForm.value.id);
         const detailParam = encodeURIComponent(detailCode);
         await axios.delete(`/api/bom/${bomNumber}/details/${detailParam}`);
-
         detailRows.value.splice(idx, 1);
         notify('삭제되었습니다.');
     } catch (e) {
@@ -655,8 +707,7 @@ const deleteRow = async (row) => {
     }
 };
 
-/* ===== 상세 등록(저장) =====
- */
+/* ===== 상세 등록(저장) ===== */
 const validateDetailRows = (rows = detailRows.value) => {
     const list = Array.isArray(rows) ? rows : [];
     for (let i = 0; i < list.length; i++) {
@@ -670,45 +721,17 @@ const validateDetailRows = (rows = detailRows.value) => {
     return '';
 };
 
-const reloadDetailsIfNeeded = async () => {
-    if (!createForm.value.id) return;
-    detailsLoading.value = true;
-    try {
-        const rows = await fetchBomDetails(createForm.value.id);
-        detailRows.value = rows;
-    } finally {
-        detailsLoading.value = false;
-    }
-};
-
 const onClickDetailInsert = async () => {
     if (!detailRows.value.length) return notify('추가된 상세 행이 없습니다.', 'warning');
+
+    const err = validateDetailRows(detailRows.value);
+    if (err) return notify(err, 'warning');
+
     try {
         if (createForm.value.id) {
-            // ===== 기존 BOM =====
-
-            const newRows = detailRows.value.filter((r) => !r.bom_detail_no);
-
-            const editedRows = detailRows.value.filter(
-                (r) =>
-                    !!r.bom_detail_no &&
-                    (r.item_id !== (r._origItemId ?? r.item_id) ||
-                        r.unit !== (r._origUnit ?? r.unit) ||
-                        Number(r.usage ?? 0) !== Number(r._origUsage ?? 0) ||
-                        Number(r.loss ?? 0) !== Number(r._origLoss ?? 0))
-            );
-
-            const sendRows = [...newRows, ...editedRows];
-            if (sendRows.length === 0) {
-                return notify('변경할 내용이 없습니다.', 'info');
-            }
-
-            // 유효성 검사(전송 대상만)
-            const err = validateDetailRows(sendRows);
-            if (err) return notify(err, 'warning');
-
+            // ===== 기존 BOM: 버전 변경 없이 상세만 저장 =====
             const body = {
-                details: sendRows.map((r) => ({
+                details: detailRows.value.map((r) => ({
                     item_id: r.item_id,
                     unit: r.unit,
                     usage: Number(r.usage) || 0,
@@ -716,61 +739,83 @@ const onClickDetailInsert = async () => {
                 }))
             };
 
-            console.log(body);
             await axios.post(`/api/bom/${enc(createForm.value.id)}/details`, body);
-
-            // 재조회 및 안내
-            await reloadDetailsIfNeeded();
-            notify(
-                `저장 완료, ${newRows.length ? `추가 ${newRows.length}행` : ''}${newRows.length && editedRows.length ? ', ' : ''}${editedRows.length ? `수정 ${editedRows.length}행` : ''}`
-                    .trim()
-                    .replace(/,\s*$/, '')
-            );
+            notify('상세 저장이 완료되었습니다.');
+            await reloadDetailsIfNeeded(); // 저장 후 테이블만 새로고침
         } else {
-            // ===== 신규 BOM: 헤더 + 상세 =====
+            // ===== 신규 BOM: 헤더+상세 동시 저장(서버가 verN 자동 지정)
             if (!validateRequired(createForm.value)) {
                 return notify('BOM을 먼저 선택하세요.', 'warning');
             }
-            const err = validateDetailRows(); // 전체 검사
-            if (err) return notify(err, 'warning');
 
             const header = {
                 item_id: createForm.value.itemId,
                 use_yn: createForm.value.useYn || 'Y',
-                ver: Number(createForm.value.ver) || 1,
                 start_date: toDateStr(createForm.value.startDate),
                 end_date: toDateStr(createForm.value.endDate),
                 remk: createForm.value.remark || null
             };
+
             const details = detailRows.value.map((r) => ({
                 item_id: r.item_id,
                 unit: r.unit,
                 usage: Number(r.usage) || 0,
                 loss: Number(r.loss ?? 0) || 0
             }));
-            const { data } = await axios.post('/api/bom', { header, details });
-            if (data?.bom_number) createForm.value.id = data.bom_number;
 
-            await reloadDetailsIfNeeded();
-            notify(`저장 완료, 등록 ${detailRows.value.length}행`);
+            await axios.post('/api/bom', { header, details });
+            notify('저장 완료 (신규 생성)');
+            await resetBomEditor(); // 신규 저장 후엔 초기화 유지
         }
     } catch (e) {
-        const msg = e?.response?.data?.message || e?.message || '상세 저장 중 오류가 발생했습니다.';
+        const msg = e?.response?.data?.message || e?.message || '저장 중 오류가 발생했습니다.';
         notify(msg, 'error');
     }
 };
+
+/* ===== 품목 변경 시 폼/상세 초기화 ===== */
+function resetForNewItem(opts = { hard: false }) {
+    const hard = opts?.hard === true;
+    if (hard) {
+        createForm.value.id = null;
+    }
+    // itemId, itemName은 유지하고 나머지 초기화
+    createForm.value.ver = '';
+    createForm.value.startDate = null;
+    createForm.value.endDate = null;
+    createForm.value.useYn = '';
+    createForm.value.remark = '';
+    detailRows.value = [];
+    selectedRow.value = null;
+}
+
+// 상세 재조회 헬퍼
+const reloadDetailsIfNeeded = async (id = createForm.value.id) => {
+    if (!id) return;
+    detailsLoading.value = true;
+    try {
+        const rows = await fetchBomDetails(id);
+        detailRows.value = rows;
+    } catch (e) {
+        notify(e?.response?.data?.message || '상세 재조회 중 오류가 발생했습니다.', 'error');
+    } finally {
+        detailsLoading.value = false;
+    }
+};
+
+//삭제
+// 헤더(전체 BOM) 삭제
 const onClickDel = async () => {
     if (!createForm.value.id) return notify('삭제할 BOM이 없습니다.', 'warning');
 
-    const ok = window.confirm(`BOM ${createForm.value.id} 를 삭제하시겠습니까?`);
+    const id = String(createForm.value.id).trim();
+    const ok = window.confirm(`BOM ${id} 를 삭제하시겠습니까?`);
     if (!ok) return;
 
     try {
-        const id = encodeURIComponent(createForm.value.id);
-        await axios.delete(`/api/bom/${id}`);
+        await axios.delete(`/api/bom/${enc(id)}`);
         notify('BOM이 삭제되었습니다.');
-        resetCreateForm();
-        detailRows.value = [];
+        await resetBomEditor();
     } catch (e) {
         notify(e?.response?.data?.message || '삭제 중 오류가 발생했습니다.', 'error');
     }

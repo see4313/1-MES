@@ -85,19 +85,25 @@ CALL delivery_update(?)
 // 출고관리 목록
 const setDelivery = (filters) => {
   let sql = `
-   SELECT ordt.detail_id,
+SELECT ordt.detail_id,
        ordt.item_id,
        item.item_name,
        ord.vend_id,
-       vend.vend_name
+       vend.vend_name,
+       ordt.qty AS order_qty,                                     -- 주문 수량
+       COALESCE(SUM(oust.oust_qty), 0) AS delivered_qty,          -- 기납기량
+       ordt.qty - COALESCE(SUM(oust.oust_qty), 0) AS overdue_qty  -- 미납기량
 FROM ORDER_DETAIL ordt
 JOIN ITEM item 
-                ON ordt.item_id = item.item_id
+       ON ordt.item_id = item.item_id
 JOIN ORDER_INFO ord
-                ON ordt.order_id = ord.order_id
+       ON ordt.order_id = ord.order_id
 JOIN VENDOR vend 
-                ON ord.vend_id = vend.vend_id
-WHERE 1=1 
+       ON ord.vend_id = vend.vend_id
+LEFT JOIN OUST oust 
+       ON oust.detail_id = ordt.detail_id
+WHERE 1=1
+
 `;
 
   const params = [];
@@ -109,6 +115,16 @@ WHERE 1=1
     sql += "AND ord.vend_id = ?";
     params.push(filters.vend_id);
   }
+
+  sql += `
+  GROUP BY ordt.detail_id, 
+         ordt.item_id, 
+         item.item_name, 
+         ord.vend_id, 
+         vend.vend_name, 
+         ordt.qty;
+  `;
+
   return { sql, params };
 };
 

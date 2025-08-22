@@ -3,6 +3,8 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const path = require("path");
+const publicPath = path.join(__dirname, "public");
 
 // 미들웨어
 // application/x-www-form-urlencoded
@@ -39,27 +41,52 @@ const failureTypeRouter = require("./routers/failureTypeRouter");
 const downtimeRouter = require("./routers/downtimeRouter");
 const urgencyRouter = require("./routers/urgencyRouter");
 
-// 기본 라우팅
+// app.use(vendRouter);
+// app.use(orderRouter);
+// app.use(employeeRouter);
+// app.use(materialRouter);
+// app.use(inspItemRouter);
+// app.use(vendorRouter);
+// app.use(productionRouter);
+// app.use(bomRouter);
+// app.use(facilityRouter);
+// app.use(cleanHistRouter);
+// app.use(productRouter);
+// app.use(warehouseRouter);
+// app.use(processRouter);
+// app.use(dashboardRouter);
+// app.use(inspectHistRouter);
+// app.use(repairHistRouter);
+// app.use(failureTypeRouter);
+// app.use(downtimeRouter);
+// app.use(urgencyRouter);
+
+app.use("/api", vendRouter);
+app.use("/api", orderRouter);
+app.use("/api", employeeRouter);
+app.use("/api", materialRouter);
+app.use("/api", inspItemRouter);
+app.use("/api", vendorRouter);
+app.use("/api", productionRouter);
+app.use("/api", bomRouter);
+app.use("/api", facilityRouter);
+app.use("/api", cleanHistRouter);
+app.use("/api", productRouter);
+app.use("/api", warehouseRouter);
+app.use("/api", processRouter);
+app.use("/api", dashboardRouter);
+app.use("/api", inspectHistRouter);
+app.use("/api", repairHistRouter);
+app.use("/api", failureTypeRouter);
+app.use("/api", downtimeRouter);
+app.use("/api", urgencyRouter);
+
+app.use(express.static(publicPath));
+
 app.get("/", (req, res) => {
-  res.send("Welcome!!");
+  res.sendFile(path.join(__dirname, "./public", "index.html"));
 });
 
-app.use(vendRouter);
-app.use(orderRouter);
-app.use(employeeRouter);
-app.use(materialRouter);
-app.use(inspItemRouter);
-app.use(vendorRouter);
-app.use(productionRouter);
-app.use(bomRouter);
-app.use(facilityRouter);
-app.use(cleanHistRouter);
-app.use(productRouter);
-app.use(warehouseRouter);
-app.use(processRouter);
-app.use(dashboardRouter);
-app.use(inspectHistRouter);
-app.use(repairHistRouter);
-app.use(failureTypeRouter);
-app.use(downtimeRouter);
-app.use(urgencyRouter);
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "./public", "index.html"));
+});
