@@ -1,0 +1,1 @@
+import{r as s}from"./index-BkcQ_3tW.js";const a=s(!1),c=s(""),e=s("success");function u(n,r="success"){c.value=n,e.value=r,a.value=!0}function t(){return{snackOpen:a,snackMessage:c,snackColor:e,snackBar:u}}export{t as u};
