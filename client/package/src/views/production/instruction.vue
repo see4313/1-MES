@@ -195,7 +195,7 @@ const confirmSubmit = async () => {
 <template>
     <v-row>
         <!-- 좌측 영역 -->
-        <v-col cols="9">
+        <v-col cols="12" sm="12" lg="9">
             <v-card elevation="10">
                 <v-card-item class="py-6 px-6">
                     <v-container fluid>
@@ -269,7 +269,7 @@ const confirmSubmit = async () => {
         </v-col>
 
         <!-- 우측 옵션 -->
-        <v-col cols="3">
+        <v-col cols="12" sm="12" lg="3">
             <v-card elevation="10">
                 <v-card-item class="py-6 px-6">
                     <v-container fluid>
