@@ -1,9 +1,15 @@
 // productionService.js
 const db = require("../database/mapper");
 
+const bomItemList = async (filters) => {
+  let list = await db.query("bomItemList", filters);
+  return list;
+};
+
 const addProdInstructions = async (data) => {
   try {
     const result = await db.query("insertProdInstruct", data);
+    console.log(result);
     return result;
   } catch (e) {
     console.error(e);
@@ -38,7 +44,7 @@ const getStatusZeroProductionList = async () => {
     return result;
   } catch (e) {
     console.log(e);
-    return { err : e };
+    return { err: e };
   }
 };
 
@@ -48,14 +54,26 @@ const getFacilityListByName = async (fNumber) => {
     return result;
   } catch (e) {
     console.log(e);
-    return { err : e }; 
+    return { err: e };
   }
-} 
+};
+
+const addProdACMSLT = async (data) => {
+  try {
+    const result = await db.query("insertProdACMSLT", data);
+    return result;
+  } catch (e) {
+    console.log(e);
+    return { err: e };
+  }
+};
 
 module.exports = {
   addProdInstructions,
   getInstructionList,
   getDetailInstruction,
   getStatusZeroProductionList,
-  getFacilityListByName
+  getFacilityListByName,
+  addProdACMSLT,
+  bomItemList,
 };

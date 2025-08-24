@@ -1,6 +1,6 @@
 <!-- instruction.vue -->
 <script setup>
-import { ref, watch, computed, onBeforeMount } from 'vue';
+import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import CardHeader from '@/components/production/card-header-btn.vue';
@@ -19,20 +19,22 @@ const goalDate = ref(null);
 const startDatePicker = ref(false);
 const startDate = ref(null);
 const remk = ref('');
+const isConfirmDialog = ref(false);
+const bomItemList = ref([]);
 
 const productType = ref([
     { key: '반제품', value: 'semi' },
     { key: '완제품', value: 'finish' }
 ]);
 
-const planLoad = () => {};
-
 watch(selectProductType, () => {
+    selectProductList.value = [];
+    bomItemList.value = [];
     selectProductList.value = [];
 });
 
 watch(
-    () => selectProductList.value.map((product) => product.quantity),
+    () => selectProductList.value.map((p) => p.quantity),
     () => {
         for (const product of selectProductList.value) {
             const qty = product.quantity;
@@ -43,15 +45,14 @@ watch(
     }
 );
 
-const formatNumber = (value) => {
-    if (value === null || value === undefined || value === '') return '';
-    const n = Number(value);
-    if (Number.isNaN(n)) return '';
-    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const formatNumber = (val) => {
+    if (!val && val !== 0) return '';
+    const n = Number(val);
+    return Number.isNaN(n) ? '' : n.toLocaleString();
 };
-const parseNumber = (value) => {
-    if (value === null || value === undefined || value === '') return 0;
-    const num = Number(String(value).replace(/,/g, ''));
+const parseNumber = (val) => {
+    if (!val) return 0;
+    const num = Number(String(val).replace(/,/g, ''));
     return Number.isNaN(num) ? 0 : num;
 };
 const onQtyInput = (product, val) => {
@@ -71,24 +72,53 @@ const getProductList = async () => {
 };
 
 const removeProduct = (id) => {
-    const i = selectProductList.value.findIndex((product) => product.itemId === id);
-    if (i !== -1) selectProductList.value.splice(i, 1);
+    const idx = selectProductList.value.findIndex((p) => p.itemId === id);
+    if (idx !== -1) selectProductList.value.splice(idx, 1);
 };
 
 const excludeIds = computed(() => selectProductList.value.map((p) => p.itemId));
 const excludeSet = computed(() => new Set(excludeIds.value));
 
-const onSelectProduct = (item) => {
-    const list = selectProductList.value;
-    list.push({ ...item, quantity: 0 });
+const unitToGram = (value, unit) => {
+    switch (unit.toLowerCase()) {
+        case 'kg':
+            return value * 1000; // 1kg = 1000g
+        case 'g':
+            return value; // 이미 g
+        case 'mg':
+            return value / 1000; // 1000mg = 1g
+        case 'l':
+            return value * 1000; // 1L = 1000g (물/우유 등 1L ≈ 1kg 기준)
+        case 'ml':
+            return value; // 1ml = 1g (밀도 1 가정)
+        case 'ea':
+            return value;
+        default:
+            return value; // 정의 안된 단위는 그대로
+    }
 };
 
-const instructionsBtn = async () => {
+const onSelectProduct = async (item) => {
+    selectProductList.value.push({ ...item, quantity: 0 });
+
+    try {
+        const params = { item_id: item.itemId };
+        const response = await axios.get('/api/prod/bomItemList', { params });
+
+        // 변환 처리
+        bomItemList.value.push(...response.data.map((bom) => ({ ...bom })));
+    } catch (error) {
+        snackBar('조회 실패', 'error');
+    }
+};
+
+// 버튼 클릭 시 → 유효성 검사 후 모달 열기
+const openConfirmDialog = () => {
     if (selectProductList.value.length === 0) {
         snackBar('생산 지시할 품목을 선택해주세요.', 'warning');
         return;
     }
-    if (selectProductList.value.some((product) => product.quantity < 1)) {
+    if (selectProductList.value.some((p) => p.quantity < 1)) {
         snackBar('지시 수량을 다시 한번 확인하여 주세요.', 'warning');
         return;
     }
@@ -100,17 +130,40 @@ const instructionsBtn = async () => {
         snackBar('목표 생산 일자를 선택하여주세요.', 'warning');
         return;
     }
-    if (!confirm('등록하시겠습니까?')) {
-        return;
-    }
+    isConfirmDialog.value = true;
+};
 
-    const detail = [];
-    for (const product of selectProductList.value) {
-        detail.push({
-            item_id: String(product.itemId),
-            goal_qty: Number(product.quantity)
-        });
-    }
+const confirmSubmit = async () => {
+    const bomDetails = bomItemList.value.map((item) => {
+        const product = selectProductList.value.find((p) => String(p.itemId) === String(item.parent_item));
+        const goalQty = product ? Number(product.quantity) : 0;
+
+        const conv_qty = unitToGram(item.conv_qty, item.unit);
+        const usageBom = unitToGram(item.usage, item.unit) * goalQty;
+
+        let use_qty;
+        if (item.item_id === 'P250815-0010') {
+            // 계란이면 정수 올림
+            use_qty = Math.ceil(usageBom / conv_qty);
+        } else {
+            // 나머지는 소수점 한 자리 올림
+            use_qty = Math.ceil((usageBom / conv_qty) * 10) / 10;
+        }
+
+        return {
+            item_id: item.item_id,
+            conv_qty,
+            loss: unitToGram(item.loss, item.unit),
+            usageBom,
+            use_qty
+        };
+    });
+
+    const details = selectProductList.value.map((p) => ({
+        item_id: String(p.itemId),
+        goal_qty: Number(p.quantity)
+    }));
+    isConfirmDialog.value = false;
 
     try {
         const { data } = await axios.post('api/prod/instructions', {
@@ -118,175 +171,211 @@ const instructionsBtn = async () => {
             goalDate: formatDate(goalDate.value, '-'),
             startDate: formatDate(startDate.value, '-'),
             remark: remk.value,
-            details: detail
+            details,
+            bomDetails
         });
-        console.log(data);
-        // 단건 처리
-        let affected = data?.affectedRows;
 
-        // 복수 처리 (MySQL bulk insert 시 data는 배열 형태일 수 있음)
-        if (Array.isArray(data)) {
-            affected = data.reduce((sum, res) => sum + (res.affectedRows || 0), 0);
-        }
-
-        if (affected > 0) {
+        if (data.warningStatus == 0) {
             selectProductList.value = [];
+            bomItemList.value = [];
             startDate.value = null;
             goalDate.value = null;
             remk.value = null;
             snackBar('성공적으로 생산 지시하였습니다.', 'success');
+        } else {
+            snackBar('생산 지시 중 문제가 발생하였습니다.', 'error');
         }
     } catch (e) {
         console.error(e);
+        snackBar('생산 지시 중 문제가 발생하였습니다.', 'error');
     }
 };
 </script>
 
 <template>
-    <v-card elevation="10">
-        <v-card-item class="py-6 px-6">
-            <v-container fluid>
-                <CardHeader
-                    title="생산 지시"
-                    btn-icon="mdi-plus-circle"
-                    btn-text="생산 계획 불러오기"
-                    btn-variant="outlined"
-                    btn-color="primary"
-                    @btn-click="planLoad"
-                />
+    <v-row>
+        <!-- 좌측 영역 -->
+        <v-col cols="9">
+            <v-card elevation="10">
+                <v-card-item class="py-6 px-6">
+                    <v-container fluid>
+                        <CardHeader
+                            title="생산 지시"
+                            btn-icon="mdi-plus-circle"
+                            btn-text="생산 계획 불러오기"
+                            btn-variant="outlined"
+                            btn-color="primary"
+                            @btn-click="() => {}"
+                        />
 
-                <v-chip-group v-model="selectProductType" mandatory selected-class="active">
-                    <v-chip v-for="type in productType" :key="type.value" :value="type.value" label pill variant="outlined" size="small">
-                        {{ type.key }}
-                    </v-chip>
-                </v-chip-group>
+                        <!-- Chip Group -->
+                        <v-chip-group v-model="selectProductType" mandatory selected-class="active">
+                            <v-chip v-for="t in productType" :key="t.value" :value="t.value" label pill variant="outlined" size="small">
+                                {{ t.key }}
+                            </v-chip>
+                        </v-chip-group>
 
-                <v-table class="fixed-table">
-                    <colgroup>
-                        <col style="width: 14%" />
-                        <col style="width: 12%" />
-                        <col style="width: 24%" />
-                        <col style="width: 16%" />
-                        <col style="width: 24%" />
-                        <col style="width: 10%" />
-                    </colgroup>
+                        <!-- Table -->
+                        <v-table class="fixed-table mt-4">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">품목 번호</th>
+                                    <th class="text-center">품목 유형</th>
+                                    <th class="text-center">품목명</th>
+                                    <th class="text-center">규격</th>
+                                    <th class="text-center">지시 수량</th>
+                                    <th class="text-center">삭제</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="product in selectProductList" :key="product.itemId">
+                                    <td class="text-center">{{ product.itemId }}</td>
+                                    <td class="text-center">{{ product.itemType }}</td>
+                                    <td class="text-center">{{ product.itemName }}</td>
+                                    <td class="text-center">{{ product.spec }}</td>
+                                    <td class="text-center">
+                                        <v-text-field
+                                            :model-value="formatNumber(product.quantity)"
+                                            @update:model-value="(val) => onQtyInput(product, val)"
+                                            type="text"
+                                            inputmode="numeric"
+                                            variant="outlined"
+                                            hide-details
+                                            density="compact"
+                                            class="qty-input"
+                                        >
+                                            <template #append-inner>
+                                                <span class="unit-label">{{ product.unit || '' }}</span>
+                                            </template>
+                                        </v-text-field>
+                                    </td>
+                                    <td class="text-center">
+                                        <v-btn color="error" size="small" @click="removeProduct(product.itemId)">
+                                            <v-icon>mdi-delete</v-icon>
+                                        </v-btn>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </v-table>
 
-                    <thead>
-                        <tr>
-                            <th class="text-center font-weight-bold">품목 번호</th>
-                            <th class="text-center font-weight-bold">품목 유형</th>
-                            <th class="text-center font-weight-bold">품목명</th>
-                            <th class="text-center font-weight-bold">규격</th>
-                            <th class="text-center font-weight-bold">지시 수량</th>
-                            <th class="text-center font-weight-bold">삭제</th>
-                        </tr>
-                    </thead>
+                        <v-row justify="center" class="my-4">
+                            <v-btn append-icon="mdi-plus-circle" variant="outlined" color="primary" @click="visibleProductModal = true">
+                                품목 추가
+                            </v-btn>
+                        </v-row>
+                    </v-container>
+                </v-card-item>
+            </v-card>
+        </v-col>
 
-                    <tbody>
-                        <tr v-for="product in selectProductList" :key="product.itemId">
-                            <td class="text-center">
-                                <div class="cell">{{ product.itemId }}</div>
-                            </td>
-                            <td class="text-center">
-                                <div class="cell">{{ product.itemType }}</div>
-                            </td>
-                            <td class="text-center">
-                                <div class="cell">{{ product.itemName }}</div>
-                            </td>
-                            <td class="text-center">
-                                <div class="cell">{{ product.spec }}</div>
-                            </td>
-
-                            <td class="text-center">
+        <!-- 우측 옵션 -->
+        <v-col cols="3">
+            <v-card elevation="10">
+                <v-card-item class="py-6 px-6">
+                    <v-container fluid>
+                        <!-- Start Date -->
+                        <v-menu v-model="startDatePicker" :close-on-content-click="false" transition="scale-transition">
+                            <template #activator="{ props }">
                                 <v-text-field
-                                    :model-value="formatNumber(product.quantity)"
-                                    @update:model-value="(val) => onQtyInput(product, val)"
-                                    type="text"
-                                    inputmode="numeric"
+                                    v-bind="props"
+                                    :model-value="formatDate(startDate, '-')"
+                                    label="생산 시작 일자"
+                                    append-inner-icon="mdi-calendar"
+                                    readonly
                                     variant="outlined"
-                                    hide-details
                                     density="compact"
-                                    :disabled="!product.itemId"
-                                    placeholder="0"
-                                    class="qty-input has-unit"
-                                    style="min-width: 0"
-                                >
-                                    <template #append-inner>
-                                        <span class="unit-label">{{ product.unit || '' }}</span>
-                                    </template>
-                                </v-text-field>
-                            </td>
+                                    clearable
+                                    @click:clear="startDate = null"
+                                />
+                            </template>
+                            <v-date-picker
+                                v-model="startDate"
+                                :min="minDate()"
+                                :max="goalDate"
+                                @update:model-value="startDatePicker = false"
+                            />
+                        </v-menu>
 
-                            <td class="text-center">
-                                <v-btn color="error" class="del-btn" @click="removeProduct(product.itemId)">
-                                    <v-icon>mdi-delete</v-icon>
-                                </v-btn>
-                            </td>
-                        </tr>
-                    </tbody>
-                </v-table>
+                        <!-- Goal Date -->
+                        <v-menu v-model="goalDatePicker" :close-on-content-click="false" transition="scale-transition">
+                            <template #activator="{ props }">
+                                <v-text-field
+                                    v-bind="props"
+                                    :model-value="formatDate(goalDate, '-')"
+                                    label="목표 생산 일자"
+                                    append-inner-icon="mdi-calendar"
+                                    readonly
+                                    variant="outlined"
+                                    density="compact"
+                                    clearable
+                                    @click:clear="goalDate = null"
+                                />
+                            </template>
+                            <v-date-picker v-model="goalDate" :min="startDate || minDate()" @update:model-value="goalDatePicker = false" />
+                        </v-menu>
 
-                <v-row justify="center" class="my-4">
-                    <v-btn append-icon="mdi-plus-circle" variant="outlined" color="primary" @click="visibleProductModal = true">
-                        품목 추가
-                    </v-btn>
-                </v-row>
+                        <v-textarea v-model="remk" label="비고" variant="outlined" density="compact" auto-grow rows="3" clearable />
 
-                <v-menu
-                    v-model="startDatePicker"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    location="bottom"
-                    :offset="8"
-                    min-width="auto"
-                >
-                    <template #activator="{ props }">
-                        <v-text-field
-                            v-bind="props"
-                            :model-value="formatDate(startDate, '-')"
-                            label="생산 시작 일자"
-                            append-inner-icon="mdi-calendar"
-                            readonly
-                            variant="outlined"
-                            density="compact"
-                            clearable
-                            @click:clear="startDate = null"
-                        />
-                    </template>
-                    <v-date-picker v-model="startDate" :min="minDate()" :max="goalDate" @update:model-value="startDatePicker = false" />
-                </v-menu>
+                        <v-btn color="primary" block @click="openConfirmDialog">생산 지시</v-btn>
+                    </v-container>
+                </v-card-item>
+            </v-card>
+        </v-col>
+    </v-row>
 
-                <v-menu
-                    v-model="goalDatePicker"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    location="bottom"
-                    :offset="8"
-                    min-width="auto"
-                >
-                    <template #activator="{ props }">
-                        <v-text-field
-                            v-bind="props"
-                            :model-value="formatDate(goalDate, '-')"
-                            label="목표 생산 일자"
-                            append-inner-icon="mdi-calendar"
-                            readonly
-                            variant="outlined"
-                            density="compact"
-                            clearable
-                            @click:clear="goalDate = null"
-                        />
-                    </template>
-                    <v-date-picker v-model="goalDate" :min="startDate || minDate()" @update:model-value="goalDatePicker = false" />
-                </v-menu>
+    <!-- 등록 확인 모달 -->
+    <v-dialog v-model="isConfirmDialog" max-width="600">
+        <v-card class="pa-4 rounded-xl">
+            <div class="text-center mb-4">
+                <v-avatar size="48" color="grey-lighten-4">
+                    <v-icon size="28" color="primary">mdi-alert-circle-outline</v-icon>
+                </v-avatar>
+                <h3 class="text-h6 font-weight-bold mt-2">등록하시겠습니까?</h3>
+            </div>
+            <v-table density="comfortable" class="mb-4">
+                <tbody>
+                    <tr>
+                        <td>생산 유형</td>
+                        <td>{{ productType.find((t) => t.value === selectProductType)?.key }}</td>
+                    </tr>
+                    <tr>
+                        <td>생산 시작 일자</td>
+                        <td>{{ formatDate(startDate, '-') }}</td>
+                    </tr>
+                    <tr>
+                        <td>목표 생산 일자</td>
+                        <td>{{ formatDate(goalDate, '-') }}</td>
+                    </tr>
+                    <tr>
+                        <td>비고</td>
+                        <td>{{ remk || '-' }}</td>
+                    </tr>
+                </tbody>
+            </v-table>
+            <v-table density="compact" class="mb-4">
+                <thead>
+                    <tr>
+                        <th>품목 번호</th>
+                        <th>품목명</th>
+                        <th>지시 수량</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="p in selectProductList" :key="p.itemId">
+                        <td>{{ p.itemId }}</td>
+                        <td>{{ p.itemName }}</td>
+                        <td>{{ formatNumber(p.quantity) }} {{ p.unit }}</td>
+                    </tr>
+                </tbody>
+            </v-table>
+            <v-card-actions class="justify-end">
+                <v-btn variant="tonal" color="grey-darken-1" @click="isConfirmDialog = false">취소</v-btn>
+                <v-btn color="primary" @click="confirmSubmit">확인</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 
-                <v-textarea v-model="remk" label="비고" variant="outlined" density="compact" auto-grow rows="3" clearable />
-
-                <v-btn color="primary" @click="instructionsBtn" block>생산 지시</v-btn>
-            </v-container>
-        </v-card-item>
-    </v-card>
-
+    <!-- 검색 모달 -->
     <ModalSearch
         :visible="visibleProductModal"
         title="품목 검색"
@@ -308,7 +397,7 @@ const instructionsBtn = async () => {
 
 <style scoped>
 .active {
-    background-color: #000;
+    background: #000;
     color: #fff;
 }
 .fixed-table {
@@ -316,38 +405,16 @@ const instructionsBtn = async () => {
     width: 100%;
 }
 .fixed-table .cell {
-    display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-.text-center {
-    max-width: 160px;
-}
-.fixed-table .td {
-    max-width: 160px;
-}
-.qty-input .v-field {
-    width: 100%;
-}
-.qty-input .v-field__input {
-    min-width: 0;
 }
 .qty-input :deep(input) {
     text-align: right;
     padding-right: 2.5rem;
 }
-.qty-input :deep(.v-field__append-inner) {
-    margin-left: 4px;
-}
 .unit-label {
     font-size: 12px;
     color: #6b7280;
-    pointer-events: none;
-    white-space: nowrap;
-}
-.del-btn {
-    min-width: 0;
-    padding: 6px 10px;
 }
 </style>

@@ -11,7 +11,7 @@
                     @btn-click1="Select()"
                     btn-text2="입고"
                     btn-variant2="flat"
-                    btn-color2="error"
+                    btn-color2="warning"
                     @btn-click2="productInsert()"
                 />
             </v-card-item>

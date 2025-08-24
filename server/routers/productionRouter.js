@@ -5,7 +5,14 @@ const router = express.Router();
 const itemService = require("../services/itemService");
 const productionService = require("../services/productionService");
 const prcsRouterService = require("../services/prcsRouterService");
-const prcsServive = require("../services/prcsService")
+const prcsServive = require("../services/prcsService");
+
+// 품목기준 bom리스트 조회
+router.get("/prod/bomItemList", async (req, res) => {
+  const filters = req.query;
+  let list = await productionService.bomItemList(filters);
+  res.send(list); // 응답
+});
 
 // getItemList -- 품목 리스트 조회
 router.get("/prod/itemlist/:type", async (req, res) => {
@@ -13,6 +20,18 @@ router.get("/prod/itemlist/:type", async (req, res) => {
   const { type } = req.params;
   try {
     const result = await itemService.getItemList(type);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+// getItemList -- 품목 리스트 조회
+router.get("/prod/prcsitemlist/:type", async (req, res) => {
+  // type = 'notmaterial' : 원재료 빼고 , semi : 반제품, finish : 완제품,
+  const { type } = req.params;
+  try {
+    const result = await itemService.getPrcsItemList(type);
     res.send(result);
   } catch (e) {
     console.error(e);
@@ -75,7 +94,7 @@ router.get("/prod/prcsrouterlist", async (req, res) => {
 // getPrcsRouter -- 공정흐름도 리스트 조회
 router.get("/prod/prcsrouter", async (req, res) => {
   const { query } = req;
-  console.log(query)
+  console.log(query);
   try {
     const result = await prcsRouterService.getPrcsRouter(query);
     res.send(result);
@@ -92,7 +111,7 @@ router.get("/prod/prcslist", async (req, res) => {
   } catch (e) {
     console.error(e);
   }
-})
+});
 
 // addPrcsRouter -- 공정흐름도 CRUD
 router.post("/prod/saveprcsrouter", async (req, res) => {
@@ -113,13 +132,24 @@ router.get("/prod/getstatuszeroprodlist", async (req, res) => {
   } catch (e) {
     console.error(e);
   }
-})
+});
 
 // getFacilityByName -- 현재 공정의 설비 가져오기
-router.get('/prod/getfacilitybyname/:fNumber', async (req, res) => {
+router.get("/prod/getfacilitybyname/:fNumber", async (req, res) => {
   const { fNumber } = req.params;
-    try {
+  try {
     const result = await productionService.getFacilityListByName(fNumber);
+    res.send(result);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+// addProdACMSLT -- 생산 실적 등록
+router.post("/prod/addprodacmslt", async (req, res) => {
+  const { body } = req;
+  try {
+    const result = await productionService.addProdACMSLT(body);
     res.send(result);
   } catch (e) {
     console.error(e);

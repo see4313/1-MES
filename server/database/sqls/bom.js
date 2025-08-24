@@ -106,6 +106,17 @@ SELECT 1
    AND VER = ?
  LIMIT 1;
 `;
+//숫자증가
+const SQL_NEXT_VER_BY_ITEM = `
+SELECT CONCAT(
+         'ver',
+         COALESCE(
+           MAX(CAST(NULLIF(REGEXP_REPLACE(VER, '[^0-9]', ''), '') AS UNSIGNED)), 0
+         ) + 1
+       ) AS next_ver
+  FROM BOM
+ WHERE ITEM_ID = ?;
+`;
 
 // BOM INSERT (BOM_NUMBER 는 next_code('BOM') 사용)
 const SQL_BOM_INSERT = `
@@ -118,7 +129,7 @@ VALUES
 const SQL_BOM_UPDATE = `
 UPDATE BOM
    SET ITEM_ID    = ?,
-       \`USE\`      = ?,
+       \`USE\`    = ?,
        VER        = ?,
        START_DATE = ?,
        END_DATE   = ?,
@@ -172,6 +183,37 @@ const BomDetail = `
 DELETE FROM BOM_DETAIL
 WHERE BOM_NUMBER = ?;`;
 
+//같은 아이템일때 가장최신 버전찾기
+const SQL_FIND_LATEST_BOM_BY_ITEM = `
+SELECT B.BOM_NUMBER AS bom_number
+  FROM BOM B
+ WHERE TRIM(B.ITEM_ID) = TRIM(?)
+ ORDER BY CAST(NULLIF(REGEXP_REPLACE(B.VER, '[^0-9]', ''), '') AS UNSIGNED) DESC,
+          B.START_DATE DESC,
+          B.BOM_NUMBER DESC
+ LIMIT 1;
+`;
+//기존 BOM 헤더 단건 조회
+const SQL_GET_BOM_HEADER = `
+SELECT B.BOM_NUMBER                          AS bom_number,
+       B.ITEM_ID                             AS item_id,
+       B.\`USE\`                             AS use_yn,
+       B.VER                                 AS ver,
+       DATE_FORMAT(B.START_DATE,'%Y-%m-%d')   AS start_date,
+       DATE_FORMAT(B.END_DATE, '%Y-%m-%d')    AS end_date,
+       B.REMK                                 AS remk
+  FROM BOM B
+ WHERE B.BOM_NUMBER = ?;
+`;
+
+const deleteOrphanDetailsByBom = `
+  DELETE d
+  FROM BOM_DETAIL d
+  LEFT JOIN ITEM i ON i.ITEM_ID = d.ITEM_ID
+  WHERE d.BOM_NUMBER = ?
+    AND i.ITEM_ID IS NULL;
+`;
+//git 안올라감 test 중 test
 module.exports = {
   selectBomList,
   selectBomDetails,
@@ -185,6 +227,9 @@ module.exports = {
   BOM_DUP_BY_ID_VER,
   SQL_BOM_INSERT,
   SQL_BOM_UPDATE,
-
+  SQL_NEXT_VER_BY_ITEM,
   BOM_DUP_BY_ID_VER_EXCEPT,
+  SQL_FIND_LATEST_BOM_BY_ITEM,
+  SQL_GET_BOM_HEADER,
+  deleteOrphanDetailsByBom,
 };

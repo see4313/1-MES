@@ -27,6 +27,7 @@ export default defineConfig({
         entries: ['./src/**/*.vue']
     },
     server: {
+        host: '0.0.0.0',
         proxy: {
             '/api': {
                 target: 'http://localhost:3000',
@@ -34,5 +35,8 @@ export default defineConfig({
                 rewrite: (path) => path.replace(/^\/api/, '')
             }
         }
+    },
+    build: {
+        outDir: '../../server/public'
     }
 });

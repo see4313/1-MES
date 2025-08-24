@@ -51,7 +51,7 @@ watch(selectedPrcsRouter, async (newVal) => {
 // 품목 목록 조회 (모달용)
 const getItemList = async () => {
     try {
-        const { data } = await axios.get('/api/prod/itemlist/notmaterial');
+        const { data } = await axios.get('/api/prod/prcsitemlist/notmaterial');
         const excludeSet = new Set(prcsRouterList.value.map(p => p.itemId));
         return (data ?? []).filter(it => !excludeSet.has(it.itemId));
     } catch (e) {

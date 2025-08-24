@@ -24,10 +24,17 @@ const asString = (q, name) => {
 };
 
 const insertProdInstruct = (data) => {
-  const { itemType, startDate, goalDate, remark, details } = data;
+  const { itemType, startDate, goalDate, remark, details, bomDetails } = data;
   const type = typeMap[itemType];
-  const sql = `call add_prod_instruct(?, ?, ?, ?, ?, @out_no)`;
-  const params = [type, startDate, goalDate, remark, JSON.stringify(details)];
+  const sql = `call add_prod_instruct(?, ?, ?, ?, ?, ?, @out_no)`;
+  const params = [
+    type,
+    startDate,
+    goalDate,
+    remark,
+    JSON.stringify(details),
+    JSON.stringify(bomDetails),
+  ];
   return { sql, params };
 };
 
@@ -101,11 +108,25 @@ const selectDetailInstruction = (query) => {
       pid.item_id          as itemId,
       i.item_name          as itemName,
       pid.goal_qty         as goalQty,
-      pid.status
+      p.drct_qty           as currProdQty,
+      pid.status,
+      coalesce(
+        case when pid.status = -1 then '전량 폐기' end,
+        prcs.prcs_name,
+        '생산 완료'
+      ) as prcsName
     from PROD_INSTRUCT_DETAIL pid
-    join ITEM i on i.item_id = pid.item_id
-    where pid.instruct_no = ?
-    order by pid.deta_instruct_no
+    join ITEM i 
+      on i.item_id = pid.item_id
+    left join PROCESS_ROUTING prcsroute 
+      on prcsroute.item_id = pid.item_id
+    and prcsroute.op_no   = pid.status
+    left join PROCESS prcs 
+      on prcs.prcs_number  = prcsroute.prcs_number
+    join PRODUCTION p
+      on pid.deta_instruct_no = p.deta_instruct_no
+      where pid.instruct_no = ?
+      order by pid.deta_instruct_no;
   `;
 
   const params = [query.instructNo];
@@ -115,18 +136,21 @@ const selectDetailInstruction = (query) => {
 
 const selectStatusZeroProductionList = () => {
   const sql = `
-   SELECT
-        prod.prod_no          AS prodNo,
-        prod.deta_instruct_no AS detaInstructNo,
-        pid.item_id           AS itemId,
-        i.item_type           AS itemType,
-        i.item_name           AS itemName,
-        prod.prcs_number      AS prcsNumber,
-        prcsr.op_no			  AS opNo,
-        prcs.prcs_name		  AS prcsName,
-        prod.drct_qty         AS drctQty,
-        prod.status,
-        prod.remk
+    SELECT
+      pid.instruct_no        AS instructNo,
+      prod.deta_instruct_no  AS detaInstructNo,
+      prod.prod_no           AS prodNo,
+      pid.item_id            AS itemId,
+      i.item_type            AS itemType,
+      i.item_name            AS itemName,
+      prod.prcs_number       AS prcsNumber,
+      cur.op_no              AS currentOpNo,
+      last.lastOpNo          AS lastOpNo,
+      prcs.prcs_name         AS prcsName,
+      pi.instruct_datetime   AS instructDatetime,
+      prod.drct_qty          AS drctQty,
+      prod.status,
+      prod.remk
     FROM PRODUCTION prod
     JOIN PROD_INSTRUCT_DETAIL pid
       ON prod.deta_instruct_no = pid.deta_instruct_no
@@ -134,18 +158,26 @@ const selectStatusZeroProductionList = () => {
       ON pid.item_id = i.item_id
     JOIN PROCESS prcs
       ON prod.prcs_number = prcs.prcs_number
-	JOIN PROCESS_ROUTING prcsr
-	  ON prod.prcs_number = prcsr.prcs_number
-	 AND pid.item_id     = prcsr.item_id
+    JOIN PROCESS_ROUTING cur
+      ON prod.prcs_number = cur.prcs_number
+    AND pid.item_id     = cur.item_id
+    JOIN (
+        SELECT item_id, MAX(op_no) AS lastOpNo
+        FROM PROCESS_ROUTING
+        GROUP BY item_id
+    ) last
+      ON pid.item_id     = last.item_id
+    JOIN PROD_INSTRUCT pi
+      ON pid.instruct_no = pi.instruct_no
     WHERE prod.status = 0
+    ORDER BY prod.prod_no DESC
  `;
   return { sql };
 };
 
 const selectFacilityListByName = (fNumber) => {
   console.log(fNumber);
-  const sql =
-  `
+  const sql = `
     select
       f.facility_id as facilityId,
       f.facility_nm as facilityName
@@ -159,13 +191,72 @@ const selectFacilityListByName = (fNumber) => {
   params = [fNumber];
 
   return { sql, params };
+};
 
-}
+const insertProdACMSLT = (data) => {
+  const {
+    prodNo,
+    itemId,
+    empNo,
+    facilityNo,
+    inputQty,
+    inferQty,
+    prodQty,
+    currOpNo,
+    remk,
+  } = data;
+
+  const sql = `
+    call add_prod_acmslt(?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  params = [
+    prodNo,
+    itemId,
+    empNo,
+    facilityNo,
+    inputQty,
+    inferQty,
+    prodQty,
+    currOpNo,
+    remk,
+  ];
+
+  return { sql, params };
+};
+
+const bomItemList = (filters) => {
+  let sql = `
+    SELECT bd.item_id,
+           b.item_id as parent_item,
+           i.item_name,
+           i.conv_qty,
+           bd.usage,
+           bd.unit,
+           bd.loss
+    FROM   BOM_DETAIL bd JOIN BOM b
+					               ON   bd.bom_number = b.bom_number
+                         JOIN ITEM i
+                         ON   bd.item_id = i.item_id
+    WHERE  1 = 1
+  `;
+
+  const params = [];
+
+  if (filters.item_id) {
+    sql += " AND b.item_id = ?";
+    params.push(filters.item_id);
+  }
+
+  return { sql, params };
+};
 
 module.exports = {
   insertProdInstruct,
   selectInstructionList,
   selectDetailInstruction,
   selectStatusZeroProductionList,
-  selectFacilityListByName
+  selectFacilityListByName,
+  insertProdACMSLT,
+  bomItemList,
 };
