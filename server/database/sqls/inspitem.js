@@ -171,6 +171,7 @@ JOIN (
   ON pid.item_id = pr_max.ITEM_ID
  AND p.prcs_number = pr_max.PRCS_NUMBER
 `;
+
 // 발주 등록
 const examHisInsert = `
 CALL examHisInsert(?, ?, ?, ?, ?, ?, ?)
