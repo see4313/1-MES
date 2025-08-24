@@ -105,10 +105,37 @@ const examDetail = (filters) => {
   return { sql, params };
 };
 
-const prodList = `
+const prodList =
+  // `
+  // SELECT pa.rsrt_id,
+  // 	     pa.prod_id,
+  //        p.deta_instruct_no,
+  //        pid.item_id,
+  //        i.item_type,
+  //        i.item_name,
+  //        pa.emp_id,
+  //        e.emp_name,
+  //        pa.facility_id,
+  //        pa.input_qty,
+  //        pa.infer_qty,
+  //        pa.prod_qty,
+  //        pa.from_date,
+  //        pa.to_date,
+  //        pa.remk
+  // FROM   PROD_ACMSLT pa JOIN PRODUCTION p
+  // 				              ON   pa.prod_id = p.prod_no
+  //                       JOIN PROD_INSTRUCT_DETAIL pid
+  //                       ON   p.deta_instruct_no = pid.deta_instruct_no
+  //                       JOIN ITEM i
+  //                       ON   pid.item_id = i.item_id
+  //                       JOIN EMPLOYEE e
+  //                       ON   pa.emp_id = e.emp_id
+  // `;
+  `
 SELECT pa.rsrt_id,
-	     pa.prod_id,
+       pa.prod_id,
        p.deta_instruct_no,
+       p.prcs_number,
        pid.item_id,
        i.item_type,
        i.item_name,
@@ -121,16 +148,29 @@ SELECT pa.rsrt_id,
        pa.from_date,
        pa.to_date,
        pa.remk
-FROM   PROD_ACMSLT pa JOIN PRODUCTION p
-				              ON   pa.prod_id = p.prod_no
-                      JOIN PROD_INSTRUCT_DETAIL pid
-                      ON   p.deta_instruct_no = pid.deta_instruct_no
-                      JOIN ITEM i
-                      ON   pid.item_id = i.item_id
-                      JOIN EMPLOYEE e
-                      ON   pa.emp_id = e.emp_id
+FROM   PROD_ACMSLT pa
+JOIN   PRODUCTION p
+       ON pa.prod_id = p.prod_no
+JOIN   PROD_INSTRUCT_DETAIL pid
+       ON p.deta_instruct_no = pid.deta_instruct_no
+JOIN   ITEM i
+       ON pid.item_id = i.item_id
+JOIN   EMPLOYEE e
+       ON pa.emp_id = e.emp_id
+JOIN (
+    SELECT pr.ITEM_ID, pr.PRCS_NUMBER
+    FROM PROCESS_ROUTING pr
+    JOIN (
+        SELECT ITEM_ID, MAX(OP_NO) AS MAX_OP_NO
+        FROM PROCESS_ROUTING
+        GROUP BY ITEM_ID
+    ) t
+      ON pr.ITEM_ID = t.ITEM_ID
+     AND pr.OP_NO = t.MAX_OP_NO
+) pr_max
+  ON pid.item_id = pr_max.ITEM_ID
+ AND p.prcs_number = pr_max.PRCS_NUMBER
 `;
-
 // 발주 등록
 const examHisInsert = `
 CALL examHisInsert(?, ?, ?, ?, ?, ?, ?)

@@ -93,7 +93,7 @@ const { snackBar } = useSnackBar();
 const showModal = ref(false); // 제품코드모달
 const selectedItem = ref(null); // 제품코드선택
 const selectedProducts = ref(null);
-const insertList = ref();
+const insertList = ref([]);
 
 const remainQty = (row) => {
     return row.exam_qty - row.bnt;
