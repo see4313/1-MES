@@ -468,6 +468,19 @@ const setNextVerLabel = async (itemId) => {
     createForm.value.ver = await fetchNextVerByItem(itemId);
 };
 
+//수정시에도 행추가
+const isExistingDetail = (r) => !!r?.bom_detail_no;
+
+const pickNewDetails = (rows = detailRows.value) =>
+    (Array.isArray(rows) ? rows : [])
+        .filter((r) => !isExistingDetail(r))
+        .map((r) => ({
+            item_id: r.item_id,
+            unit: r.unit,
+            usage: Number(r.usage) || 0,
+            loss: Number(r.loss ?? 0) || 0
+        }));
+
 /* ===== 모달 선택 핸들러 ===== */
 const onSelectBom = async (row) => {
     if (!row) return (showBomModal.value = false);
@@ -594,24 +607,38 @@ const onClickSave = async () => {
 
     try {
         if (isUpdate) {
-            // ===== 기존 BOM 헤더 수정 (버전은 변경하지 않고 그대로 유지) =====
+            // ===== 기존 BOM 헤더 수정 (버전은 유지) =====
             const payload = {
                 itemId: createForm.value.itemId,
                 use: createForm.value.useYn || 'Y',
-                ver: createForm.value.ver, // 서버가 ver 미전송 시 기본값 처리하는 경우를 막기 위해 현재 ver 전달
+                ver: createForm.value.ver,
                 startDate: toDateStr(createForm.value.startDate),
                 endDate: toDateStr(createForm.value.endDate),
                 remk: createForm.value.remark || null
             };
+
             await axios.put(`/api/bom/${enc(createForm.value.id)}`, payload);
-            notify('BOM 헤더가 수정되었습니다.');
-            // 필요 시 재조회/동기화 로직 추가 가능
+
+            // 🔹 신규로 "행추가"한 상세만 골라 저장
+            const newDetails = pickNewDetails();
+
+            if (newDetails.length > 0) {
+                // 신규 상세 유효성 검사(필요한 필드만 검사)
+                const err = validateDetailRows(newDetails);
+                if (err) {
+                    notify(err, 'warning');
+                    return;
+                }
+
+                await axios.post(`/api/bom/${enc(createForm.value.id)}/details`, { details: newDetails });
+                notify('BOM 헤더 및 신규 상세가 저장되었습니다.');
+                await reloadDetailsIfNeeded(); // 테이블 싱크
+            } else {
+                notify('BOM 헤더가 수정되었습니다.');
+            }
+
             return;
         }
-
-        // ===== 신규 BOM 생성 (헤더+상세) =====
-        const ok = window.confirm('등록하시겠습니까?');
-        if (!ok) return;
 
         const header = {
             item_id: createForm.value.itemId,
