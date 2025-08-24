@@ -3,7 +3,10 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const path = require("path");
+const publicPath = path.join(__dirname, "public");
 
+const nodeEnv = process.argv[2] == "production";
 // 미들웨어
 // application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
@@ -38,28 +41,75 @@ const repairHistRouter = require("./routers/repairHistRouter");
 const failureTypeRouter = require("./routers/failureTypeRouter");
 const downtimeRouter = require("./routers/downtimeRouter");
 const urgencyRouter = require("./routers/urgencyRouter");
+if (!nodeEnv) {
+  console.log(nodeEnv, "개발모드");
+  app.use(vendRouter);
+  app.use(orderRouter);
+  app.use(employeeRouter);
+  app.use(materialRouter);
+  app.use(inspItemRouter);
+  app.use(vendorRouter);
+  app.use(productionRouter);
+  app.use(bomRouter);
+  app.use(facilityRouter);
+  app.use(cleanHistRouter);
+  app.use(productRouter);
+  app.use(warehouseRouter);
+  app.use(processRouter);
+  app.use(dashboardRouter);
+  app.use(inspectHistRouter);
+  app.use(repairHistRouter);
+  app.use(failureTypeRouter);
+  app.use(downtimeRouter);
+  app.use(urgencyRouter);
+} else {
+  console.log(nodeEnv, "운영모드");
+  // app.use(`/${apiPath}`, vendRouter);
+  // app.use(`/${apiPath}`, orderRouter);
+  // app.use(`/${apiPath}`, employeeRouter);
+  // app.use(`/${apiPath}`, materialRouter);
+  // app.use(`/${apiPath}`, inspItemRouter);
+  // app.use(`/${apiPath}`, vendorRouter);
+  // app.use(`/${apiPath}`, productionRouter);
+  // app.use(`/${apiPath}`, bomRouter);
+  // app.use(`/${apiPath}`, facilityRouter);
+  // app.use(`/${apiPath}`, cleanHistRouter);
+  // app.use(`/${apiPath}`, productRouter);
+  // app.use(`/${apiPath}`, warehouseRouter);
+  // app.use(`/${apiPath}`, processRouter);
+  // app.use(`/${apiPath}`, dashboardRouter);
+  // app.use(`/${apiPath}`, inspectHistRouter);
+  // app.use(`/${apiPath}`, repairHistRouter);
+  // app.use(`/${apiPath}`, failureTypeRouter);
+  // app.use(`/${apiPath}`, downtimeRouter);
+  // app.use(`/${apiPath}`, urgencyRouter);
 
-// 기본 라우팅
+  app.use(`/api`, vendRouter);
+  app.use(`/api`, orderRouter);
+  app.use(`/api`, employeeRouter);
+  app.use(`/api`, materialRouter);
+  app.use(`/api`, inspItemRouter);
+  app.use(`/api`, vendorRouter);
+  app.use(`/api`, productionRouter);
+  app.use(`/api`, bomRouter);
+  app.use(`/api`, facilityRouter);
+  app.use(`/api`, cleanHistRouter);
+  app.use(`/api`, productRouter);
+  app.use(`/api`, warehouseRouter);
+  app.use(`/api`, processRouter);
+  app.use(`/api`, dashboardRouter);
+  app.use(`/api`, inspectHistRouter);
+  app.use(`/api`, repairHistRouter);
+  app.use(`/api`, failureTypeRouter);
+  app.use(`/api`, downtimeRouter);
+  app.use(`/api`, urgencyRouter);
+}
+app.use(express.static(publicPath));
+
 app.get("/", (req, res) => {
-  res.send("Welcome!!");
+  res.sendFile(path.join(__dirname, "./public", "index.html"));
 });
 
-app.use(vendRouter);
-app.use(orderRouter);
-app.use(employeeRouter);
-app.use(materialRouter);
-app.use(inspItemRouter);
-app.use(vendorRouter);
-app.use(productionRouter);
-app.use(bomRouter);
-app.use(facilityRouter);
-app.use(cleanHistRouter);
-app.use(productRouter);
-app.use(warehouseRouter);
-app.use(processRouter);
-app.use(dashboardRouter);
-app.use(inspectHistRouter);
-app.use(repairHistRouter);
-app.use(failureTypeRouter);
-app.use(downtimeRouter);
-app.use(urgencyRouter);
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "./public", "index.html"));
+});
