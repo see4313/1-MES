@@ -160,7 +160,10 @@ const formattedpapDate = computed(() => {
 
 const fetchEmp = async () => {
     try {
-        const response = await axios.get('/api/selectEmp');
+        const params = {
+            dept_id: 'D004'
+        };
+        const response = await axios.get('/api/selectEmp', { params });
         return response.data; // 반드시 배열 형태여야 함
     } catch (error) {
         snackBar('조회 실패.', 'error');
@@ -171,7 +174,9 @@ const fetchEmp = async () => {
 const fetchItem = async () => {
     try {
         const params = {
-            uon: 'Y' // 사용여부
+            uon: 'Y', // 사용여부
+            item_type: '완제품',
+            item_type1: '반제품'
         };
         const response = await axios.get('/api/itemList', { params });
         return response.data; // 반드시 배열 형태여야 함
@@ -255,9 +260,24 @@ const dataReset = () => {
 
 // 등록 실행
 const addExam = async () => {
+    if (!selectItemId.value) {
+        snackBar('품목을 선택해주세요.', 'warning');
+        return;
+    }
+    if (!selectEmpId.value) {
+        snackBar('담당자를 선택해주세요.', 'warning');
+        return;
+    }
+
     // 상세 항목 존재 여부 체크
     if (!examDetailList.value || examDetailList.value.length === 0) {
         snackBar('상세 항목을 하나 이상 선택해주세요.', 'warning');
+        return;
+    }
+
+    const invalidRow = examDetailList.value.find((row) => !row.insp_id);
+    if (invalidRow) {
+        snackBar('검사 번호를 선택하지 않은 행이 있습니다.', 'warning');
         return;
     }
 

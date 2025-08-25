@@ -306,11 +306,22 @@ const onSelectEmp = (item) => {
 
 const onSelectItem = (item) => {
     if (itemModalIndex.value != null) {
+        // 중복 체크
+        const exists = procDetailList.value.some((row, idx) => row.item_id === item.item_id && idx !== itemModalIndex.value);
+
+        if (exists) {
+            snackBar('이미 추가된 품목입니다.', 'warning');
+            return; // 중복이면 종료
+        }
+
+        // 중복 없으면 행에 데이터 반영
         const row = procDetailList.value[itemModalIndex.value];
         row.item_id = item.item_id;
         row.item_name = item.item_name;
         row.unit = item.unit;
         row.spec = item.spec;
+
+        // 모달 닫기
         itemModal.value = false;
         itemModalIndex.value = null;
     }
