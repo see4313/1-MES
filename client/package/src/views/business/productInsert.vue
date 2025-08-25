@@ -40,11 +40,7 @@
                 <Column field="item_name" header="제품명"></Column>
                 <Column field="item_type" header="제품유형"></Column>
                 <Column field="exam_qty" header="수량"></Column>
-                <Column header="입고가능수량">
-                    <template #body="{ data }">
-                        {{ remainQty(data) }}
-                    </template>
-                </Column>
+                <Column field="remain_qty" header="입고가능수량"></Column>
                 <Column header="입고수량" style="width: 120px">
                     <template #body="{ data }">
                         <v-text-field type="number" dense hide-details style="width: 100px" variant="outlined" min="0" v-model="data.qty" />
@@ -95,10 +91,6 @@ const selectedItem = ref(null); // 제품코드선택
 const selectedProducts = ref(null);
 const insertList = ref([]);
 
-const remainQty = (row) => {
-    return row.exam_qty - row.total_qty;
-};
-
 // 입고가능수량이 0보다 큰 데이터만 표시
 // const filteredList = computed(() => {
 //     return insertList.value.filter((row) => remainQty(row) > 0);
@@ -136,8 +128,8 @@ const productInsert = async () => {
     }
 
     for (let item of selectedProducts.value) {
-        const availableQty = remainQty(item);
-        if (!item.qty || item.qty <= 0) {
+        const availableQty = item.remain_qty;
+        if (!item.remain_qty || item.remain_qty <= 0) {
             snackBar(`입고수량은 0보다 커야 합니다.`, 'warning');
             return;
         }
@@ -153,7 +145,8 @@ const productInsert = async () => {
             item_id: item.item_id,
             qty: item.qty,
             remk: item.remk,
-            exam_id: item.exam_id
+            exam_id: item.exam_id,
+            rsrt_id: item.rsrt_id
         }));
         const response = await axios.post('/api/productInsert', payload);
 

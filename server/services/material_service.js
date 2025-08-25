@@ -93,6 +93,7 @@ const modifyItem = async (item) => {
     "uon",
     "remk",
     "exp_date",
+    "safe_qty",
     "item_id",
   ]);
   let resInfo = await mariadb.query("itemUpdate", updateData);
@@ -120,6 +121,7 @@ const addItem = async (item) => {
     "remk",
     "conv_qty",
     "exp_date",
+    "safe_qty",
   ]);
   let resInfo = await mariadb.query("itemInsert", insertData);
 
