@@ -50,7 +50,7 @@
                         <v-text-field variant="outlined" label="온도(℃)" v-model="searchForm.temp" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="습도(%)" v-model="searchForm.rh" />
+                        <v-text-field variant="outlined" label="습도(%)" v-model="searchForm.rh" type="number" @input="inputrh" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="창고위치" v-model="searchForm.warehouseLoca" />
@@ -154,7 +154,7 @@
                         <v-text-field variant="outlined" label="온도(℃)" v-model="createForm.temp" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="습도(%)" v-model="createForm.rh" />
+                        <v-text-field variant="outlined" label="습도(%)" v-model="createForm.rh" type="number" @input="inputrh" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="비고" v-model="createForm.remark" />
@@ -332,8 +332,19 @@ watch(selectedRow, (row) => {
     };
 });
 
+const inputrh = () => {
+    if (searchForm.value.rh <= 0) {
+        notify('습도 0보다 같거나 작을수 없습니다.', 'warning');
+        searchForm.value.rh = 1;
+    }
+    if (createForm.value.rh <= 0) {
+        notify('습도 0보다 같거나 작을수 없습니다.', 'warning');
+        createForm.value.rh = 1;
+    }
+};
+
 /* ===== 필수값 검사 ===== */
-const validateRequired = (f) => !!(f.warehouseName && f.useYn && f.warehouseLoca);
+const validateRequired = (f) => !!(f.warehouseName && f.useYn && f.warehouseLoca && f.temp && f.rh);
 
 const isSaving = ref(false);
 const enc = encodeURIComponent;

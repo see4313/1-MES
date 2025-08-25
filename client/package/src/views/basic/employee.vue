@@ -34,7 +34,7 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" v-model="searchForm.phone" />
+                        <v-text-field variant="outlined" label="연락처" v-model="searchForm.phone" @input="onPhoneInput" />
                     </v-col>
 
                     <!-- 입사일(조회) -->
@@ -185,7 +185,7 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" v-model="createForm.phone" />
+                        <v-text-field variant="outlined" label="연락처" v-model="createForm.phone" @input="onPhoneInput" />
                     </v-col>
 
                     <!-- 입사일(등록/수정) -->
@@ -525,6 +525,30 @@ watch(selectedRow, (row) => {
 });
 /* ===== 공용 ===== */
 const validateRequired = (f) => !!(f.name && f.dept && f.phone && f.joinDate && f.status && f.permName);
+
+//연락처 -
+function onPhoneInput() {
+    // 숫자만 남기기
+    let digits = (createForm.value.phone || '').replace(/\D/g, '');
+    let digits2 = (searchForm.value.phone || '').replace(/\D/g, '');
+
+    // 정규식으로 하이픈 삽입
+    if (digits.length <= 3) {
+        createForm.value.phone = digits;
+    } else if (digits.length <= 7) {
+        createForm.value.phone = digits.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+    } else {
+        createForm.value.phone = digits.replace(/(\d{3})(\d{3,4})(\d{1,4}).*/, '$1-$2-$3');
+    }
+    // 정규식으로 하이픈 삽입
+    if (digits2.length <= 3) {
+        searchForm.value.phone = digits2;
+    } else if (digits2.length <= 7) {
+        searchForm.value.phone = digits2.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+    } else {
+        searchForm.value.phone = digits2.replace(/(\d{3})(\d{3,4})(\d{1,4}).*/, '$1-$2-$3');
+    }
+}
 
 /* ===== 등록 ===== */
 const snackOpen = ref(false);
