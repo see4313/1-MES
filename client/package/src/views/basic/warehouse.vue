@@ -47,7 +47,7 @@
                         <v-text-field variant="outlined" label="창고명" v-model="searchForm.warehouseName" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="온도(℃)" v-model="searchForm.temp" />
+                        <v-text-field variant="outlined" label="온도(℃)" v-model="searchForm.temp" type="number" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="습도(%)" v-model="searchForm.rh" type="number" @input="inputrh" />
@@ -151,7 +151,7 @@
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="온도(℃)" v-model="createForm.temp" />
+                        <v-text-field variant="outlined" label="온도(℃)" v-model="createForm.temp" type="number" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="습도(%)" v-model="createForm.rh" type="number" @input="inputrh" />
@@ -333,11 +333,11 @@ watch(selectedRow, (row) => {
 });
 
 const inputrh = () => {
-    if (searchForm.value.rh <= 0) {
+    if (searchForm.value.rh <= 0 && searchForm.value.rh) {
         notify('습도 0보다 같거나 작을수 없습니다.', 'warning');
         searchForm.value.rh = 1;
     }
-    if (createForm.value.rh <= 0) {
+    if (createForm.value.rh <= 0 && createForm.value.rh) {
         notify('습도 0보다 같거나 작을수 없습니다.', 'warning');
         createForm.value.rh = 1;
     }
