@@ -455,13 +455,13 @@ const fetchItemList = async (q = '') => {
 
 // 다음 버전 라벨("verN")
 const fetchNextVerByItem = async (itemId) => {
-    if (!itemId) return '';
+    if (!itemId) return 'ver1';
     try {
         const { data } = await axios.get('/api/bom/maxVersion', { params: { itemId } });
-        return String(data?.ver ?? '').trim();
-    } catch (e) {
-        console.warn('fetchNextVerByItem error:', e?.message || e);
-        return '';
+        const v = String(data?.ver ?? '1').trim();
+        return v.toLowerCase().startsWith('ver') ? v.toLowerCase() : `ver${v}`;
+    } catch {
+        return 'ver1';
     }
 };
 const setNextVerLabel = async (itemId) => {
@@ -482,6 +482,13 @@ const pickNewDetails = (rows = detailRows.value) =>
         }));
 
 /* ===== 모달 선택 핸들러 ===== */
+
+const asVer = (v) => {
+    const m = String(v ?? '').match(/\d+/);
+    const n = m ? Number(m[0]) : 1;
+    return `ver${n}`;
+};
+
 const onSelectBom = async (row) => {
     if (!row) return (showBomModal.value = false);
 
@@ -490,7 +497,7 @@ const onSelectBom = async (row) => {
         id: bomNumber,
         itemId: row.item_id ?? row.itemId ?? '',
         itemName: row.item_name ?? row.itemName ?? '',
-        ver: row.ver ?? '',
+        ver: asVer(row.ver ?? ''),
         startDate: row.start_date ? asDate(row.start_date) : null,
         endDate: row.end_date ? asDate(row.end_date) : null,
         useYn: row.use_yn ?? row.useYn ?? 'Y',
@@ -611,7 +618,7 @@ const onClickSave = async () => {
             const payload = {
                 itemId: createForm.value.itemId,
                 use: createForm.value.useYn || 'Y',
-                ver: createForm.value.ver,
+                ver: asVer(createForm.value.ver),
                 startDate: toDateStr(createForm.value.startDate),
                 endDate: toDateStr(createForm.value.endDate),
                 remk: createForm.value.remark || null
@@ -642,12 +649,12 @@ const onClickSave = async () => {
 
         const header = {
             item_id: createForm.value.itemId,
+            ver: asVer(createForm.value.ver || (await fetchNextVerByItem(createForm.value.itemId))),
             use_yn: createForm.value.useYn || 'Y',
             start_date: toDateStr(createForm.value.startDate),
             end_date: toDateStr(createForm.value.endDate),
             remk: createForm.value.remark || null
         };
-
         const details = Array.isArray(detailRows.value)
             ? detailRows.value.map((r) => ({
                   item_id: r.item_id,
@@ -783,6 +790,7 @@ const onClickDetailInsert = async () => {
                 remk: createForm.value.remark || null
             };
 
+            await axios.post('/api/bom', { header, details });
             const details = detailRows.value.map((r) => ({
                 item_id: r.item_id,
                 unit: r.unit,
