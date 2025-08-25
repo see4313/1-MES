@@ -28,7 +28,7 @@
             </v-row>
 
             <DataTable
-                :value="filteredList"
+                :value="insertList"
                 tableStyle="min-width: 50rem"
                 v-model:selection="selectedProducts"
                 class="cursor-pointer"
@@ -96,13 +96,13 @@ const selectedProducts = ref(null);
 const insertList = ref([]);
 
 const remainQty = (row) => {
-    return row.exam_qty - row.bnt;
+    return row.exam_qty - row.total_qty;
 };
 
 // 입고가능수량이 0보다 큰 데이터만 표시
-const filteredList = computed(() => {
-    return insertList.value.filter((row) => remainQty(row) > 0);
-});
+// const filteredList = computed(() => {
+//     return insertList.value.filter((row) => remainQty(row) > 0);
+// });
 
 // 완제품 입고 목록
 const Select = async () => {
@@ -160,6 +160,7 @@ const productInsert = async () => {
         if (response.data.result) {
             snackBar('입고 완료', 'success');
             selectedProducts.value = null;
+            Select();
         } else {
             snackBar('등록 실패.', 'error');
         }

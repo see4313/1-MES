@@ -582,7 +582,7 @@ async function onClickSave() {
     const isUpdate = !!createForm.value.id;
 
     if (createForm.value.phone.length != 13) {
-        return notify('11자리만 입력가능합니다.', 'warning');
+        return notify('연락처는 11자리만 등록가능합니다.', 'warning');
     }
 
     // 유효성

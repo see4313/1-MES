@@ -149,7 +149,7 @@ const sidebarItem = [
             {
                 title: '검사항목 관리',
                 to: '/insp',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: '불량코드 관리',
@@ -208,7 +208,7 @@ const sidebarItem = [
             {
                 title: '설비 관리',
                 to: '/facility/management',
-                roles: ['admin', 'prod', 'mgr']
+                roles: ['admin', 'mgr']
             },
             {
                 title: '점검 이력 관리',
