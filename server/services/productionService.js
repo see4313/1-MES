@@ -9,7 +9,6 @@ const bomItemList = async (filters) => {
 const addProdInstructions = async (data) => {
   try {
     const result = await db.query("insertProdInstruct", data);
-    console.log(result);
     return result;
   } catch (e) {
     console.error(e);
