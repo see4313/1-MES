@@ -56,8 +56,14 @@
                 >
                 <Column field="emp_name" header="담당자"></Column>
                 <Column field="vend_name" header="업체명"></Column>
-                <Column field="st" header="상태"></Column>
-                <Column field="remk" header="비고"></Column>
+                <Column header="상태">
+                    <template #body="{ data: d }">
+                        <v-chip size="x-small" variant="outlined" :color="d.st === '완료' ? 'success' : 'warning'" label>
+                            {{ d.st }}
+                        </v-chip>
+                    </template>
+                </Column>
+                <Column field="remk" header="비고"> </Column>
             </DataTable>
         </v-card>
 
@@ -142,6 +148,7 @@ const Select = async () => {
         };
         const response = await axios.get('/api/orderList', { params });
         orderList.value = response.data;
+        console.log(orderList.value);
     } catch (error) {
         snackBar('조회 실패.', 'error');
     }

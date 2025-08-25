@@ -1,6 +1,6 @@
 const productList = (filters) => {
   let sql = `
-  SELECT inv.lot_id, 
+SELECT inv.lot_id, 
         inv.item_id,
         inv.crea_date,
         inv.vald_date,
@@ -15,6 +15,7 @@ JOIN ITEM item
               ON inv.item_id = item.item_id
 WHERE 1 = 1
 AND item.item_type = '완제품'
+OR item.item_type = '반제품'
 AND inv.status = '사용가능'
 `;
   const params = [];
