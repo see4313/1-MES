@@ -21,6 +21,7 @@ const inventoryList = (filters) => {
                         JOIN WAREHOUSE wh
                         ON   iv.wh_id = wh.wh_id
     WHERE  1=1
+    AND    it.item_type = '원재료'
   `;
 
   const params = [];
@@ -36,10 +37,6 @@ const inventoryList = (filters) => {
   if (filters.lot_id) {
     sql += " AND iv.lot_id = ?";
     params.push(filters.lot_id);
-  }
-  if (filters.item_type) {
-    sql += " AND it.item_type = ?";
-    params.push(filters.item_type);
   }
   if (filters.cutd_cond) {
     sql += " AND it.cutd_cond = ?";
@@ -183,6 +180,10 @@ const itemList = (filters) => {
   if (filters.item_type) {
     sql += " AND item_type = ?";
     params.push(filters.item_type);
+  }
+  if (filters.item_type1) {
+    sql += " OR item_type = ?";
+    params.push(filters.item_type1);
   }
   if (filters.cutd_cond) {
     sql += " AND cutd_cond = ?";
