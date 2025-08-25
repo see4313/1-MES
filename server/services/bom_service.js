@@ -63,8 +63,8 @@ async function getBomDetails(bomNumber) {
     return [];
   }
 }
-async function itemModal() {
-  return rows(await mapper.query("itemModal", []));
+async function itemModal(keyword = "", scope = "") {
+  return rows(await mapper.query("itemModal", { keyword, scope }));
 }
 async function nextVerLabelByItemId(itemId) {
   if (!itemId) return "ver1";

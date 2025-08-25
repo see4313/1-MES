@@ -445,14 +445,22 @@ const fetchBomDetails = async (bomNumber) => {
 
 const fetchItemList = async (q = '') => {
     try {
-        const { data } = await axios.get('/api/item', { params: { keyword: q || undefined } });
+        const scope =
+            itemModalTarget.value === 'create'
+                ? 'header' // BOM 등록(헤더): 완제품만
+                : itemModalTarget.value === 'detail'
+                  ? 'detail' // 상세: 반제품/원재료만
+                  : ''; // 검색: 전체
+
+        const { data } = await axios.get('/api/item', {
+            params: { keyword: q || undefined, scope }
+        });
         return unwrap(data);
     } catch (e) {
         console.warn('[fetchItemList] API 조정 필요', e?.message || e);
         return [];
     }
 };
-
 // 다음 버전 라벨("verN")
 const fetchNextVerByItem = async (itemId) => {
     if (!itemId) return 'ver1';
