@@ -9,14 +9,15 @@ SELECT inv.lot_id,
         inv.wh_id,
         item.safe_qty,
         inv.bnt,
+        inv.status,
         (item.safe_qty / NULLIF(inv.bnt, 0)) AS psafe
 FROM INVENTORY inv 
 JOIN ITEM item
               ON inv.item_id = item.item_id
 WHERE 1 = 1
-AND item.item_type = '완제품'
-OR item.item_type = '반제품'
 AND inv.status = '사용가능'
+AND item.item_type = '완제품'
+OR item.item_type = '반제품';
 `;
   const params = [];
 
@@ -38,20 +39,13 @@ SELECT
     it.item_type,
     i.sttus,
     i.exam_qty,
-    COALESCE(s.total_entebord_qty, 0) AS total_qty
+    i.remain_qty
 FROM ITEM_EXAM_HIS i
-LEFT JOIN (
-    SELECT 
-        his_id, 
-        SUM(entebord_qty) AS total_entebord_qty
-    FROM INVENTORY
-    GROUP BY his_id
-) s
-    ON i.exam_id = s.his_id
+
 JOIN ITEM it
     ON i.item_id = it.item_id
 WHERE i.sttus = '합격'
-  AND i.exam_qty <> COALESCE(s.total_entebord_qty, 0);
+  AND i.remain_qty <> 0;
 `;
   const params = [];
 

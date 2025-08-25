@@ -227,7 +227,6 @@ WHERE p.status = 1
 `
 ;
 
-// 발주 등록
 const examHisInsert = `
 CALL examHisInsert(?, ?, ?, ?, ?, ?, ?)
 `;

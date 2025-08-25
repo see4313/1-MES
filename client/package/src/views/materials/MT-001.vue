@@ -76,6 +76,7 @@
                                     <Column field="spec" header="규격" style="width: 130px"></Column>
                                     <Column field="unit" header="단위" style="width: 100px"></Column>
                                     <Column field="exp_date" header="유효기한 일자" style="width: 125px; text-align: right"></Column>
+                                    <Column field="safe_qty" header="안전재고" style="width: 120px"></Column>
                                     <Column field="uon" header="사용여부" style="width: 120px"></Column>
                                     <Column field="remk" header="비고"></Column>
                                 </DataTable>
@@ -108,20 +109,25 @@
             <v-row>
                 <v-col cols="12" md="8">
                     <v-row justify="space-between" dense>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="3">
                             <v-text-field label="품목명" v-model="itemName" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="3">
                             <v-text-field label="품목구분" v-model="itemType" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemTypeModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="3">
                             <v-text-field label="규격" v-model="itemSpec" variant="outlined">
+                                <!-- 직접 입력 -->
+                            </v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="3">
+                            <v-text-field label="안전재고" v-model="itemSafe" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
@@ -281,6 +287,7 @@ const itemUseYn = ref(null);
 const itemRemk = ref(null);
 const convQty = ref(null);
 const expDate = ref(null);
+const itemSafe = ref(null);
 const itemList = ref(); // 조회 목록
 const itemNameModal = ref(false); // 품목명 모달
 const itemTypeModal = ref(false); // 품목구분 모달
@@ -319,6 +326,7 @@ function dataReset() {
     itemRemk.value = null;
     convQty.value = null;
     expDate.value = null;
+    itemSafe.value = null;
 }
 
 // 행 선택
@@ -336,6 +344,7 @@ watch(selectItemList, (newVal) => {
         itemUseYn.value = newVal.uon;
         itemRemk.value = newVal.remk;
         expDate.value = newVal.exp_date;
+        itemSafe.value = newVal.safe_qty;
     }
 });
 
@@ -359,10 +368,10 @@ const itemSave = async () => {
         !itemType.value ||
         !itemSpec.value ||
         !expDate.value ||
-        // !convQty.value ||
         !selectUnit.value ||
         !itemCutd.value ||
-        !itemUseYn.value
+        !itemUseYn.value ||
+        !itemSafe.value
     ) {
         snackBar('모든 필수 항목을 입력해주세요.', 'warning');
         return;
@@ -379,6 +388,7 @@ const itemSave = async () => {
                 uon: itemUseYn.value,
                 remk: itemRemk.value,
                 exp_date: expDate.value,
+                safe_qty: itemSafe.value,
                 conv_qty: itemType.value === '원재료' ? (itemSpec.value ? Number(itemSpec.value.replace(/[^0-9]/g, '')) : 0) : 1
             };
 
@@ -400,7 +410,8 @@ const itemSave = async () => {
                 remk: itemRemk.value,
                 item_id: itemId.value,
                 conv_qty: convQty.value,
-                exp_date: expDate.value
+                exp_date: expDate.value,
+                safe_qty: itemSafe.value
             };
 
             let response = await axios.put('/api/itemUpdate', obj).catch((err) => console.log(err));

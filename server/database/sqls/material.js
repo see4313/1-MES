@@ -58,26 +58,39 @@ const inventoryList = (filters) => {
 const historyList = (filters) => {
   let sql = `
     WITH latest_exam AS (
-    SELECT *,
-           ROW_NUMBER() OVER(PARTITION BY rsrt_id ORDER BY exam_date DESC) AS rn
-    FROM ITEM_EXAM_HIS
-)
-SELECT 
-    lh.history_id,
-    lh.lot_id,
-    COALESCE(iv.item_id, le.item_id) AS item_id,
-    lh.rsrt_id,
-    COALESCE(i.item_name, i2.item_name) AS item_name,
-    COALESCE(i.item_type, i2.item_type) AS item_type,
-    lh.use_qty,
-    lh.use_date,
-    lh.remk
-FROM LOT_HISTORY lh
-LEFT JOIN INVENTORY iv ON lh.lot_id = iv.lot_id
-LEFT JOIN ITEM i ON iv.item_id = i.item_id
-LEFT JOIN latest_exam le ON lh.rsrt_id = le.rsrt_id AND le.rn = 1
-LEFT JOIN ITEM i2 ON le.item_id = i2.item_id
-WHERE 1 = 1
+        SELECT *,
+              ROW_NUMBER() OVER(PARTITION BY rsrt_id ORDER BY exam_date DESC) AS rn
+        FROM ITEM_EXAM_HIS
+    )
+    SELECT 
+        lh.history_id,
+        lh.lot_id,
+        COALESCE(iv.item_id, le.item_id, pid.item_id) AS item_id,
+        lh.rsrt_id,
+        COALESCE(i.item_name, i2.item_name, i3.item_name) AS item_name,
+        COALESCE(i.item_type, i2.item_type, i3.item_type) AS item_type,
+        lh.use_qty,
+        lh.use_date,
+        lh.remk
+    FROM LOT_HISTORY lh
+    LEFT JOIN INVENTORY iv 
+          ON lh.lot_id = iv.lot_id
+    LEFT JOIN ITEM i 
+          ON iv.item_id = i.item_id
+    LEFT JOIN latest_exam le 
+          ON lh.rsrt_id = le.rsrt_id 
+          AND le.rn = 1
+    LEFT JOIN ITEM i2 
+          ON le.item_id = i2.item_id
+    LEFT JOIN PROD_ACMSLT pa 
+          ON lh.rsrt_id = pa.rsrt_id
+    LEFT JOIN PRODUCTION pr 
+          ON pa.prod_id = pr.prod_no
+    LEFT JOIN PROD_INSTRUCT_DETAIL pid
+          ON pr.deta_instruct_no = pid.deta_instruct_no
+    LEFT JOIN ITEM i3 
+          ON pid.item_id = i3.item_id
+    WHERE 1=1
   `;
 
   const params = [];
@@ -274,14 +287,14 @@ WHERE item_id = ?
 // 품목 수정
 const itemUpdate = `
 UPDATE ITEM
-SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?, exp_date = ?
+SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?, exp_date = ?, safe_qty = ?
 WHERE  item_id = ?
 `;
 
 // 품목 등록
 const itemInsert = `
-INSERT INTO ITEM (item_id, item_name, item_type, unit, spec, cutd_cond, uon, remk, conv_qty, exp_date)
-VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO ITEM (item_id, item_name, item_type, unit, spec, cutd_cond, uon, remk, conv_qty, exp_date, safe_qty)
+VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 // 발주 등록
