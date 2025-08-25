@@ -120,7 +120,7 @@
                                     min="0"
                                 /> </template
                         ></Column>
-                        <Column field="amt" header="금액" style="width: 500px"
+                        <Column field="amt" header="금액 (원)" style="width: 500px"
                             ><template #body="slotProps">
                                 <v-text-field
                                     v-model.number="orderDetails[slotProps.index].amt"
@@ -130,11 +130,12 @@
                                     style="width: 100px"
                                     variant="outlined"
                                     min="0"
+                                    @blur="formatCurrencyField(slotProps.index, 'amt')"
                                 /> </template
                         ></Column>
-                        <Column field="tamt" header="총 금액(원)" style="width: 500px">
+                        <Column field="tamt" header="총 금액 (원)" style="width: 500px">
                             <template #body="slotProps">
-                                {{ (slotProps.data.qty * slotProps.data.amt).toLocaleString() }}
+                                {{ formatCurrency(slotProps.data.qty * slotProps.data.amt) }}
                             </template></Column
                         >
                         <!-- 삭제 버튼 -->
@@ -160,7 +161,11 @@
             { key: 'order_id', label: '주문번호' },
             { key: 'vend_name', label: '업체명' },
             { key: 'emp_name', label: '담당자' },
-            { key: 'ordr_date', label: '주문일자' }
+            {
+                key: 'ordr_date',
+                label: '주문일자',
+                format: (value) => dayjs(value).format('YYYY-MM-DD')
+            }
         ]"
         :fetchData="fetchItems"
         :pageSize="5"
@@ -247,6 +252,22 @@ const formattedLeavDate = computed(() => {
     return leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : '';
 });
 
+// 숫자를 원 형태로 변경
+const formatCurrency = (value) => {
+    if (!value) return '';
+    return new Intl.NumberFormat('ko-KR').format(value) + '원';
+};
+
+// 입력칸 blur 시 포맷팅 적용
+const formatCurrencyField = (index, field) => {
+    const raw = orderDetails.value[index][field];
+    if (!raw) {
+        orderDetails.value[index][field] = '';
+        return;
+    }
+    orderDetails.value[index][field] = Number(raw); // 숫자로 보관
+};
+
 watch(selectOrder, async (newOrderId) => {
     if (newOrderId) {
         try {
@@ -268,7 +289,11 @@ watch(selectOrder, async (newOrderId) => {
 const fetchItems = async () => {
     try {
         const response = await axios.get('/api/orderModal');
-        return response.data; // 반드시 배열 형태여야 함
+        const data = response.data.map((item) => ({
+            ...item,
+            ordr_date: dayjs(item.ordr_date).format('YYYY-MM-DD')
+        }));
+        return data;
     } catch (error) {
         console.error('조회 실패', error);
         return [];
@@ -357,8 +382,8 @@ const setOrder = async () => {
             ordr: orderName.value,
             vend_id: vendId.value,
             emp_id: empId.value,
-            ordr_date: joinDate.value,
-            paprd_date: leavDate.value,
+            ordr_date: joinDate.value ? dayjs(joinDate.value).format('YYYY-MM-DD') : null,
+            paprd_date: leavDate.value ? dayjs(leavDate.value).format('YYYY-MM-DD') : null,
             remk: remk.value,
             details: orderDetails.value.map((item) => ({
                 detail_id: item.detail_id,

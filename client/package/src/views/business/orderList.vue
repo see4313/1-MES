@@ -73,8 +73,16 @@
                 <Column field="qty" header="수량"></Column>
                 <Column field="spec" header="규격"></Column>
                 <Column field="unit" header="단위"></Column>
-                <Column field="amt" header="금액"></Column>
-                <Column field="tamt" header="총금액"></Column>
+                <Column field="amt" header="금액(원)"
+                    ><template #body="{ data }">
+                        {{ new Intl.NumberFormat('ko-KR').format(data.amt) + '원' }}
+                    </template></Column
+                >
+                <Column field="tamt" header="총금액(원)"
+                    ><template #body="{ data }">
+                        {{ new Intl.NumberFormat('ko-KR').format(data.amt) + '원' }}
+                    </template></Column
+                >
             </DataTable>
         </v-card>
     </v-row>

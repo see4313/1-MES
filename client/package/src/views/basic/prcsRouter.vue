@@ -173,7 +173,7 @@ const saveProcessRouter = async () => {
     <v-container fluid>
         <v-row>
             <!-- 좌측: 품목별 공정 흐름도 조회 -->
-            <v-col cols="6">
+            <v-col cols="12" sm="12" lg="6">
                 <v-card elevation="10">
                     <v-card-item class="py-6 px-6">
                         <v-container fluid>
@@ -195,7 +195,7 @@ const saveProcessRouter = async () => {
             </v-col>
 
             <!-- 우측: 공정 흐름도 등록 -->
-            <v-col cols="6">
+            <v-col cols="12" sm="12" lg="6">
                 <v-card elevation="10">
                     <v-card-item class="py-6 px-6">
                         <v-container fluid>

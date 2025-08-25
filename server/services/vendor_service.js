@@ -38,8 +38,8 @@ const vendorSearchParams = (b = {}) => [
   nz(b.vendName),
   toNull(b.vendType),
   nz(b.vendType),
-  toNull(b.psch), // Add the 7th parameter
-  nz(b.psch), // Add the 8th parameter
+  toNull(b.psch),
+  nz(b.psch),
 ];
 
 const vendorSearchParamsExactNameBiz = ({ vendName, bizNumber } = {}) => [

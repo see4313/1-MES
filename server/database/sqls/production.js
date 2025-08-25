@@ -108,11 +108,25 @@ const selectDetailInstruction = (query) => {
       pid.item_id          as itemId,
       i.item_name          as itemName,
       pid.goal_qty         as goalQty,
-      pid.status
+      p.drct_qty           as currProdQty,
+      pid.status,
+      coalesce(
+        case when pid.status = -1 then '전량 폐기' end,
+        prcs.prcs_name,
+        '생산 완료'
+      ) as prcsName
     from PROD_INSTRUCT_DETAIL pid
-    join ITEM i on i.item_id = pid.item_id
-    where pid.instruct_no = ?
-    order by pid.deta_instruct_no
+    join ITEM i 
+      on i.item_id = pid.item_id
+    left join PROCESS_ROUTING prcsroute 
+      on prcsroute.item_id = pid.item_id
+    and prcsroute.op_no   = pid.status
+    left join PROCESS prcs 
+      on prcs.prcs_number  = prcsroute.prcs_number
+    join PRODUCTION p
+      on pid.deta_instruct_no = p.deta_instruct_no
+      where pid.instruct_no = ?
+      order by pid.deta_instruct_no;
   `;
 
   const params = [query.instructNo];
