@@ -36,9 +36,11 @@ router.get(
 // 품목 모달용
 router.get(
   "/item",
-  asyncHandler(async (_req, res) => {
-    const items = await bomService.itemModal();
-    res.json(asArray(items));
+  asyncHandler(async (req, res) => {
+    const keyword = String(req.query.keyword || "");
+    const scope = String(req.query.scope || ""); // '', 'header', 'detail'
+    const list = await bomService.itemModal(keyword, scope);
+    res.json(list);
   })
 );
 

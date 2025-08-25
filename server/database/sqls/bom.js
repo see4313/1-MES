@@ -148,10 +148,29 @@ SELECT 1
 `;
 
 // 모달(품목)
-const itemModal = `
-SELECT item_id, item_name, spec, unit
-FROM ITEM
-`;
+const itemModal = ({ keyword = "", scope = "" } = {}) => {
+  let sql = `
+    SELECT item_id, item_name, spec, unit
+    FROM ITEM
+    WHERE 1=1
+  `;
+  const params = [];
+
+  // 범위: 등록(헤더) = FG만, 상세 = SF/RM만
+  if (scope === "header") {
+    sql += ` AND ITEM_TYPE = '완제품'`;
+  } else if (scope === "detail") {
+    sql += ` AND ITEM_TYPE IN ('원재료','반제품')`;
+  }
+
+  if (keyword) {
+    sql += ` AND (item_id LIKE ? OR item_name LIKE ?)`;
+    params.push(`%${keyword}%`, `%${keyword}%`);
+  }
+
+  sql += ` ORDER BY item_id`;
+  return { sql, params };
+};
 
 // 단건 삭제
 const deleteBomDetail = `
@@ -213,7 +232,7 @@ const deleteOrphanDetailsByBom = `
   WHERE d.BOM_NUMBER = ?
     AND i.ITEM_ID IS NULL;
 `;
-//git 안올라감 test 중 test
+
 module.exports = {
   selectBomList,
   selectBomDetails,
