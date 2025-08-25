@@ -581,6 +581,10 @@ const onClickDel = async () => {
 async function onClickSave() {
     const isUpdate = !!createForm.value.id;
 
+    if (createForm.value.phone.length != 13) {
+        return notify('11자리만 입력가능합니다.', 'warning');
+    }
+
     // 유효성
     if (!isUpdate && !validateRequired(createForm.value)) {
         notify('필수 항목을 확인하세요.', 'warning');
