@@ -119,7 +119,7 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" v-model="createForm.cntinfo" />
+                        <v-text-field variant="outlined" label="연락처" v-model="createForm.cntinfo" @input="onPhoneInput" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -380,6 +380,22 @@ const buildPayload = () => ({
     psch: createForm.value.psch,
     remark: createForm.value.remark ?? null
 });
+
+//연락처 -
+function onPhoneInput() {
+    // 숫자만 남기기
+    let digits = (createForm.value.cntinfo || '').replace(/\D/g, '');
+
+    // 정규식으로 하이픈 삽입
+    if (digits.length <= 3) {
+        createForm.value.cntinfo = digits;
+    } else if (digits.length <= 7) {
+        createForm.value.cntinfo = digits.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+    } else {
+        createForm.value.cntinfo = digits.replace(/(\d{3})(\d{3,4})(\d{1,4}).*/, '$1-$2-$3');
+    }
+}
+
 //등록 수정
 const onClickSave = async () => {
     const isUpdate = !!createForm.value.id;
