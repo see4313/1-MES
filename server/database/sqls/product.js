@@ -1,6 +1,6 @@
 const productList = (filters) => {
   let sql = `
-  SELECT inv.lot_id, 
+SELECT inv.lot_id, 
         inv.item_id,
         inv.crea_date,
         inv.vald_date,
@@ -15,7 +15,8 @@ JOIN ITEM item
               ON inv.item_id = item.item_id
 WHERE 1 = 1
 AND item.item_type = '완제품'
-
+OR item.item_type = '반제품'
+AND inv.status = '사용가능'
 `;
   const params = [];
 
@@ -29,22 +30,28 @@ AND item.item_type = '완제품'
 // 완제품입고 목록
 const insertList = (filters) => {
   let sql = `
-SELECT i.exam_id,
-      i.rsrt_id,
-       i.item_id,
-       it.item_name,
-       it.item_type,
-       i.sttus,
-       i.exam_qty,
-       s.bnt,
-       s.his_id
-FROM   ITEM_EXAM_HIS i LEFT JOIN (SELECT his_id, bnt
-                      FROM   INVENTORY
-                     ) s
-                  ON   i.exam_id = s.his_id
-                       JOIN ITEM it
-                       ON   i.item_id = it.item_id
-WHERE  i.sttus = '합격'
+SELECT 
+    i.exam_id,
+    i.rsrt_id,
+    i.item_id,
+    it.item_name,
+    it.item_type,
+    i.sttus,
+    i.exam_qty,
+    COALESCE(s.total_entebord_qty, 0) AS total_qty
+FROM ITEM_EXAM_HIS i
+LEFT JOIN (
+    SELECT 
+        his_id, 
+        SUM(entebord_qty) AS total_entebord_qty
+    FROM INVENTORY
+    GROUP BY his_id
+) s
+    ON i.exam_id = s.his_id
+JOIN ITEM it
+    ON i.item_id = it.item_id
+WHERE i.sttus = '합격'
+  AND i.exam_qty <> COALESCE(s.total_entebord_qty, 0);
 `;
   const params = [];
 
@@ -103,7 +110,7 @@ JOIN VENDOR vend
 LEFT JOIN OUST oust 
        ON oust.detail_id = ordt.detail_id
 WHERE 1=1
-
+AND   ordt.status = '미완료'
 `;
 
   const params = [];

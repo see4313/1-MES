@@ -22,16 +22,15 @@ const deliveryList = async (filters) => {
 // 입고관리
 const productInsert = async (data) => {
   let resInfo = await mariadb.query("productInsert", JSON.stringify(data));
-  console.log(resInfo);
-  // if (resInfo.affectedRows > 0) {
-  //   return {
-  //     result: true,
-  //   };
-  // } else {
-  //   return {
-  //     result: false,
-  //   };
-  // }
+  if (resInfo.affectedRows > 0) {
+    return {
+      result: true,
+    };
+  } else {
+    return {
+      result: false,
+    };
+  }
 };
 
 // 완제품 출고

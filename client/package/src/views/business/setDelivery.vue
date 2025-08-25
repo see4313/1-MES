@@ -190,8 +190,6 @@ const delUpdate = async () => {
         }
         if (!confirm('출고하시겠습니까?')) return;
 
-        console.log(selectItemList.value);
-
         const emp_id = sessionStorage.getItem('userId'); //세션에서 사원번호 가져옴
 
         let obj = selectItemList.value.map((item) => ({
@@ -206,6 +204,7 @@ const delUpdate = async () => {
 
         if (response.data.result) {
             snackBar('출고완료', 'success');
+            selectItemList.value = null;
             Select();
         } else {
             snackBar('항목을 선택해주세요.', 'error');

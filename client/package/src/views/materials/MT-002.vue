@@ -13,23 +13,16 @@
                 @btn-click2="select()"
             />
             <v-row>
-                <v-col cols="12" md="12">
+                <v-col cols="12" md="8">
                     <v-row justify="space-between" dense>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="6">
                             <v-text-field label="품목 번호" v-model="selectItemId" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemIdModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="4">
-                            <v-text-field label="품목 구분" v-model="selectItemType" variant="outlined" readonly>
-                                <template #append-inner>
-                                    <v-icon @click="itemTypeModal = true" class="cursor-pointer">mdi-magnify</v-icon>
-                                </template>
-                            </v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="6">
                             <v-text-field label="보관 조건" v-model="selectCutd" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="cutdModal = true" class="cursor-pointer">mdi-magnify</v-icon>
@@ -39,14 +32,14 @@
                     </v-row>
 
                     <v-row dense>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="6">
                             <v-text-field label="창고 코드" v-model="selectWhId" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="whIdModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="4">
+                        <v-col cols="12" sm="6">
                             <v-menu
                                 v-model="expMenu"
                                 :close-on-content-click="false"
@@ -126,31 +119,14 @@
         @close="lotIdModal = false"
     />
 
-    <!-- 품목구분 모달 -->
-    <ModalSearch
-        :visible="itemTypeModal"
-        title="품목구분 검색"
-        idField="order_id"
-        :columns="[
-            { key: 'order_id', label: '주문번호' },
-            { key: 'vend_id', label: '거래처번호' },
-            { key: 'ordr', label: '주문명' }
-        ]"
-        :fetchData="fetchItemType"
-        :pageSize="5"
-        @select="onSelectItemType"
-        @close="itemTypeModal = false"
-    />
-
     <!-- 보관조건 모달 -->
     <ModalSearch
         :visible="cutdModal"
         title="주문 검색"
-        idField="order_id"
+        idField="cmmn_id"
         :columns="[
-            { key: 'order_id', label: '주문번호' },
-            { key: 'vend_id', label: '거래처번호' },
-            { key: 'ordr', label: '주문명' }
+            { key: 'cmmn_id', label: '공통코드' },
+            { key: 'cmmn_name', label: '코드명' }
         ]"
         :fetchData="fetchCutd"
         :pageSize="5"
@@ -192,7 +168,6 @@ const { snackBar } = useSnackBar();
 const inventoryList = ref(); // 조회 목록
 const itemIdModal = ref(false); // 품목번호 모달
 const lotIdModal = ref(false); // LOT번호 모달
-const itemTypeModal = ref(false); // 품목구분 모달
 const cutdModal = ref(false); // 보관조건 모달
 const whIdModal = ref(false); // 창고코드 모달
 const selectItemId = ref(null); // 품목번호 선택
@@ -265,16 +240,6 @@ const fetchLotId = async () => {
     }
 };
 
-const fetchItemType = async () => {
-    try {
-        const response = await axios.get('/api/itemType');
-        return response.data; // 반드시 배열 형태여야 함
-    } catch (error) {
-        snackBar('조회 실패.', 'error');
-        return [];
-    }
-};
-
 const fetchCutd = async () => {
     try {
         const response = await axios.get('/api/cutdCond');
@@ -304,12 +269,8 @@ const onSelectLotId = (item) => {
     selectLotId.value = item.lot_id; // LOT번호
 };
 
-const onSelectItemType = (item) => {
-    selectItemType.value = item.type; // 품목구분
-};
-
 const onSelectCutd = (item) => {
-    selectCutd.value = item.cutd_cond; // 보관조건
+    selectCutd.value = item.cmmn_name; // 보관조건
 };
 
 const onSelectWhId = (item) => {

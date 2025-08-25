@@ -189,8 +189,6 @@ const onSelectProd = async (item) => {
     selectRsrtId.value = item.rsrt_id; // 실적번호
     selectItemName.value = item.item_name;
     selectItemId.value = item.item_id; // 품목번호
-    selectEmpId.value = item.emp_id; // 사원번호
-    selectEmpName.value = item.emp_name;
     selectItemQty.value = item.prod_qty;
     remk.value = item.remk;
     detail_sttus.value = '불합격'; // 결과
@@ -241,11 +239,20 @@ const checkResult = (index) => {
 };
 
 // 등록 실행
+// 등록 실행
 const addExam = async () => {
+    // 기본 유효성 체크
+    if (!selectRsrtId.value) return snackBar('생산실적을 선택하세요.', 'warning');
+    if (!examDetailList.value || examDetailList.value.length === 0) return snackBar('검사 목록이 없습니다.', 'warning');
+    if (!selectEmpId.value) return snackBar('담당자를 선택하세요.', 'warning');
+
+    const hasEmptyValue = examDetailList.value.some((item) => item.judt_val === null || item.judt_val === undefined);
+    if (hasEmptyValue) return snackBar('모든 검사 항목의 측정값을 입력하세요.', 'warning');
+
     if (confirm('등록하시겠습니까?')) {
         try {
             const payload = {
-                rsrt_id: selectRsrtId.value, // 생산실적 번호
+                rsrt_id: selectRsrtId.value,
                 item_id: selectItemId.value,
                 emp_id: selectEmpId.value,
                 sttus: detail_sttus.value,
@@ -265,11 +272,12 @@ const addExam = async () => {
                 dataReset();
                 examDetailList.value = [];
             } else {
-                snackBar('등록 실패.', 'error');
+                snackBar('등록 실패.', 'error'); // 서버 에러는 error 유지
             }
         } catch (err) {
-            snackBar('에러', 'error');
+            snackBar('에러 발생', 'error'); // 실제 예외도 error 유지
         }
     }
 };
+
 </script>

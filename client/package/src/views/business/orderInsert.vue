@@ -140,6 +140,15 @@
                                 {{ data.allamt ? new Intl.NumberFormat('ko-KR').format(data.allamt) + '원' : '' }}
                             </template></Column
                         >
+
+                        <!-- 삭제 버튼 -->
+                        <Column style="width: 80px; text-align: center">
+                            <template #body="slotProps">
+                                <v-btn icon color="error" @click="deleteRow(slotProps.index)">
+                                    <v-icon size="20">mdi-delete</v-icon>
+                                </v-btn>
+                            </template>
+                        </Column>
                     </DataTable>
                 </div>
             </v-col>
@@ -240,6 +249,13 @@ const selectedItem2 = ref(null);
 const selectedItem3 = ref(null);
 const empId = ref(null);
 const vendId = ref(null);
+
+// 행 삭제 함수
+const deleteRow = (index) => {
+    if (confirm('삭제하시겠습니까?')) {
+        productsDetail.value.splice(index, 1);
+    }
+};
 
 // 입력 할 때 , + 원으로 출력됨
 const formatCurrency = (event, data, field) => {

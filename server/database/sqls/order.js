@@ -1,6 +1,6 @@
 const orderList = (filters) => {
   let sql = `
-    SELECT ord.order_id
+SELECT ord.order_id
        , ord.vend_id
        , vend.vend_name
       , ord.emp_id
@@ -10,11 +10,11 @@ const orderList = (filters) => {
       , ord.paprd_date
       , ord.remk
       , ord.st
-      FROM ORDER_INFO ord JOIN VENDOR vend
+FROM ORDER_INFO ord JOIN VENDOR vend
                     ON ord.vend_id = vend.vend_id
-       JOIN EMPLOYEE emp
+JOIN EMPLOYEE emp
                    ON ord.emp_id = emp.emp_id
-    WHERE 1=1
+WHERE 1=1
 `;
 
   const params = [];
@@ -95,6 +95,7 @@ FROM ORDER_INFO ord JOIN VENDOR vend
                     ON ord.vend_id = vend.vend_id
 JOIN EMPLOYEE emp
                    ON ord.emp_id = emp.emp_id
+WHERE ord.st = '미완료'                   
 `;
 
 // 모달 (상세주문)
