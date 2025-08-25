@@ -274,14 +274,14 @@ WHERE item_id = ?
 // 품목 수정
 const itemUpdate = `
 UPDATE ITEM
-SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?, exp_date = ?
+SET    item_name = ?, item_type = ?, unit = ?, spec = ?, cutd_cond = ?, uon = ?, remk = ?, exp_date = ?, safe_qty = ?
 WHERE  item_id = ?
 `;
 
 // 품목 등록
 const itemInsert = `
-INSERT INTO ITEM (item_id, item_name, item_type, unit, spec, cutd_cond, uon, remk, conv_qty, exp_date)
-VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO ITEM (item_id, item_name, item_type, unit, spec, cutd_cond, uon, remk, conv_qty, exp_date, safe_qty)
+VALUES (next_code('P'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 // 발주 등록
