@@ -619,7 +619,7 @@ const onClickSave = async () => {
 
             await axios.put(`/api/bom/${enc(createForm.value.id)}`, payload);
 
-            // 🔹 신규로 "행추가"한 상세만 골라 저장
+            // 신규로 "행추가"한 상세만 골라 저장
             const newDetails = pickNewDetails();
 
             if (newDetails.length > 0) {

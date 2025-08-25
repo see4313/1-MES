@@ -119,7 +119,7 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" v-model="createForm.cntinfo" />
+                        <v-text-field variant="outlined" label="연락처" v-model="createForm.cntinfo" @input="onPhoneInput" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -164,7 +164,6 @@
                             v-model="createForm.address"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openAddressModal"
-                            readonly
                         />
                     </v-col>
 
@@ -175,7 +174,21 @@
             </v-col>
         </v-card>
     </v-row>
+    <v-dialog v-model="showAddrDialog" max-width="520">
+        <v-card>
+            <v-card-title>상세주소 입력</v-card-title>
+            <v-card-text>
+                <div class="text-caption mb-2">기본주소</div>
+                <div class="mb-4">{{ baseAddr }}</div>
 
+                <v-text-field id="detailAddrInput" label="상세주소" v-model="detailAddr" variant="outlined" autofocus />
+            </v-card-text>
+            <v-card-actions class="justify-end">
+                <v-btn variant="text" @click="showAddrDialog = false">취소</v-btn>
+                <v-btn color="primary" @click="confirmAddress">확인</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
     <!-- ===== 스낵바 ===== -->
     <v-snackbar v-model="snackOpen" :timeout="2000" :color="snackColor" location="top right" rounded="pill">
         {{ snackMessage }}
@@ -262,6 +275,10 @@ const openModal = async (type, target) => {
     else if (type === 'psch') showVendPschModal.value = true;
 };
 
+const showAddrDialog = ref(false);
+const baseAddr = ref('');
+const detailAddr = ref('');
+
 /*----주소 모달 ----*/
 async function openAddressModal() {
     if (!window.daum?.Postcode) {
@@ -275,13 +292,21 @@ async function openAddressModal() {
 
     // 주소 검색
     new window.daum.Postcode({
-        oncomplete: (data) => {
-            const baseAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-            const detail = prompt('상세주소를 입력하세요', '') || '';
-            createForm.value.address = detail ? `${baseAddr} ${detail}` : baseAddr;
+        oncomplete: async (data) => {
+            // 기본 주소 세팅
+            baseAddr.value = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+            detailAddr.value = ''; // 초기화
+            showAddrDialog.value = true; // 다이얼로그 열기
+            await nextTick();
         }
     }).open();
 }
+function confirmAddress() {
+    const full = detailAddr.value ? `${baseAddr.value} ${detailAddr.value}` : baseAddr.value;
+    createForm.value.address = full; // 등록/수정 폼에 반영
+    showAddrDialog.value = false;
+}
+
 /* ===== 모달 선택 ===== */
 const onSelectVendType = (row) => {
     const val = row?.vend_type || row?.vendType || '';
@@ -380,6 +405,22 @@ const buildPayload = () => ({
     psch: createForm.value.psch,
     remark: createForm.value.remark ?? null
 });
+
+//연락처 -
+function onPhoneInput() {
+    // 숫자만 남기기
+    let digits = (createForm.value.cntinfo || '').replace(/\D/g, '');
+
+    // 정규식으로 하이픈 삽입
+    if (digits.length <= 3) {
+        createForm.value.cntinfo = digits;
+    } else if (digits.length <= 7) {
+        createForm.value.cntinfo = digits.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+    } else {
+        createForm.value.cntinfo = digits.replace(/(\d{3})(\d{3,4})(\d{1,4}).*/, '$1-$2-$3');
+    }
+}
+
 //등록 수정
 const onClickSave = async () => {
     const isUpdate = !!createForm.value.id;

@@ -47,10 +47,10 @@
                         <v-text-field variant="outlined" label="창고명" v-model="searchForm.warehouseName" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="온도(℃)" v-model="searchForm.temp" />
+                        <v-text-field variant="outlined" label="온도(℃)" v-model="searchForm.temp" type="number" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="습도(%)" v-model="searchForm.rh" />
+                        <v-text-field variant="outlined" label="습도(%)" v-model="searchForm.rh" type="number" @input="inputrh" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="창고위치" v-model="searchForm.warehouseLoca" />
@@ -147,14 +147,13 @@
                             v-model="createForm.warehouseLoca"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openAddressModal"
-                            readonly
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="온도(℃)" v-model="createForm.temp" />
+                        <v-text-field variant="outlined" label="온도(℃)" v-model="createForm.temp" type="number" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="습도(%)" v-model="createForm.rh" />
+                        <v-text-field variant="outlined" label="습도(%)" v-model="createForm.rh" type="number" @input="inputrh" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="비고" v-model="createForm.remark" />
@@ -163,7 +162,21 @@
             </v-col>
         </v-card>
     </v-row>
+    <v-dialog v-model="showAddrDialog" max-width="520">
+        <v-card>
+            <v-card-title>상세주소 입력</v-card-title>
+            <v-card-text>
+                <div class="text-caption mb-2">기본주소</div>
+                <div class="mb-4">{{ baseAddr }}</div>
 
+                <v-text-field id="detailAddrInput" label="상세주소" v-model="detailAddr" variant="outlined" autofocus />
+            </v-card-text>
+            <v-card-actions class="justify-end">
+                <v-btn variant="text" @click="showAddrDialog = false">취소</v-btn>
+                <v-btn color="primary" @click="confirmAddress">확인</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
     <!-- ===== 스낵바 ===== -->
     <v-snackbar v-model="snackOpen" :timeout="2000" :color="snackColor" location="top right" rounded="pill">
         {{ snackMessage }}
@@ -257,6 +270,10 @@ const openItemModal = async (field = 'warehouseType', target = 'search') => {
     else if (field === 'warehouseLoca') showWhLocaModal.value = true;
 };
 
+const showAddrDialog = ref(false);
+const baseAddr = ref('');
+const detailAddr = ref('');
+
 /*----주소 모달 ----*/
 async function openAddressModal() {
     // 스크립트 없으면 로드
@@ -271,14 +288,20 @@ async function openAddressModal() {
 
     // 주소 검색
     new window.daum.Postcode({
-        oncomplete: (data) => {
-            const baseAddr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-            const detail = prompt('상세주소를 입력하세요', '') || '';
-            createForm.value.warehouseLoca = detail ? `${baseAddr} ${detail}` : baseAddr;
+        oncomplete: async (data) => {
+            // 기본 주소 세팅
+            baseAddr.value = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+            detailAddr.value = ''; // 초기화
+            showAddrDialog.value = true; // 다이얼로그 열기
+            await nextTick();
         }
     }).open();
 }
-
+function confirmAddress() {
+    const full = detailAddr.value ? `${baseAddr.value} ${detailAddr.value}` : baseAddr.value;
+    createForm.value.warehouseLoca = full; // 등록/수정 폼에 반영
+    showAddrDialog.value = false;
+}
 const onSelectWhType = (row) => {
     const label = row?.cmmn_name ?? '';
     const id = row?.cmmn_id ?? '';
@@ -332,8 +355,19 @@ watch(selectedRow, (row) => {
     };
 });
 
+const inputrh = () => {
+    if (searchForm.value.rh <= 0 && searchForm.value.rh) {
+        notify('습도 0보다 같거나 작을수 없습니다.', 'warning');
+        searchForm.value.rh = 1;
+    }
+    if (createForm.value.rh <= 0 && createForm.value.rh) {
+        notify('습도 0보다 같거나 작을수 없습니다.', 'warning');
+        createForm.value.rh = 1;
+    }
+};
+
 /* ===== 필수값 검사 ===== */
-const validateRequired = (f) => !!(f.warehouseName && f.useYn && f.warehouseLoca);
+const validateRequired = (f) => !!(f.warehouseName && f.useYn && f.warehouseLoca && f.temp && f.rh);
 
 const isSaving = ref(false);
 const enc = encodeURIComponent;

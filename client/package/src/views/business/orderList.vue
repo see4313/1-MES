@@ -86,7 +86,7 @@
                 >
                 <Column field="tamt" header="총금액(원)"
                     ><template #body="{ data }">
-                        {{ new Intl.NumberFormat('ko-KR').format(data.amt) + '원' }}
+                        {{ new Intl.NumberFormat('ko-KR').format(data.amt * data.qty) + '원' }}
                     </template></Column
                 >
             </DataTable>
