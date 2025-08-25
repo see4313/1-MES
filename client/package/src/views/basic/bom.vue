@@ -144,31 +144,33 @@
                         <Column field="spec" header="규격" />
                         <Column field="unit" header="단위" />
 
+                        <!-- 투입량 -->
                         <Column field="usage" header="투입량">
                             <template #body="slotProps">
                                 <v-text-field
-                                    v-model.number="slotProps.data.usage"
-                                    type="number"
+                                    :model-value="comma(slotProps.data.usage)"
+                                    @update:model-value="(v) => (slotProps.data.usage = num(v))"
+                                    inputmode="decimal"
                                     dense
                                     hide-details
-                                    style="width: 100px"
                                     variant="outlined"
-                                    min="0"
+                                    style="width: 120px"
                                     class="right-align-input"
                                 />
                             </template>
                         </Column>
 
+                        <!-- 손실률 -->
                         <Column field="loss" header="손실률">
                             <template #body="slotProps">
                                 <v-text-field
-                                    v-model.number="slotProps.data.loss"
-                                    type="number"
+                                    :model-value="comma(slotProps.data.loss)"
+                                    @update:model-value="(v) => (slotProps.data.loss = num(v))"
+                                    inputmode="decimal"
                                     dense
                                     hide-details
-                                    style="width: 100px"
                                     variant="outlined"
-                                    min="0"
+                                    style="width: 120px"
                                     class="right-align-input"
                                 />
                             </template>
@@ -356,6 +358,12 @@ const formatDate = (v) => (v ? dayjs(v).format('YYYY-MM-DD') : '');
 const toDateStr = (v) => (v ? dayjs(v).format('YYYY-MM-DD') : null);
 const unwrap = (data) => (Array.isArray(data) ? data : (data?.items ?? data?.rows ?? []));
 const enc = encodeURIComponent;
+//  콤마
+const comma = (v) => (v === null || v === undefined || v === '' ? '' : String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+const num = (s) => {
+    const n = Number(String(s ?? '').replace(/,/g, ''));
+    return Number.isNaN(n) ? null : n;
+};
 
 /* ===== 상태 ===== */
 const menus = ref({ searchStart: false, searchEnd: false, createStart: false, createEnd: false });
