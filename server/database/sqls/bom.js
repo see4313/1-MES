@@ -156,9 +156,9 @@ const itemModal = ({ keyword = "", scope = "" } = {}) => {
   `;
   const params = [];
 
-  // 범위: 등록(헤더) = FG만, 상세 = SF/RM만
+  //
   if (scope === "header") {
-    sql += ` AND ITEM_TYPE = '완제품'`;
+    sql += ` AND ITEM_TYPE IN ('완제품','반제품')`;
   } else if (scope === "detail") {
     sql += ` AND ITEM_TYPE IN ('원재료','반제품')`;
   }
