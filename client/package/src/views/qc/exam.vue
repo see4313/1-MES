@@ -16,14 +16,14 @@
                 <v-col cols="12" md="12">
                     <v-row justify="space-between" dense>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="품목" v-model="selectItemName" variant="outlined" readonly>
+                            <v-text-field label="품목*" v-model="selectItemName" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="담당자" v-model="selectEmpName" variant="outlined" readonly>
+                            <v-text-field label="담당자*" v-model="selectEmpName" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="empModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>

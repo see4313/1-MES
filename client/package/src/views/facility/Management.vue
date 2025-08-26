@@ -65,7 +65,11 @@
                 <Column field="facility_nm" header="설비명" />
                 <Column field="facility_type_name" header="설비유형" />
                 <Column field="emp_name" header="담당자" />
-                <Column field="purchase_dt" header="구매일자" />
+                <Column field="purchase_dt" header="구매일자">
+                    <template #body="{ data }">
+                        {{ formatDate(data.purchase_dt) }}
+                    </template>
+                </Column>
                 <Column field="temp_val" header="적정 온도(C)" />
                 <Column field="humidity_val" header="적정 습도(%)" />
                 <Column field="rpm_val" header="적정 RPM" />
@@ -117,7 +121,7 @@
                     </v-text-field>
                 </v-col>
                 <v-col cols="12" sm="4">
-                    <v-text-field type="date" label="구매일자" v-model="buyDate" :max="todayStr" variant="outlined" />
+                    <v-text-field type="date" label="구매일자" v-model="formatedDate" :max="todayStr" variant="outlined" />
                 </v-col>
             </v-row>
 
@@ -175,7 +179,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 import CardHeader2 from '@/components/production/card-header-btn2.vue';
 import CardHeader3 from '@/components/production/card-header-btn3k.vue';
@@ -184,8 +188,11 @@ import Column from 'primevue/column';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import { useSnackBar } from '@/composables/useSnackBar.js';
 import { useFormatDate } from '@/composables/useFormatDate';
+import dayjs from 'dayjs';
 
-const { formatDate } = useFormatDate();
+const formatDate = (date) => {
+    return date ? dayjs(date).format('YYYY-MM-DD') : '';
+};
 
 // Snack Bar
 const { snackOpen, snackMessage, snackColor } = useSnackBar();
@@ -222,6 +229,7 @@ const optimalHumidity = ref('');
 const optimalRpm = ref('');
 const optimalPower = ref('');
 const itemRemk = ref('');
+const formatedDate = ref('');
 
 // 모달 상태
 const itemNameModal = ref(false);
@@ -245,7 +253,7 @@ function dataReset() {
     itemType.value = '';
     itemSpec.value = '';
     itemCutd.value = '';
-    buyDate.value = '';
+    formatedDate.value = '';
     optimalTemp.value = '';
     optimalHumidity.value = '';
     optimalRpm.value = '';
@@ -272,22 +280,24 @@ async function select() {
 
 // 목록 클릭 → 폼에 반영 + ID 세팅
 watch(selectfacilityList, (val) => {
-    if (!val) return;
-    itemId.value = val.facility_id || '';
-    itemName.value = val.facility_nm || '';
-    itemType.value = val.facility_type_name || '';
-    itemSpec.value = val.facility_cnt || '';
-    itemCutd.value = val.emp_name || '';
-    buyDate.value = val.purchase_dt || '';
-    optimalTemp.value = val.temp_val || '';
-    optimalHumidity.value = val.humidity_val || '';
-    optimalRpm.value = val.rpm_val || '';
-    optimalPower.value = val.power_val || '';
-    itemRemk.value = val.remk || '';
-
-    // 값이 없으면 기존 값 유지
-    if (val.facility_type) selectItemTypeId.value = val.facility_type;
-    if (val.emp_id) selectCutdId.value = val.emp_id;
+    if (!val) {
+        itemId.value = null;
+        dataReset();
+    } else {
+        itemId.value = val.facility_id;
+        itemName.value = val.facility_nm;
+        itemType.value = val.facility_type_name;
+        itemSpec.value = val.facility_cnt;
+        itemCutd.value = val.emp_name;
+        optimalTemp.value = val.temp_val;
+        optimalHumidity.value = val.humidity_val;
+        optimalRpm.value = val.rpm_val;
+        optimalPower.value = val.power_val;
+        itemRemk.value = val.remk;
+        selectItemTypeId.value = val.facility_type;
+        selectCutdId.value = val.emp_id;
+        formatedDate.value = formatDate(val.purchase_dt);
+    }
 });
 
 // 모달 데이터
@@ -328,7 +338,7 @@ const itemSave = async () => {
         facility_nm: itemName.value,
         facility_type: selectItemTypeId.value,
         emp_id: selectCutdId.value,
-        purchase_dt: formatDate(buyDate.value, '-'),
+        purchase_dt: formatedDate.value,
         temp_val: optimalTemp.value,
         humidity_val: optimalHumidity.value,
         rpm_val: optimalRpm.value,
@@ -345,8 +355,8 @@ const itemSave = async () => {
             response = await axios.put('/api/facilityUpdate', obj);
             if (response.data.success) showSnack('수정되었습니다', 'warning');
         }
-        await select();
         dataReset();
+        select();
     } catch (err) {
         console.error(err);
         showSnack('저장 실패', 'error');
@@ -367,8 +377,8 @@ const itemDelete = async () => {
         const response = await axios.delete('/api/facilityDelete', { data: { facility_id: itemId.value } });
         if (response.data.success) {
             showSnack('삭제되었습니다.', 'error');
-            await select();
             dataReset();
+            select();
         }
     } catch (err) {
         console.error(err);

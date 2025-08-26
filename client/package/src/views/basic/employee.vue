@@ -170,13 +170,13 @@
             <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="사원명" v-model="createForm.name" />
+                        <v-text-field variant="outlined" label="사원명*" v-model="createForm.name" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="부서명"
+                            label="부서명*"
                             v-model="createForm.dept"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openDeptModal('create')"
@@ -185,7 +185,7 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" v-model="createForm.phone" @input="onPhoneInput" />
+                        <v-text-field variant="outlined" label="연락처*" v-model="createForm.phone" @input="onPhoneInput" />
                     </v-col>
 
                     <!-- 입사일(등록/수정) -->
@@ -194,7 +194,7 @@
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
-                                    label="입사일"
+                                    label="입사일*"
                                     append-inner-icon="mdi-calendar"
                                     variant="outlined"
                                     :model-value="formattedJoinDate1"
@@ -240,7 +240,7 @@
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="사원상태"
+                            label="사원상태*"
                             v-model="createForm.status"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openStatusModal('create')"
@@ -252,7 +252,7 @@
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="권한"
+                            label="권한*"
                             v-model="createForm.permName"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openPermModal('create')"

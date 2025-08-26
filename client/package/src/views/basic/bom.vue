@@ -222,7 +222,7 @@
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="품목번호"
+                            label="품목번호*"
                             v-model="createForm.itemId"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openItemModal('create')"
@@ -231,7 +231,7 @@
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="품목명" v-model="createForm.itemName" readonly />
+                        <v-text-field variant="outlined" label="품목명*" v-model="createForm.itemName" readonly />
                     </v-col>
 
                     <v-col cols="12" sm="4">
@@ -249,7 +249,7 @@
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
-                                    label="시작일"
+                                    label="시작일*"
                                     append-inner-icon="mdi-calendar"
                                     variant="outlined"
                                     :model-value="formatDate(createForm.startDate)"
@@ -283,7 +283,7 @@
                     <v-col cols="12" sm="4">
                         <v-radio-group
                             v-model="createForm.useYn"
-                            label="사용여부"
+                            label="사용여부*"
                             variant="outlined"
                             style="width: 100%; --v-input-gap: 4px"
                         >

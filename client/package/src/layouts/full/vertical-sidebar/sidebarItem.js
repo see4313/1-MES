@@ -151,36 +151,36 @@ const sidebarItem = [
                 to: '/insp',
                 roles: ['admin', 'mgr']
             },
-            {
-                title: '불량코드 관리',
-                to: '/badnlist',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '입고 품질 검사 등록',
-                to: '/iqc',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '입고 품질 검사 조회',
-                to: '/iqii',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '불량이력서 확인',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '공정 품질 검사 등록',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '공정 품질 검사 조회',
-                to: '',
-                roles: ['admin', 'prod', 'mgr']
-            },
+            // {
+            //     title: '불량코드 관리',
+            //     to: '/badnlist',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
+            // {
+            //     title: '입고 품질 검사 등록',
+            //     to: '/iqc',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
+            // {
+            //     title: '입고 품질 검사 조회',
+            //     to: '/iqii',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
+            // {
+            //     title: '불량이력서 확인',
+            //     to: '',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
+            // {
+            //     title: '공정 품질 검사 등록',
+            //     to: '',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
+            // {
+            //     title: '공정 품질 검사 조회',
+            //     to: '',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
             {
                 title: '검사서 관리',
                 to: '/exam',
@@ -199,37 +199,37 @@ const sidebarItem = [
         icon: 'home-angle-linear',
         to: '/front',
         children: [
-            {
-                title: '대시보드',
-                to: '/facility/dashboard',
-                roles: ['admin', 'prod', 'mgr']
-            },
+            // {
+            //     title: '대시보드',
+            //     to: '/facility/dashboard',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
 
             {
                 title: '설비 관리',
                 to: '/facility/management',
                 roles: ['admin', 'mgr']
-            },
-            {
-                title: '점검 이력 관리',
-                to: '/facility/inspect/manage',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '세척 이력 관리',
-                to: '/facility/cleaning/histmanage',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '고장/수리 관리',
-                to: '/facility/repair/rfmanage',
-                roles: ['admin', 'prod', 'mgr']
-            },
-            {
-                title: '비가동 관리',
-                to: '/facility/downtime',
-                roles: ['admin', 'prod', 'mgr']
             }
+            // {
+            //     title: '점검 이력 관리',
+            //     to: '/facility/inspect/manage',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
+            // {
+            //     title: '세척 이력 관리',
+            //     to: '/facility/cleaning/histmanage',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
+            // {
+            //     title: '고장/수리 관리',
+            //     to: '/facility/repair/rfmanage',
+            //     roles: ['admin', 'prod', 'mgr']
+            // },
+            // {
+            //     title: '비가동 관리',
+            //     to: '/facility/downtime',
+            //     roles: ['admin', 'prod', 'mgr']
+            // }
         ]
     }
 ];
