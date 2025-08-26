@@ -18,7 +18,7 @@
                     <v-row justify="space-between" dense>
                         <!-- 설비명 -->
                         <v-col cols="12" sm="3">
-                            <v-text-field label="설비명" v-model="selectItemName" variant="outlined" readonly>
+                            <v-text-field label="설비명" v-model="selectedName" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemNameModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -26,7 +26,7 @@
                         </v-col>
                         <!-- 설비유형 -->
                         <v-col cols="12" sm="3">
-                            <v-text-field label="설비유형" v-model="selectItemType" variant="outlined" readonly>
+                            <v-text-field label="설비유형" v-model="selectedType" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemTypeModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -153,7 +153,10 @@
         :visible="itemTypeModal"
         title="설비유형"
         idField="type_id"
-        :columns="[{ key: 'type_name', label: '유형' }]"
+        :columns="[
+            { key: 'type_id', label: 'ID' },
+            { key: 'type_name', label: '유형' }
+        ]"
         :fetchData="fetchItemTypes"
         @select="onSelectItemType"
         @close="itemTypeModal = false"
@@ -223,13 +226,15 @@ const itemName = ref('');
 const itemType = ref('');
 const itemSpec = ref('');
 const itemCutd = ref('');
-const buyDate = ref('');
 const optimalTemp = ref('');
 const optimalHumidity = ref('');
 const optimalRpm = ref('');
 const optimalPower = ref('');
 const itemRemk = ref('');
 const formatedDate = ref('');
+const selectedName = ref('');
+const selectedType = ref('');
+const selectedTypeName = ref('');
 
 // 모달 상태
 const itemNameModal = ref(false);
@@ -244,6 +249,9 @@ function selectReset() {
     selectItemTypeId.value = '';
     selectCutd.value = '';
     selectCutdId.value = '';
+    selectedName.value = '';
+    selectedType.value = '';
+    selectedTypeName.value = '';
 }
 
 // 등록폼 초기화
@@ -267,8 +275,8 @@ function dataReset() {
 async function select() {
     try {
         const params = {
-            facility_id: selectItemId.value,
-            facility_type: selectItemTypeId.value,
+            facility_nm: selectedName.value,
+            facility_type: selectedTypeName.value,
             emp_id: selectCutdId.value
         };
         const response = await axios.get('/api/facilityList', { params });
@@ -307,14 +315,11 @@ const fetchUsers = async () => (await axios.get('/api/users')).data;
 
 // 모달 선택
 function onSelectItemName(row) {
-    selectItemName.value = row.item_name;
-    selectItemId.value = row.item_id;
-    itemName.value = row.item_name;
+    selectedName.value = row.item_name;
 }
 function onSelectItemType(row) {
-    selectItemType.value = row.type_name;
-    selectItemTypeId.value = row.type_id;
-    itemType.value = row.type_name;
+    selectedType.value = row.type_name;
+    selectedTypeName.value = row.type_id;
 }
 function onSelectCutd(row) {
     selectCutd.value = row.user_name;

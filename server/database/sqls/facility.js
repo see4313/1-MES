@@ -23,9 +23,9 @@ WHERE 1=1
   `;
   const params = [];
 
-  if (filters.facility_id) {
-    sql += " AND f.FACILITY_ID = ?";
-    params.push(filters.facility_id);
+  if (filters.facility_nm) {
+    sql += " AND f.FACILITY_NM = ?";
+    params.push(filters.facility_nm);
   }
   if (filters.facility_type) {
     sql += " AND f.FACILITY_TYPE = ?";
@@ -64,6 +64,7 @@ const facilityUsers = `
          , EMP_NAME AS user_name
     FROM  EMPLOYEE
     WHERE dept_id = 'D003'
+    AND   STATUS = '재직'
     ORDER BY EMP_NAME ASC
 `;
 
