@@ -62,7 +62,8 @@ const facilityTypes = `
 const facilityUsers = `
     SELECT EMP_ID AS user_id
          , EMP_NAME AS user_name
-    FROM EMPLOYEE
+    FROM  EMPLOYEE
+    WHERE dept_id = 'D003'
     ORDER BY EMP_NAME ASC
 `;
 

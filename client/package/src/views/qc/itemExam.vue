@@ -16,7 +16,7 @@
                 <v-col cols="12" md="12">
                     <v-row justify="space-between" dense>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="생산실적" v-model="selectRsrtId" variant="outlined" readonly>
+                            <v-text-field label="생산실적*" v-model="selectRsrtId" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="prodModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -35,7 +35,7 @@
                 <v-col cols="12" md="12">
                     <v-row dense>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="담당자" v-model="selectEmpName" variant="outlined" readonly>
+                            <v-text-field label="담당자*" v-model="selectEmpName" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="empModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -279,5 +279,4 @@ const addExam = async () => {
         }
     }
 };
-
 </script>
