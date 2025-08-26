@@ -41,7 +41,7 @@
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-menu v-model="joinMenu" :close-on-content-click="true" transition="scale-transition" offset-y min-width="auto">
+                        <v-menu v-model="joinMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
@@ -57,7 +57,7 @@
                         </v-menu>
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-menu v-model="leavMenu" :close-on-content-click="true" transition="scale-transition" offset-y min-width="auto">
+                        <v-menu v-model="leavMenu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
                             <template #activator="{ props }">
                                 <v-text-field
                                     v-bind="props"
