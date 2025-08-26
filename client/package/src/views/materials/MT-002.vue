@@ -220,7 +220,8 @@ const select = async () => {
 const fetchItemId = async () => {
     try {
         const params = {
-            uon: 'Y' // 사용여부
+            uon: 'Y', // 사용여부
+            item_type: '원재료'
         };
         const response = await axios.get('/api/itemList', { params });
         return response.data; // 반드시 배열 형태여야 함

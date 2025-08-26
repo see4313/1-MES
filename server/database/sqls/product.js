@@ -1,23 +1,21 @@
 const productList = (filters) => {
   let sql = `
 SELECT inv.lot_id, 
-        inv.item_id,
-        inv.crea_date,
-        inv.vald_date,
-        item.item_name, 
-        item.item_type,
-        inv.wh_id,
-        item.safe_qty,
-        inv.bnt,
-        inv.status,
-        (item.safe_qty / NULLIF(inv.bnt, 0)) AS psafe
+       inv.item_id,
+       inv.crea_date,
+       inv.vald_date,
+       item.item_name, 
+       item.item_type,
+       inv.wh_id,
+       item.safe_qty,
+       inv.bnt,
+       inv.status,
+       (item.safe_qty / NULLIF(inv.bnt, 0)) AS psafe
 FROM INVENTORY inv 
 JOIN ITEM item
-              ON inv.item_id = item.item_id
-WHERE 1 = 1
-AND inv.status = '사용가능'
-AND item.item_type = '완제품'
-OR item.item_type = '반제품';
+       ON inv.item_id = item.item_id
+WHERE inv.status = '사용가능'
+  AND (item.item_type = '완제품' OR item.item_type = '반제품');
 `;
   const params = [];
 
