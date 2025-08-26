@@ -188,7 +188,7 @@
         idField="facility_id"
         :columns="[
             { key: 'facility_id', label: 'ID' },
-            { key: 'facility_name', label: '설비명' }
+            { key: 'facility_nm', label: '설비명' }
         ]"
         :fetchData="fetchFacilities"
         @select="onSelectFacility"
@@ -378,9 +378,9 @@ function selectReset() {
 // ===== 모달 선택 =====
 function onSelectFacility(row) {
     facilityId.value = row.facility_id;
-    facilityName.value = row.facility_name;
+    facilityName.value = row.facility_nm;
     filterFacilityId.value = row.facility_id;
-    filterFacilityName.value = row.facility_name;
+    filterFacilityName.value = row.facility_nm;
     facilityModal.value = false;
 }
 function onSelectEmp(row) {
@@ -407,11 +407,11 @@ watch(selectedRow, (val) => {
     if (!val) return;
     inspectId.value = val.inspect_id || '';
     facilityId.value = val.facility_id || '';
-    facilityName.value = val.facility_name || '';
+    facilityName.value = val.facility_nm || '';
     empId.value = val.emp_id || '';
     empName.value = val.emp_name || '';
     inspectItemId.value = val.inspect_item_id || '';
-    inspectItemName.value = val.inspect_item_name || '';
+    inspectItemName.value = val.inspect_item_nm || '';
     unitName.value = val.unit_name || '';
     stdLower.value = val.std_lower ?? null;
     stdUpper.value = val.std_upper ?? null;

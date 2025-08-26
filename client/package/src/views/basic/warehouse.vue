@@ -116,7 +116,7 @@
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="창고유형"
+                            label="창고유형*"
                             v-model="createForm.warehouseType"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openItemModal('warehouseType', 'create')"
@@ -124,12 +124,12 @@
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="창고명" v-model="createForm.warehouseName" />
+                        <v-text-field variant="outlined" label="창고명*" v-model="createForm.warehouseName" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-radio-group
                             v-model="createForm.useYn"
-                            label="사용여부"
+                            label="사용여부*"
                             variant="outlined"
                             style="width: 100%; --v-input-gap: 4px"
                         >
@@ -143,17 +143,17 @@
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="창고위치"
+                            label="창고위치*"
                             v-model="createForm.warehouseLoca"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openAddressModal"
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="온도(℃)" v-model="createForm.temp" type="number" />
+                        <v-text-field variant="outlined" label="온도(℃)*" v-model="createForm.temp" type="number" />
                     </v-col>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="습도(%)" v-model="createForm.rh" type="number" @input="inputrh" />
+                        <v-text-field variant="outlined" label="습도(%)*" v-model="createForm.rh" type="number" @input="inputrh" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field variant="outlined" label="비고" v-model="createForm.remark" />

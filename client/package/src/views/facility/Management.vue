@@ -18,7 +18,7 @@
                     <v-row justify="space-between" dense>
                         <!-- 설비명 -->
                         <v-col cols="12" sm="3">
-                            <v-text-field label="설비명" v-model="selectItemName" variant="outlined" readonly>
+                            <v-text-field label="설비명" v-model="selectedName" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemNameModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -26,7 +26,7 @@
                         </v-col>
                         <!-- 설비유형 -->
                         <v-col cols="12" sm="3">
-                            <v-text-field label="설비유형" v-model="selectItemType" variant="outlined" readonly>
+                            <v-text-field label="설비유형" v-model="selectedType" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemTypeModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -65,7 +65,11 @@
                 <Column field="facility_nm" header="설비명" />
                 <Column field="facility_type_name" header="설비유형" />
                 <Column field="emp_name" header="담당자" />
-                <Column field="purchase_dt" header="구매일자" />
+                <Column field="purchase_dt" header="구매일자">
+                    <template #body="{ data }">
+                        {{ formatDate(data.purchase_dt) }}
+                    </template>
+                </Column>
                 <Column field="temp_val" header="적정 온도(C)" />
                 <Column field="humidity_val" header="적정 습도(%)" />
                 <Column field="rpm_val" header="적정 RPM" />
@@ -117,7 +121,7 @@
                     </v-text-field>
                 </v-col>
                 <v-col cols="12" sm="4">
-                    <v-text-field type="date" label="구매일자" v-model="buyDate" :max="todayStr" variant="outlined" />
+                    <v-text-field type="date" label="구매일자" v-model="formatedDate" :max="todayStr" variant="outlined" />
                 </v-col>
             </v-row>
 
@@ -149,7 +153,10 @@
         :visible="itemTypeModal"
         title="설비유형"
         idField="type_id"
-        :columns="[{ key: 'type_name', label: '유형' }]"
+        :columns="[
+            { key: 'type_id', label: 'ID' },
+            { key: 'type_name', label: '유형' }
+        ]"
         :fetchData="fetchItemTypes"
         @select="onSelectItemType"
         @close="itemTypeModal = false"
@@ -175,7 +182,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 import CardHeader2 from '@/components/production/card-header-btn2.vue';
 import CardHeader3 from '@/components/production/card-header-btn3k.vue';
@@ -184,8 +191,11 @@ import Column from 'primevue/column';
 import ModalSearch from '@/views/commons/CommonModal.vue';
 import { useSnackBar } from '@/composables/useSnackBar.js';
 import { useFormatDate } from '@/composables/useFormatDate';
+import dayjs from 'dayjs';
 
-const { formatDate } = useFormatDate();
+const formatDate = (date) => {
+    return date ? dayjs(date).format('YYYY-MM-DD') : '';
+};
 
 // Snack Bar
 const { snackOpen, snackMessage, snackColor } = useSnackBar();
@@ -216,12 +226,15 @@ const itemName = ref('');
 const itemType = ref('');
 const itemSpec = ref('');
 const itemCutd = ref('');
-const buyDate = ref('');
 const optimalTemp = ref('');
 const optimalHumidity = ref('');
 const optimalRpm = ref('');
 const optimalPower = ref('');
 const itemRemk = ref('');
+const formatedDate = ref('');
+const selectedName = ref('');
+const selectedType = ref('');
+const selectedTypeName = ref('');
 
 // 모달 상태
 const itemNameModal = ref(false);
@@ -236,6 +249,9 @@ function selectReset() {
     selectItemTypeId.value = '';
     selectCutd.value = '';
     selectCutdId.value = '';
+    selectedName.value = '';
+    selectedType.value = '';
+    selectedTypeName.value = '';
 }
 
 // 등록폼 초기화
@@ -245,7 +261,7 @@ function dataReset() {
     itemType.value = '';
     itemSpec.value = '';
     itemCutd.value = '';
-    buyDate.value = '';
+    formatedDate.value = '';
     optimalTemp.value = '';
     optimalHumidity.value = '';
     optimalRpm.value = '';
@@ -259,8 +275,8 @@ function dataReset() {
 async function select() {
     try {
         const params = {
-            facility_id: selectItemId.value,
-            facility_type: selectItemTypeId.value,
+            facility_nm: selectedName.value,
+            facility_type: selectedTypeName.value,
             emp_id: selectCutdId.value
         };
         const response = await axios.get('/api/facilityList', { params });
@@ -272,22 +288,24 @@ async function select() {
 
 // 목록 클릭 → 폼에 반영 + ID 세팅
 watch(selectfacilityList, (val) => {
-    if (!val) return;
-    itemId.value = val.facility_id || '';
-    itemName.value = val.facility_nm || '';
-    itemType.value = val.facility_type_name || '';
-    itemSpec.value = val.facility_cnt || '';
-    itemCutd.value = val.emp_name || '';
-    buyDate.value = val.purchase_dt || '';
-    optimalTemp.value = val.temp_val || '';
-    optimalHumidity.value = val.humidity_val || '';
-    optimalRpm.value = val.rpm_val || '';
-    optimalPower.value = val.power_val || '';
-    itemRemk.value = val.remk || '';
-
-    // 값이 없으면 기존 값 유지
-    if (val.facility_type) selectItemTypeId.value = val.facility_type;
-    if (val.emp_id) selectCutdId.value = val.emp_id;
+    if (!val) {
+        itemId.value = null;
+        dataReset();
+    } else {
+        itemId.value = val.facility_id;
+        itemName.value = val.facility_nm;
+        itemType.value = val.facility_type_name;
+        itemSpec.value = val.facility_cnt;
+        itemCutd.value = val.emp_name;
+        optimalTemp.value = val.temp_val;
+        optimalHumidity.value = val.humidity_val;
+        optimalRpm.value = val.rpm_val;
+        optimalPower.value = val.power_val;
+        itemRemk.value = val.remk;
+        selectItemTypeId.value = val.facility_type;
+        selectCutdId.value = val.emp_id;
+        formatedDate.value = formatDate(val.purchase_dt);
+    }
 });
 
 // 모달 데이터
@@ -297,14 +315,11 @@ const fetchUsers = async () => (await axios.get('/api/users')).data;
 
 // 모달 선택
 function onSelectItemName(row) {
-    selectItemName.value = row.item_name;
-    selectItemId.value = row.item_id;
-    itemName.value = row.item_name;
+    selectedName.value = row.item_name;
 }
 function onSelectItemType(row) {
-    selectItemType.value = row.type_name;
-    selectItemTypeId.value = row.type_id;
-    itemType.value = row.type_name;
+    selectedType.value = row.type_name;
+    selectedTypeName.value = row.type_id;
 }
 function onSelectCutd(row) {
     selectCutd.value = row.user_name;
@@ -328,7 +343,7 @@ const itemSave = async () => {
         facility_nm: itemName.value,
         facility_type: selectItemTypeId.value,
         emp_id: selectCutdId.value,
-        purchase_dt: formatDate(buyDate.value, '-'),
+        purchase_dt: formatedDate.value,
         temp_val: optimalTemp.value,
         humidity_val: optimalHumidity.value,
         rpm_val: optimalRpm.value,
@@ -345,8 +360,8 @@ const itemSave = async () => {
             response = await axios.put('/api/facilityUpdate', obj);
             if (response.data.success) showSnack('수정되었습니다', 'warning');
         }
-        await select();
         dataReset();
+        select();
     } catch (err) {
         console.error(err);
         showSnack('저장 실패', 'error');
@@ -367,8 +382,8 @@ const itemDelete = async () => {
         const response = await axios.delete('/api/facilityDelete', { data: { facility_id: itemId.value } });
         if (response.data.success) {
             showSnack('삭제되었습니다.', 'error');
-            await select();
             dataReset();
+            select();
         }
     } catch (err) {
         console.error(err);

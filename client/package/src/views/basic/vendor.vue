@@ -106,26 +106,26 @@
             <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="거래처명" v-model="createForm.vendName" />
+                        <v-text-field variant="outlined" label="거래처명*" v-model="createForm.vendName" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="사업자번호"
+                            label="사업자번호*"
                             v-model="createForm.bizNumber"
                             @update:modelValue="(val) => (createForm.bizNumber = formatBizNo(val))"
                         />
                     </v-col>
 
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="연락처" v-model="createForm.cntinfo" @input="onPhoneInput" />
+                        <v-text-field variant="outlined" label="연락처*" v-model="createForm.cntinfo" @input="onPhoneInput" />
                     </v-col>
 
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="거래처유형"
+                            label="거래처유형*"
                             v-model="createForm.vendType"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openModal('vendType', 'create')"
@@ -136,7 +136,7 @@
                     <v-col cols="12" sm="4">
                         <v-radio-group
                             v-model="createForm.useYn"
-                            label="사용여부"
+                            label="사용여부*"
                             variant="outlined"
                             style="width: 100%; --v-input-gap: 4px"
                         >
@@ -149,7 +149,7 @@
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="담당자"
+                            label="담당자*"
                             v-model="createForm.psch"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openModal('psch', 'create')"
@@ -160,7 +160,7 @@
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="주소"
+                            label="주소*"
                             v-model="createForm.address"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openAddressModal"

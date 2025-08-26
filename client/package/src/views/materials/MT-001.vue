@@ -110,24 +110,24 @@
                 <v-col cols="12" md="8">
                     <v-row justify="space-between" dense>
                         <v-col cols="12" sm="3">
-                            <v-text-field label="품목명" v-model="itemName" variant="outlined">
+                            <v-text-field label="품목명*" v-model="itemName" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="3">
-                            <v-text-field label="품목구분" v-model="itemType" variant="outlined" readonly>
+                            <v-text-field label="품목구분*" v-model="itemType" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemTypeModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="3">
-                            <v-text-field label="규격" v-model="itemSpec" variant="outlined">
+                            <v-text-field label="규격*" v-model="itemSpec" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="3">
-                            <v-text-field label="안전재고" v-model="itemSafe" variant="outlined">
+                            <v-text-field label="안전재고*" v-model="itemSafe" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
@@ -135,26 +135,26 @@
 
                     <v-row justify="space-between" dense>
                         <v-col cols="12" sm="3">
-                            <v-text-field label="단위" v-model="selectUnit" variant="outlined" readonly>
+                            <v-text-field label="단위*" v-model="selectUnit" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="itemUnitModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="3">
-                            <v-text-field label="유효기간 일자" v-model="expDate" variant="outlined">
+                            <v-text-field label="유효기간 일자*" v-model="expDate" variant="outlined">
                                 <!-- 직접 입력 -->
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="3">
-                            <v-text-field label="보관조건" v-model="itemCutd" variant="outlined" readonly>
+                            <v-text-field label="보관조건*" v-model="itemCutd" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="cutdModal2 = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="3">
-                            <v-radio-group v-model="itemUseYn" label="사용여부" class="mt-0 radio-row">
+                            <v-radio-group v-model="itemUseYn" label="사용여부*" class="mt-0 radio-row">
                                 <v-row justify="space-between" class="px-4">
                                     <v-radio label="사용" value="Y"></v-radio>
                                     <v-radio label="미사용" value="N"></v-radio>
