@@ -142,13 +142,11 @@
                             <v-text-field label="검사명" v-model="fName" variant="outlined" />
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <div class="pt-1">
-                                <div class="mb-2 text-subtitle-2">사용여부</div>
-                                <v-radio-group v-model="fUseYn" inline>
-                                    <v-radio label="사용" value="Y" class="mr-8" />
-                                    <v-radio label="미사용" value="N" />
-                                </v-radio-group>
-                            </div>
+                            <v-text-field label="공정구분" v-model="fProcessFg" variant="outlined" readonly>
+                                <template #append-inner>
+                                    <v-icon @click="processDialog = true" class="cursor-pointer">mdi-magnify</v-icon>
+                                </template>
+                            </v-text-field>
                         </v-col>
                     </v-row>
 
@@ -172,7 +170,13 @@
                             </div>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="기준값" v-model="fBaseVal" variant="outlined" />
+                            <div class="pt-1">
+                                <div class="mb-2 text-subtitle-2">사용여부</div>
+                                <v-radio-group v-model="fUseYn" inline>
+                                    <v-radio label="사용" value="Y" class="mr-8" />
+                                    <v-radio label="미사용" value="N" />
+                                </v-radio-group>
+                            </div>
                         </v-col>
                     </v-row>
 
@@ -185,11 +189,7 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="4">
-                            <v-text-field label="공정구분" v-model="fProcessFg" variant="outlined" readonly>
-                                <template #append-inner>
-                                    <v-icon @click="processDialog = true" class="cursor-pointer">mdi-magnify</v-icon>
-                                </template>
-                            </v-text-field>
+                            <v-text-field label="기준값" v-model="fBaseVal" variant="outlined" />
                         </v-col>
                         <v-col cols="12" sm="4">
                             <v-text-field label="비고(간략)" v-model="fRemk" variant="outlined" />
