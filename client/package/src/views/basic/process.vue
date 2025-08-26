@@ -29,7 +29,6 @@
                             v-model="searchForm.prcsName"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner.stop="openItemModal('processType', 'search')"
-                            readonly
                         />
                     </v-col>
                     <v-col cols="12" sm="4">
