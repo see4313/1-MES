@@ -76,7 +76,7 @@ EX) 홍길동 / 영업-주문목록-목록불러오기 / 202X0XXX
 - Vite  
 - Bootstrap  
 - Vuetify
-- PrimeView
+- PrimeVue
 - Axios  
 
 ### Back-End

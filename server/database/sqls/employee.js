@@ -13,7 +13,7 @@ SELECT
   E.REMK                             AS remk
 FROM EMPLOYEE E
 LEFT JOIN DEPARTMENT D ON D.DEPT_ID = E.DEPT_ID
-WHERE 1=1
+WHERE emp_id not in ('root')
   AND (? IS NULL OR E.EMP_NAME  LIKE CONCAT('%', ?, '%'))
   AND (? IS NULL OR D.DEPT_NAME LIKE CONCAT('%', ?, '%'))
   AND (? IS NULL OR E.PHONE     LIKE CONCAT('%', ?, '%'))
