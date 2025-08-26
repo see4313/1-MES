@@ -212,6 +212,11 @@
                 />
             </v-card-item>
 
+            <!-- 추가: 수정 시 자동 버전업 토글 -->
+            <v-col cols="12" class="pt-0 pa-0 ma-0">
+                <v-switch v-model="bumpOnEdit" inset color="warning" label="수정 시 자동 버전업" />
+            </v-col>
+
             <v-col cols="12" md="12">
                 <v-row dense>
                     <v-col cols="12" sm="4">
@@ -371,6 +376,7 @@ const itemTargetRow = ref(null);
 const showBomModal = ref(false);
 const showItemModal = ref(false);
 const itemModalTarget = ref('search'); // 'search' | 'create' | 'detail'
+const bumpOnEdit = ref(true); //  추가: 수정 시 자동 버전업 토글
 
 /* 폼 */
 const searchForm = ref({
@@ -620,7 +626,7 @@ const resetBomEditor = async () => {
     await nextTick();
 };
 
-// 저장 버튼
+// 저장 버튼 (수정 시 자동 버전업 반영)
 const onClickSave = async () => {
     if (!validateRequired(createForm.value)) {
         return notify('필수 항목을 확인하세요.', 'warning');
@@ -629,8 +635,43 @@ const onClickSave = async () => {
     const isUpdate = !!createForm.value.id;
 
     try {
+        // === [버전업 활성] & [수정 모드]면: 새 버전 생성 ===
+        if (isUpdate && bumpOnEdit.value) {
+            const nextVer = await fetchNextVerByItem(createForm.value.itemId);
+
+            const header = {
+                item_id: createForm.value.itemId,
+                ver: asVer(nextVer),
+                use_yn: createForm.value.useYn || 'Y',
+                start_date: toDateStr(createForm.value.startDate),
+                end_date: toDateStr(createForm.value.endDate),
+                remk: createForm.value.remark || null
+            };
+
+            const details = (Array.isArray(detailRows.value) ? detailRows.value : []).map((r) => ({
+                item_id: r.item_id,
+                unit: r.unit,
+                usage: Number(r.usage) || 0,
+                loss: Number(r.loss ?? 0) || 0
+            }));
+
+            const { data } = await axios.post('/api/bom', { header, details });
+
+            const newBomNumber = data?.bom_number ?? data?.id ?? null;
+
+            notify(`새 버전(${header.ver})으로 저장되었습니다.`);
+
+            // 에디터를 새 버전으로 전환
+            createForm.value.id = newBomNumber;
+            createForm.value.ver = header.ver;
+
+            await reloadDetailsIfNeeded(createForm.value.id);
+            return;
+        }
+
+        // === 기존 로직 유지: (버전업 꺼짐) ===
         if (isUpdate) {
-            // ===== 기존 BOM 헤더 수정 (버전은 유지) =====
+            // (1) 헤더만 수정 (ver는 유지)
             const payload = {
                 itemId: createForm.value.itemId,
                 use: createForm.value.useYn || 'Y',
@@ -642,11 +683,10 @@ const onClickSave = async () => {
 
             await axios.put(`/api/bom/${enc(createForm.value.id)}`, payload);
 
-            // 신규로 "행추가"한 상세만 골라 저장
+            // (2) 새로 추가된 상세만 저장
             const newDetails = pickNewDetails();
 
             if (newDetails.length > 0) {
-                // 신규 상세 유효성 검사(필요한 필드만 검사)
                 const err = validateDetailRows(newDetails);
                 if (err) {
                     notify(err, 'warning');
@@ -654,15 +694,16 @@ const onClickSave = async () => {
                 }
 
                 await axios.post(`/api/bom/${enc(createForm.value.id)}/details`, { details: newDetails });
-                notify('BOM 헤더 및 신규 상세가 저장되었습니다.');
+                notify('BOM 및 신규 상세가 저장되었습니다.');
                 await reloadDetailsIfNeeded(); // 테이블 싱크
             } else {
-                notify('BOM 헤더가 수정되었습니다.');
+                notify('BOM이 수정되었습니다.');
             }
 
             return;
         }
 
+        // === 신규 생성 ===
         const header = {
             item_id: createForm.value.itemId,
             ver: asVer(createForm.value.ver || (await fetchNextVerByItem(createForm.value.itemId))),
@@ -671,16 +712,14 @@ const onClickSave = async () => {
             end_date: toDateStr(createForm.value.endDate),
             remk: createForm.value.remark || null
         };
-        const details = Array.isArray(detailRows.value)
-            ? detailRows.value.map((r) => ({
-                  item_id: r.item_id,
-                  unit: r.unit,
-                  usage: Number(r.usage) || 0,
-                  loss: Number(r.loss ?? 0) || 0
-              }))
-            : [];
+        const details = (Array.isArray(detailRows.value) ? detailRows.value : []).map((r) => ({
+            item_id: r.item_id,
+            unit: r.unit,
+            usage: Number(r.usage) || 0,
+            loss: Number(r.loss ?? 0) || 0
+        }));
 
-        await axios.post('/api/bom', { header, details });
+        const { data } = await axios.post('/api/bom', { header, details });
         notify('BOM 등록이 완료되었습니다.');
         resetCreateForm();
         detailRows.value = [];
@@ -793,7 +832,7 @@ const onClickDetailInsert = async () => {
             notify('상세 저장이 완료되었습니다.');
             await reloadDetailsIfNeeded(); // 저장 후 테이블만 새로고침
         } else {
-            // ===== 신규 BOM: 헤더+상세 동시 저장(서버가 verN 자동 지정)
+            // ===== 신규 BOM: 헤더+상세 동시 저장(서버가 verN 자동 지정) — 한 번만 POST
             if (!validateRequired(createForm.value)) {
                 return notify('BOM을 먼저 선택하세요.', 'warning');
             }
@@ -806,7 +845,6 @@ const onClickDetailInsert = async () => {
                 remk: createForm.value.remark || null
             };
 
-            await axios.post('/api/bom', { header, details });
             const details = detailRows.value.map((r) => ({
                 item_id: r.item_id,
                 unit: r.unit,
