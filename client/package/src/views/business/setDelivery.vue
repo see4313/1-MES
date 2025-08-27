@@ -165,7 +165,6 @@ const setDelivery = ref(null);
 const deliveryList = ref(null);
 const itemId = ref(null);
 const setorderId = ref(null);
-
 const selectItemList = ref(null);
 
 onMounted(() => {});
@@ -178,17 +177,22 @@ const delUpdate = async () => {
     }
 
     try {
+        const totalQty = selectItemList.value.reduce((sum, item) => {
+            return sum + Number(item.qty || 0);
+        }, 0);
+
+        if (totalQty > Number(setorderId.value.overdue_qty)) {
+            snackBar('미납기량을 초과하여 출고할 수 없습니다.', 'error');
+            return;
+        }
+
         for (let item of selectItemList.value) {
-            if (item.qty > item.bnt) {
-                snackBar('출고수량이 출고가능수량보다 많습니다.', 'error');
-                return; // 출고 중단
-            }
-            if (item.qty > setorderId.value.overdue_qty) {
-                snackBar('미납기량을 초과하여 출고할 수 없습니다.', 'error');
+            if (Number(item.qty) > Number(item.bnt)) {
+                snackBar(`[${item.item_name}] 출고수량이 출고가능수량보다 많습니다.`, 'error');
                 return;
             }
-            if (item.qty <= 0) {
-                snackBar('출고수량은 0 이상이어야 합니다.', 'error');
+            if (Number(item.qty) <= 0) {
+                snackBar(`[${item.item_name}] 출고수량은 0 이상이어야 합니다.`, 'error');
                 return;
             }
         }
@@ -208,8 +212,9 @@ const delUpdate = async () => {
 
         if (response.data.result) {
             snackBar('출고완료', 'success');
-            selectItemList.value = null;
-            setDelivery.value = null;
+            selectItemList.value = [];
+            setorderId.value = null;
+            deliveryList.value = null;
             Select();
         } else {
             snackBar('항목을 선택해주세요.', 'error');

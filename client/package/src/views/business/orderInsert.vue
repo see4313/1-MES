@@ -53,7 +53,7 @@
                                     :model-value="formattedJoinDate"
                                 />
                             </template>
-                            <v-date-picker v-model="joinDate" @change="joinMenu = false" />
+                            <v-date-picker v-model="joinDate" @update:modelValue="joinMenu = false" />
                         </v-menu>
                     </v-col>
                     <v-col cols="12" sm="4">
@@ -69,7 +69,7 @@
                                     :model-value="formattedLeavDate"
                                 />
                             </template>
-                            <v-date-picker v-model="leavDate" @change="leavMenu = false" />
+                            <v-date-picker v-model="leavDate" @update:modelValue="leavMenu = false" />
                         </v-menu>
                     </v-col>
                     <v-col cols="12" sm="4">
