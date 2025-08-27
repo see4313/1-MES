@@ -183,6 +183,10 @@ const delUpdate = async () => {
                 snackBar('출고수량이 출고가능수량보다 많습니다.', 'error');
                 return; // 출고 중단
             }
+            if (item.qty > setorderId.value.overdue_qty) {
+                snackBar('미납기량을 초과하여 출고할 수 없습니다.', 'error');
+                return;
+            }
             if (item.qty <= 0) {
                 snackBar('출고수량은 0 이상이어야 합니다.', 'error');
                 return;
@@ -205,6 +209,7 @@ const delUpdate = async () => {
         if (response.data.result) {
             snackBar('출고완료', 'success');
             selectItemList.value = null;
+            setDelivery.value = null;
             Select();
         } else {
             snackBar('항목을 선택해주세요.', 'error');
@@ -218,6 +223,7 @@ const delUpdate = async () => {
 watch(setorderId, async (newVal) => {
     if (!newVal) {
         itemId.value = null;
+        deliveryList.value = null;
     } else {
         itemId.value = newVal.item_id;
 

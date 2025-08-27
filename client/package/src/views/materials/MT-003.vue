@@ -16,14 +16,14 @@
                 <v-col cols="12" md="8">
                     <v-row justify="space-between" dense>
                         <v-col cols="12" sm="6">
-                            <v-text-field label="업체명" v-model="selectVendName" variant="outlined" readonly>
+                            <v-text-field label="업체명*" v-model="selectVendName" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="vendModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
                             </v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field label="담당자" v-model="selectEmpName" variant="outlined" readonly>
+                            <v-text-field label="담당자*" v-model="selectEmpName" variant="outlined" readonly>
                                 <template #append-inner>
                                     <v-icon @click="empModal = true" class="cursor-pointer">mdi-magnify</v-icon>
                                 </template>
@@ -43,7 +43,7 @@
                                     <v-text-field
                                         v-bind="props"
                                         v-model="regDate"
-                                        label="발주일자"
+                                        label="발주일자*"
                                         append-inner-icon="mdi-calendar"
                                         readonly
                                         variant="outlined"
@@ -65,7 +65,7 @@
                                     <v-text-field
                                         v-bind="props"
                                         v-model="papDate"
-                                        label="납기일자"
+                                        label="납기일자*"
                                         append-inner-icon="mdi-calendar"
                                         readonly
                                         variant="outlined"

@@ -18,12 +18,12 @@
                 </v-card-item>
                 <v-row dense>
                     <v-col cols="12" sm="4">
-                        <v-text-field variant="outlined" label="주문명" v-model="orderinfo.ordr" />
+                        <v-text-field variant="outlined" label="주문명*" v-model="orderinfo.ordr" />
                     </v-col>
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="담당자"
+                            label="담당자*"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner="showModal = true"
                             v-model="selectedItem"
@@ -33,7 +33,7 @@
                     <v-col cols="12" sm="4">
                         <v-text-field
                             variant="outlined"
-                            label="업체명"
+                            label="업체명*"
                             append-inner-icon="mdi-magnify"
                             @click:append-inner="showModal2 = true"
                             v-model="selectedItem2"
@@ -46,7 +46,7 @@
                                 <v-text-field
                                     v-bind="props"
                                     v-model="joinDate"
-                                    label="주문일자"
+                                    label="주문일자*"
                                     append-inner-icon="mdi-calendar"
                                     readonly
                                     variant="outlined"
@@ -62,7 +62,7 @@
                                 <v-text-field
                                     v-bind="props"
                                     v-model="leavDate"
-                                    label="납기일자"
+                                    label="납기일자*"
                                     append-inner-icon="mdi-calendar"
                                     readonly
                                     variant="outlined"
