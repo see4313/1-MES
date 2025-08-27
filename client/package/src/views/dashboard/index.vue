@@ -10,22 +10,7 @@ import SafetyStock from '@/components/dashboard/SafetyStock.vue';
 </script>
 
 <template>
-    <v-row>
-        <v-col cols="12" lg="12"><SafetyStock /></v-col>
-        <v-col cols="12" lg="4">< /></v-col>
-        <v-col cols="12" lg="8"></v-col>
-        <v-col cols="12" lg="4"></v-col>
-
-    </v-row>
-
-    <v-row>
-        <v-col cols="12" lg="8"><RevenueCard /></v-col>
-        <v-col cols="12" lg="4"
-            ><NewCustomer class="mb-6" />
-            <Totalincome />
-        </v-col>
-        <v-col cols="12" lg="8"><RevenueProduct /></v-col>
-        <v-col cols="12" lg="4"><DailyActivities /> </v-col>
-        <v-col cols="12"><BlogCards /></v-col>
+    <v-row class="mt-12" justify="center" align="center">
+        <img src="./img/main_logo.png" width="500px" style="border-radius: 36px" />
     </v-row>
 </template>
