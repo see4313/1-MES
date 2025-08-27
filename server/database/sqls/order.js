@@ -26,6 +26,9 @@ WHERE 1=1
     sql += "AND ord.ordr_date = ?";
     params.push(filters.ordr_date);
   }
+
+  sql += " ORDER BY ord.ordr_date desc";
+
   return { sql, params };
 };
 
