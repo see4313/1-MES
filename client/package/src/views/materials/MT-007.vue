@@ -29,7 +29,22 @@
                         <Column field="bnt" header="수량"></Column>
                         <Column header="폐기수량">
                             <template #body="{ data }">
-                                <InputNumber v-model="data.use_qty" :min="1" />
+                                <InputNumber
+                                    v-model="data.use_qty"
+                                    :min="0"
+                                    :step="0.1"
+                                    mode="decimal"
+                                    :minFractionDigits="0"
+                                    :maxFractionDigits="1"
+                                    @keypress="
+                                        (e) => {
+                                            const value = e.target.value + e.key;
+                                            if (!/^\d*\.?\d{0,1}$/.test(value)) {
+                                                e.preventDefault(); // 두 자리 이상 입력 막음
+                                            }
+                                        }
+                                    "
+                                />
                             </template>
                         </Column>
                         <Column header="폐기사유">

@@ -378,48 +378,51 @@ const itemSave = async () => {
     }
 
     if (confirm('저장하시겠습니까?')) {
+        // 행 선택 시 저장되는 품목번호가 없을 때
         if (!itemId.value) {
             let obj = {
-                item_name: itemName.value,
-                item_type: itemType.value,
-                unit: selectUnit.value,
-                spec: itemSpec.value,
-                cutd_cond: itemCutd.value,
-                uon: itemUseYn.value,
-                remk: itemRemk.value,
-                exp_date: expDate.value,
-                safe_qty: itemSafe.value,
+                item_name: itemName.value, // 품목명
+                item_type: itemType.value, // 품목구분
+                unit: selectUnit.value, // 단위
+                spec: itemSpec.value, //  규격
+                cutd_cond: itemCutd.value, // 보관조건
+                uon: itemUseYn.value, // 사용여부
+                remk: itemRemk.value, // 비고
+                exp_date: expDate.value, // 유효기한
+                safe_qty: itemSafe.value, // 안전재고
+                // 환산수량은 품목이 원재료라면 규격에서 숫자만 추출해서 사용하고 완제품 / 반제품이라면 1로 설정
                 conv_qty: itemType.value === '원재료' ? (itemSpec.value ? Number(itemSpec.value.replace(/[^0-9]/g, '')) : 0) : 1
             };
-
+            // axios 호출 (품목 등록)
             let response = await axios.post('/api/itemInsert', obj).catch((err) => console.log(err));
 
             if (response.data.result) {
                 snackBar('등록되었습니다', 'sueccss');
-                select();
-                dataReset();
+                select(); // 조회
+                dataReset(); // 입력값 초기화
             }
+            // 행을 선택하여 품목번호가 저장되었을 때
         } else {
             let obj = {
-                item_name: itemName.value,
-                item_type: itemType.value,
-                unit: selectUnit.value,
-                spec: itemSpec.value,
-                cutd_cond: itemCutd.value,
-                uon: itemUseYn.value,
-                remk: itemRemk.value,
-                item_id: itemId.value,
-                conv_qty: convQty.value,
-                exp_date: expDate.value,
-                safe_qty: itemSafe.value
+                item_name: itemName.value, // 품목명
+                item_type: itemType.value, // 품목구분
+                unit: selectUnit.value, // 단위
+                spec: itemSpec.value, //  유닛
+                cutd_cond: itemCutd.value, // 보관조건
+                uon: itemUseYn.value, // 사용여부
+                remk: itemRemk.value, // 비고
+                item_id: itemId.value, // 품목번호
+                conv_qty: convQty.value, // 환산수량
+                exp_date: expDate.value, // 유효기한
+                safe_qty: itemSafe.value // 안전재고
             };
-
+            // axios 호출 (품목 수정)
             let response = await axios.put('/api/itemUpdate', obj).catch((err) => console.log(err));
 
             if (response.data.result) {
                 snackBar('수정되었습니다', 'sueccss');
-                select();
-                dataReset();
+                select(); // 조회
+                dataReset(); // 입력값 초기화
             }
         }
     }
